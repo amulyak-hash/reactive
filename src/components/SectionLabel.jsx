@@ -11,7 +11,7 @@ export default function SectionLabel({ text, delay = 0, active = false, accent =
   }, [active, delay]);
 
   return (
-    <div style={{
+    <div className="section-label" style={{
       display: 'flex',
       alignItems: 'center',
       gap: 8,
@@ -30,7 +30,7 @@ export default function SectionLabel({ text, delay = 0, active = false, accent =
         fontFamily: FONT_MONO,
         fontSize: 10,
         fontWeight: 600,
-        color: C.t3,
+        color: C.t2,
         textTransform: 'uppercase',
         letterSpacing: '0.1em',
       }}>

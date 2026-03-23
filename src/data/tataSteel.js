@@ -700,3 +700,303 @@ export const DEFECT_DATA = [
   { day: "Sat", rate: 0.8 },
   { day: "Sun", rate: 1.1 },
 ];
+
+/* ─── Lens Menu: Archetypes (Axis 1) ─── */
+export const ARCHETYPES = {
+  rtr: { key: 'rtr', name: 'Real-Time Responder', shortName: 'RTR', timing: '<2s', accent: C.red },
+  oo:  { key: 'oo',  name: 'Ops Optimizer',       shortName: 'OO',  timing: '5-10s', accent: C.blue },
+  ap:  { key: 'ap',  name: 'Analytical Planner',   shortName: 'AP',  timing: '30s+', accent: C.purple },
+  sdm: { key: 'sdm', name: 'Strategic Decision Maker', shortName: 'SDM', timing: 'Executive', accent: C.cyan },
+  ss:  { key: 'ss',  name: 'Safety Sentinel',      shortName: 'SS',  timing: 'Alert-first', accent: C.amber },
+};
+
+/* ─── Lens Menu: Cognitive Styles (Axis 2) ─── */
+export const COG_STYLES = {
+  'rapid-decider':        { key: 'rapid-decider',        name: 'Rapid Decider',             cluster: 'speed' },
+  'decisive-actor':       { key: 'decisive-actor',       name: 'Decisive Actor',            cluster: 'speed' },
+  'deliberate-analyst':   { key: 'deliberate-analyst',   name: 'Deliberate Analyst',        cluster: 'depth' },
+  'deep-investigator':    { key: 'deep-investigator',    name: 'Deep Investigator',         cluster: 'depth' },
+  'systems-thinker':      { key: 'systems-thinker',      name: 'Systems Thinker',           cluster: 'systems' },
+  'pattern-recognizer':   { key: 'pattern-recognizer',   name: 'Pattern Recognizer',        cluster: 'systems' },
+  'collab-facilitator':   { key: 'collab-facilitator',   name: 'Collaborative Facilitator', cluster: 'people' },
+  'consensus-builder':    { key: 'consensus-builder',    name: 'Consensus Builder',         cluster: 'people' },
+  'narrative-interpreter':{ key: 'narrative-interpreter', name: 'Narrative Interpreter',     cluster: 'people' },
+  'intuitive-scanner':    { key: 'intuitive-scanner',    name: 'Intuitive Scanner',         cluster: 'people' },
+};
+
+export const COG_CLUSTERS = [
+  { id: 'speed',   label: 'Speed',   accent: C.red,    styles: ['rapid-decider', 'decisive-actor'] },
+  { id: 'depth',   label: 'Depth',   accent: C.purple, styles: ['deliberate-analyst', 'deep-investigator'] },
+  { id: 'systems', label: 'Systems', accent: C.cyan,   styles: ['systems-thinker', 'pattern-recognizer'] },
+  { id: 'people',  label: 'People',  accent: C.green,  styles: ['collab-facilitator', 'consensus-builder', 'narrative-interpreter', 'intuitive-scanner'] },
+];
+
+/* ─── Archetype Narrative Variants ─── */
+export const ARCHETYPE_NARRATIVES = {
+  rtr: {
+    overview: "Plant B −17%. Line 3 down. M21 fault ×7. Supplier X 12h late. Action required.",
+    plantB: "Line 3: 42% util. M21 dominant fault. Bearing failure origin.",
+    line3: "BF-3 superheat 22°C. CCM-3 speed reduced. Feed variance: Si +0.12%.",
+  },
+  oo: {
+    overview: "Production 8% below target. Plant B is the primary driver (−17%). Line 3 utilization at 42% due to M21 mechanical faults. Supplier X delayed 12h — material buffer at 6h.",
+    plantB: "Line 3 accounts for 73% of shortfall. M21: 7 faults in 8h. Non-OEM bearing replaced 6 days ago. Lines 1,2,4 compensating.",
+    line3: "BF-3 → CCM-3 chain degraded. Superheat 22°C (target 34°C). Si variance from Supplier X batch. Casting speed reduced 15%.",
+  },
+  ap: {
+    overview: "Enterprise production is tracking 8% below expected output, with deviation concentrated in Plant B, Jamshedpur. Diagnostic analysis reveals a compound failure mode: repeated downtime events on Line 3 (Machine M21 — 7 faults traced to a non-OEM bearing replacement 6 days ago) are compounded by a 12-hour supplier delay from Supplier X, whose iron ore batch shows silicon content 0.12% above specification. The causal chain propagates from raw material variance through blast furnace thermal performance to continuous casting speed reduction, creating a compound confidence of 59% for automotive-grade specification compliance.",
+    plantB: "Analysis of Plant B indicates Line 3 accounts for 73% of the production shortfall. Machine M21 shows repeated mechanical faults coinciding with the morning shift, traced to a non-OEM bearing replacement performed 6 days ago. The fault pattern is temporal — clustered between hours 2-5 — suggesting a warm-up cycle interaction. This is compounded by the delayed Supplier X shipment, which supplies the primary input material for Line 3.",
+    line3: "Line 3 performance degradation follows the BF-3 → CCM-3 chain. Blast furnace superheat has dropped from 34°C to 22°C, driven by silicon variance in the Supplier X ore batch (0.34% Si vs 0.22% spec). The thermal anomaly migrates clockwise through the furnace hearth. Continuous casting speed has been reduced by 15%, and the mold level is showing oscillation.",
+  },
+  sdm: {
+    overview: "Enterprise output: 92% of target. Key risk: Plant B (−17%). Financial exposure: ₹4.2 Cr from Line 3 downtime. Supplier X delay adds ₹1.8 Cr risk. Automotive delivery: 1 shipment at risk. Recommended escalation: procurement + maintenance.",
+    plantB: "Plant B: 78/95 target. Gap: 17 pts. Root cause: Line 3 mechanical (73%), material delay (15%), quality holds (12%). Cost impact: ₹4.2 Cr. Recovery ETA: 18h post-bearing replacement.",
+    line3: "Line 3 status: RED. Output: 42%. Financial: ₹4.2 Cr exposure. Customer impact: 1 automotive shipment. Root cause confidence: 92% → 87% → 74% → 59%.",
+  },
+  ss: {
+    overview: "ALERT: 2 active zones — BF-3 (superheat deviation) and CCM-3 (casting speed reduced). M21 fault count: 7 in 8h — escalating. Supplier X material delayed 12h — single source dependency. Safety margin: BF-3 operating 12°C below thermal safety threshold. Immediate attention: Line 3 mechanical integrity.",
+    plantB: "ALERT: Line 3 — M21 mechanical fault recurring. 7 events in 8h. Vibration signature elevated. Non-OEM bearing installed 6 days ago. Risk: cascading mechanical failure. Safety recommendation: preventive shutdown for inspection.",
+    line3: "CRITICAL: BF-3 superheat 22°C (safety threshold: 34°C). 12°C below target. CCM-3 mold level oscillating. Si variance in feedstock increasing slag volume. Refractory stress ELEVATED.",
+  },
+};
+
+/* ─── Improvement #1: Archetype-Specific Signal Packs ─── */
+export const ARCHETYPE_SIGNALS = {
+  rtr: [
+    { label: 'M21 Fault', value: '×7', sub: 'mechanical repeat', color: C.red, storyId: 'fault_count' },
+    { label: 'BF-3 Temp', value: '22°C', sub: 'below 34°C target', color: C.orange, storyId: 'bf' },
+    { label: 'CCM-3 Speed', value: '1.2 m/min', sub: 'threshold breach', color: C.amber, storyId: 'cc' },
+  ],
+  oo: [
+    { label: 'Output Gap', value: '−8%', sub: 'shortfall widening', color: C.red, storyId: 'prod_trend' },
+    { label: 'Line 4 Comp.', value: '94%', sub: 'buffer absorbing', color: C.amber, storyId: 'machine_util' },
+    { label: 'Ore Buffer', value: '2h', sub: 'stock remaining', color: C.red, storyId: 'supplier' },
+  ],
+  ap: [
+    { label: 'Causal Conf.', value: '59%', sub: 'compound chain', color: C.purple, storyId: 'bf' },
+    { label: 'Feed Var.', value: 'P96', sub: 'Si 96th percentile', color: C.amber, storyId: 'defect_rate' },
+    { label: 'Model Calib.', value: '80%=80%', sub: 'well-calibrated', color: C.green, storyId: 'rm' },
+  ],
+  sdm: [
+    { label: 'Revenue Risk', value: '₹8.1 Cr', sub: 'total exposure', color: C.red, storyId: 'prod_trend' },
+    { label: 'Shipment', value: '1 at risk', sub: 'automotive delivery', color: C.amber, storyId: 'supplier' },
+    { label: 'Recovery', value: '18h', sub: 'post-bearing fix ETA', color: C.cyan, storyId: 'downtime' },
+  ],
+  ss: [
+    { label: 'Safety Margin', value: '−12°C', sub: 'BF-3 below threshold', color: C.red, storyId: 'bf' },
+    { label: 'Vibration', value: 'ELEVATED', sub: 'M21 stress level', color: C.red, storyId: 'fault_count' },
+    { label: 'Shutdown Risk', value: '20h', sub: 'to full line halt', color: C.amber, storyId: 'material_dep' },
+  ],
+};
+
+/* ─── Improvement #2: Role-Specific KPI Rails ─── */
+export const ARCHETYPE_KPIS = {
+  rtr: [
+    { label: 'Active Alarms', value: '2 zones' },
+    { label: 'Next Action', value: 'M21 bearing' },
+    { label: 'ETA', value: '18h' },
+  ],
+  oo: [
+    { label: 'Throughput Gap', value: '−8%' },
+    { label: 'Recovery Cap.', value: 'Line 4 @ 94%' },
+    { label: 'Queue', value: 'BF-3 backed up' },
+  ],
+  ap: [
+    { label: 'Confidence', value: '59% compound' },
+    { label: 'Variance', value: 'Si +0.12%' },
+    { label: 'Lineage', value: '5 generations' },
+  ],
+  sdm: [
+    { label: 'Revenue Risk', value: '₹8.1 Cr' },
+    { label: 'Delivery', value: '1 shipment' },
+    { label: 'Recovery', value: '18h' },
+  ],
+  ss: [
+    { label: 'Safety Margin', value: '−12°C BF-3' },
+    { label: 'Vibration', value: 'M21 elevated' },
+    { label: 'Shutdown', value: '20h to halt' },
+  ],
+};
+
+/* ─── Improvement #5: Zone Archetype Metrics ─── */
+export const ZONE_ARCHETYPE_METRICS = {
+  bf: {
+    rtr: { metric: '22°C ↓', sub: 'Ack / slow cast' },
+    oo:  { metric: 'Si +0.12%', sub: 'feed variance · buffer 2h' },
+    ap:  { metric: '92% → 59%', sub: 'compound conf. chain' },
+    sdm: { metric: '₹1.2 Cr', sub: 'exposed · recovery 18h' },
+    ss:  { metric: '−12°C margin', sub: 'refractory stress elevated' },
+  },
+  sms: {
+    rtr: { metric: '1,665°C', sub: 'nominal · watch S27' },
+    oo:  { metric: '40 sensors OK', sub: 'CO₂ drift detected' },
+    ap:  { metric: 'S27 drifting', sub: '6 min early warning' },
+    sdm: { metric: 'Nominal', sub: 'no financial exposure' },
+    ss:  { metric: 'S27 drift', sub: '< 1700°C threshold' },
+  },
+  cc: {
+    rtr: { metric: '1.2 m/min', sub: '↓ speed · 22°C superheat' },
+    oo:  { metric: '−15% speed', sub: 'queue building' },
+    ap:  { metric: '74% conf.', sub: 'grade probability' },
+    sdm: { metric: '₹2.1 Cr', sub: 'automotive grade risk' },
+    ss:  { metric: 'Mold osc.', sub: 'casting stability alert' },
+  },
+  rm: {
+    rtr: { metric: '97.1%', sub: 'yield nominal' },
+    oo:  { metric: '97.1% yield', sub: 'within band' },
+    ap:  { metric: '80%=80%', sub: 'calibrated · 847 decisions' },
+    sdm: { metric: '97.1%', sub: 'no risk flag' },
+    ss:  { metric: '97.1%', sub: 'safety margin OK' },
+  },
+  ql: {
+    rtr: { metric: '94.2%', sub: 'pass rate nominal' },
+    oo:  { metric: '0.8/1K', sub: 'defect rate steady' },
+    ap:  { metric: '7/10', sub: 'natural frequency' },
+    sdm: { metric: '94.2%', sub: 'quality cost neutral' },
+    ss:  { metric: '0.8/1K', sub: 'within safety spec' },
+  },
+};
+
+/* ─── Improvement #4: Combo-Specific Default Lens ─── */
+export const COMBO_DEFAULTS = {
+  'rtr:rapid-decider':        { downtime: 2, fault_count: 0 },
+  'rtr:decisive-actor':       { downtime: 0, fault_count: 1 },
+  'oo:systems-thinker':       { factory_map: 1, machine_util: 1 },
+  'oo:pattern-recognizer':    { machine_util: 1, defect_rate: 2 },
+  'ap:deep-investigator':     { bf: 0, defect_rate: 1 },
+  'ap:deliberate-analyst':    { bf: 2, defect_rate: 0 },
+  'sdm:narrative-interpreter':{ plant_perf: 2, supplier: 2 },
+  'sdm:consensus-builder':    { supplier: 2, plant_perf: 1 },
+  'ss:intuitive-scanner':     { machine_util: 0, fault_count: 1 },
+  'ss:rapid-decider':         { fault_count: 1, downtime: 0 },
+};
+
+/* ─── Improvement #3: Dashboard Section Config ─── */
+export const DASHBOARD_SECTIONS = [
+  { id: 'briefing',          defaultOrder: 0 },
+  { id: 'intelligence',      defaultOrder: 1 },
+  { id: 'operational_pulse', defaultOrder: 2 },
+  { id: 'risk',              defaultOrder: 3 },
+  { id: 'external',          defaultOrder: 4 },
+  { id: 'factory_map',       defaultOrder: 5 },
+];
+
+export const ARCHETYPE_SECTION_OVERRIDES = {
+  rtr: { hidden: ['briefing', 'operational_pulse', 'external'], order: { risk: 0, intelligence: 1, factory_map: 2 } },
+  oo:  { hidden: [], order: { operational_pulse: 0, risk: 1, intelligence: 2, briefing: 3, external: 4, factory_map: 5 } },
+  ap:  { hidden: [], order: null },
+  sdm: { hidden: [], order: null, inject: ['financial_summary'] },
+  ss:  { hidden: [], order: { risk: 0, factory_map: 1, intelligence: 2, briefing: 3, operational_pulse: 4, external: 5 } },
+};
+
+export const SDM_FINANCIAL_SUMMARY = {
+  headline: '₹8.1 Cr Total Exposure',
+  items: [
+    { label: 'Line 3 Downtime', value: '₹4.2 Cr' },
+    { label: 'Supplier X Delay', value: '₹1.8 Cr' },
+    { label: 'Grade Risk', value: '₹2.1 Cr' },
+  ],
+};
+
+/* ─── Improvement #8: Card Surface Metrics ─── */
+export const CARD_SURFACE_METRICS = {
+  downtime: {
+    rtr: [{ label: 'M21', value: '96 min' }, { label: 'Events', value: '8' }],
+    oo:  [{ label: 'Lost Tonnes', value: '38t' }, { label: 'Recovery', value: '18h' }],
+    ap:  [{ label: 'Root', value: 'bearing d-6' }, { label: 'Conf.', value: '92%' }],
+    sdm: [{ label: 'Revenue', value: '₹4.2 Cr' }, { label: 'Delivery', value: '1 at risk' }],
+    ss:  [{ label: 'Bearing', value: 'non-OEM' }, { label: 'Escalation', value: '4×' }],
+  },
+  prod_trend: {
+    rtr: [{ label: 'Gap', value: '−8%' }, { label: 'Since', value: '11:00' }],
+    oo:  [{ label: 'Shortfall', value: '73% → Line 3' }],
+    ap:  [{ label: 'Causes', value: '3 compound' }],
+    sdm: [{ label: 'Lost', value: '₹4.2 Cr' }],
+    ss:  [{ label: 'Alert', value: 'gap widening' }],
+  },
+  machine_util: {
+    rtr: [{ label: 'Line 3', value: '42%' }],
+    oo:  [{ label: 'Bimodal', value: '42% vs 88%' }],
+    ap:  [{ label: 'Comp.', value: 'Line 4 → 94%' }],
+    sdm: [{ label: 'Capacity', value: '−58% Line 3' }],
+    ss:  [{ label: 'Wear', value: 'Line 4 accelerated' }],
+  },
+  supplier: {
+    rtr: [{ label: 'Delay', value: '12h' }, { label: 'Buffer', value: '2h' }],
+    oo:  [{ label: 'Buffer', value: '2h remaining' }],
+    ap:  [{ label: 'Reliability', value: '78% ↓' }],
+    sdm: [{ label: 'Exposure', value: '₹1.8 Cr' }],
+    ss:  [{ label: 'Single Src', value: '68% dependency' }],
+  },
+  defect_rate: {
+    rtr: [{ label: 'Sun', value: '1.1%' }],
+    oo:  [{ label: 'Weekend', value: 'edge wave ↑' }],
+    ap:  [{ label: 'Trace', value: 'BF-3 → QC' }],
+    sdm: [{ label: 'Trend', value: 'worsening' }],
+    ss:  [{ label: 'Handover', value: '22:00 target' }],
+  },
+  plant_perf: {
+    rtr: [{ label: 'Plant B', value: '78%' }],
+    oo:  [{ label: 'Gap', value: '17 pts' }],
+    ap:  [{ label: 'Type', value: 'equipment-limited' }],
+    sdm: [{ label: 'Revenue Gap', value: '₹12.4 Cr' }],
+    ss:  [{ label: 'Uptime', value: '72% Plant B' }],
+  },
+  factory_map: {
+    rtr: [{ label: 'Alerts', value: '2 zones' }],
+    oo:  [{ label: 'Bottleneck', value: 'BF-3' }],
+    ap:  [{ label: 'Chain', value: '4 stages' }],
+    sdm: [{ label: 'Flow', value: 'BF-3 constricted' }],
+    ss:  [{ label: 'Hazard', value: 'BF-3 + CCM-3' }],
+  },
+};
+
+/* ─── Improvement #9: Story Adaptive Config ─── */
+export const STORY_ADAPTIVE_CONFIG = {
+  speed:   { compressSteps: true, sourceIndices: [0, 3] },
+  depth:   { compressSteps: false, annotationMode: 'evidence' },
+  systems: { compressSteps: false, annotationMode: 'context' },
+  people:  { compressSteps: false, annotationMode: 'affected' },
+};
+
+export const STORY_ANNOTATIONS = {
+  bf:           { evidence: 'Confidence: 92% → 87% → 74% → 59% compound', context: 'Upstream: Supplier X | Downstream: CCM-3 → HSM-1', affected: 'Process engineer, Shift supervisor, Quality engineer' },
+  sms:          { evidence: 'Sensor 27 CO₂ drift detected at minute 8', context: 'Upstream: BF-3 hot metal | Downstream: CCM-3', affected: 'BOF operator, Shift supervisor' },
+  cc:           { evidence: '74% grade probability — automotive spec', context: 'Upstream: BF-3 superheat | Downstream: HSM-1 → QC', affected: 'Casting operator, Shift supervisor, Process engineer, Plant director' },
+  rm:           { evidence: '847 decisions — calibration at 80%=80%', context: 'Upstream: CCM-3 solidification | Downstream: QC inspection', affected: 'Quality engineer, Rolling mill operator' },
+  ql:           { evidence: '7/10 natural frequency — improving', context: 'Upstream: Full production chain | Downstream: Shipping', affected: 'Quality manager, Dispatch coordinator' },
+  downtime:     { evidence: 'Root cause: non-OEM bearing d-6 — 92% conf.', context: 'Upstream: M21 bearing swap | Downstream: Line 3 output → CCM-3', affected: 'Maintenance team, Line supervisor, Procurement' },
+  prod_trend:   { evidence: '73% shortfall from Line 3, 15% material, 12% quality', context: 'Upstream: All lines | Downstream: Shipment schedule', affected: 'Production manager, Shift supervisors' },
+  machine_util: { evidence: 'Bimodal: 42% vs 85-91% — Line 4 compensating', context: 'Upstream: Line 3 M21 | Downstream: Line 4 overflow', affected: 'Line supervisors, Maintenance planner' },
+  supplier:     { evidence: 'Reliability 78% ↓ from 91% — erosion pattern', context: 'Upstream: Supplier X dispatch | Downstream: BF-3 feed → full chain', affected: 'Procurement, Plant director, BF-3 operator' },
+  defect_rate:  { evidence: 'Weekend edge wave spike — 22:00 handover target', context: 'Upstream: HSM-1 pressure | Downstream: Customer shipment', affected: 'Quality team, Shift handover crew' },
+  plant_perf:   { evidence: 'Equipment-limited archetype — uptime 72%', context: 'All 4 plants | Plant B gap: 17 pts', affected: 'Plant director, VP Operations' },
+  factory_map:  { evidence: 'BF-3 constriction propagating downstream', context: 'Full chain: Ore → BF → SMS → CCM → HSM → QC', affected: 'All line operators, Production planner' },
+  fault_count:  { evidence: 'M21 serial offender — 23 faults/month escalating', context: 'Upstream: Bearing replacement | Downstream: Line 3 capacity', affected: 'Maintenance team, Parts procurement' },
+  material_dep: { evidence: 'Resilience score 2.1/5 — single source critical', context: 'Supplier X → BF-3 → full chain shutdown in 20h', affected: 'Procurement, Risk management, Plant director' },
+  output_line:  { evidence: 'Line 3 at 42% — lowest of 5 lines', context: 'Line 4 absorbing overflow at 94%', affected: 'Line supervisors, Production planner' },
+};
+
+/* ─── Improvement #10: Cognitive Autoplay Config ─── */
+export const COG_AUTOPLAY_CONFIG = {
+  'rapid-decider':        { autoplay: false, showFullText: true,  interval: 0 },
+  'decisive-actor':       { autoplay: false, showFullText: true,  interval: 0 },
+  'deliberate-analyst':   { autoplay: false, showFullText: false, interval: 0, scrubberScale: 2 },
+  'deep-investigator':    { autoplay: false, showFullText: false, interval: 0, scrubberScale: 2 },
+  'systems-thinker':      { autoplay: true,  showFullText: false, interval: 5000 },
+  'pattern-recognizer':   { autoplay: true,  showFullText: false, interval: 4000 },
+  'collab-facilitator':   { autoplay: true,  showFullText: false, interval: 6000 },
+  'consensus-builder':    { autoplay: true,  showFullText: false, interval: 6000 },
+  'narrative-interpreter':{ autoplay: true,  showFullText: false, interval: 7000 },
+  'intuitive-scanner':    { autoplay: true,  showFullText: false, interval: 4000 },
+};
+
+/* ─── Improvement #7: Combo Section Transforms ─── */
+export const COMBO_SECTION_TRANSFORMS = {
+  'rtr:rapid-decider': {
+    prod_trend: { mode: 'single-line', text: 'Gap now: −8% / worsening since 11:00 / act now' },
+  },
+  'ss:narrative-interpreter': {
+    briefing: { mode: 'safety-narrative', text: 'SAFETY INCIDENT: BF-3 thermal deviation 12°C below threshold. M21 mechanical integrity at risk after 7 faults in 8h. Refractory stress indicators elevated. Line 3 vibration signature abnormal. Recommend: preventive inspection before next shift.' },
+  },
+};

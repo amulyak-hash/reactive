@@ -4,14 +4,30 @@ import { C, rgb, FONT_SANS, FONT_MONO, FONT_SERIF } from '../theme/tokens';
 import { AI_AGENT_DATA, CARD_REGISTRY, ZONES } from '../data/tataSteel';
 import { useTyping } from '../hooks/useTyping';
 
-function getExplanation(ctx, layer) {
+const ARCHETYPE_SUFFIXES = {
+  rtr: (id) => ({ bf: ' → Action: reduce casting speed', cc: ' → Action: acknowledge mold alert', downtime: ' → Action: inspect M21 bearing', default: ' → Immediate attention required' }[id] || ''),
+  oo:  (id) => ({ machine_util: ' → Queue impact: Line 4 compensating at 94%', supplier: ' → Buffer: 2h remaining', default: ' → Monitor throughput recovery' }[id] || ''),
+  ap:  (id) => ({ bf: ' → Confidence chain: 92% → 87% → 74% → 59%', defect_rate: ' → Lineage: 5 generations from Supplier X', default: '' }[id] || ''),
+  sdm: (id) => ({ prod_trend: ' → Financial exposure: ₹4.2 Cr', supplier: ' → Supply risk: ₹1.8 Cr', default: ' → Total exposure: ₹8.1 Cr' }[id] || ''),
+  ss:  (id) => ({ bf: ' → Safety: 12°C below thermal threshold', fault_count: ' → Risk: cascading mechanical failure', default: ' → Safety margin critical' }[id] || ''),
+};
+
+function getExplanation(ctx, layer, archetype) {
+  let base;
   if (ctx?.id && AI_AGENT_DATA.explanations[ctx.id]) {
-    return AI_AGENT_DATA.explanations[ctx.id];
+    base = AI_AGENT_DATA.explanations[ctx.id];
+  } else if (layer && AI_AGENT_DATA.explanations[layer]) {
+    base = AI_AGENT_DATA.explanations[layer];
+  } else {
+    base = AI_AGENT_DATA.explanations.dashboard;
   }
-  if (layer && AI_AGENT_DATA.explanations[layer]) {
-    return AI_AGENT_DATA.explanations[layer];
+  if (archetype && ARCHETYPE_SUFFIXES[archetype]) {
+    const id = ctx?.id || layer;
+    const suffixFn = ARCHETYPE_SUFFIXES[archetype];
+    const suffix = suffixFn(id) || suffixFn('default');
+    return base + suffix;
   }
-  return AI_AGENT_DATA.explanations.dashboard;
+  return base;
 }
 
 function getContextLabel(ctx, layer) {
@@ -59,17 +75,19 @@ function matchCannedResponse(input) {
   return bestResponse;
 }
 
-export default function AIAgent() {
+export default function AIAgent({ visibleLayer }) {
   const aiOpen = useStore(s => s.aiOpen);
   const toggleAI = useStore(s => s.toggleAI);
   const aiContext = useStore(s => s.aiContext);
   const aiMessages = useStore(s => s.aiMessages);
   const pushAIMessage = useStore(s => s.pushAIMessage);
-  const layer = useStore(s => s.layer);
+  const storeLayer = useStore(s => s.layer);
+  const layer = visibleLayer ?? storeLayer;
   const enterStory = useStore(s => s.enterStory);
   const goToPlantB = useStore(s => s.goToPlantB);
   const goToZones = useStore(s => s.goToZones);
   const setLens = useStore(s => s.setLens);
+  const activeArchetype = useStore(s => s.activeArchetype);
 
   const [orbHovered, setOrbHovered] = useState(false);
   const [inputVal, setInputVal] = useState('');
@@ -77,7 +95,7 @@ export default function AIAgent() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  const explanation = getExplanation(aiContext, layer);
+  const explanation = getExplanation(aiContext, layer, activeArchetype);
   const contextMeta = getContextLabel(aiContext, layer);
   const suggestions = getSuggestions(aiContext, layer);
 
@@ -130,8 +148,8 @@ export default function AIAgent() {
   }, [enterStory, goToPlantB, goToZones, setLens]);
 
   const isStory = layer === 'story';
-  const orbBottom = isStory ? 80 : 24;
-  const panelBottom = isStory ? 136 : 80;
+  const orbBottom = isStory ? 200 : 24;
+  const panelBottom = isStory ? 256 : 80;
 
   return (
     <>

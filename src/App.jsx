@@ -78,7 +78,7 @@ export default function App() {
         {activeLayer === 'zones' && <ZoneView />}
         {activeLayer === 'story' && <StoryView />}
       </div>
-      <AIAgent />
+      <AIAgent visibleLayer={activeLayer} />
     </>
   );
 }

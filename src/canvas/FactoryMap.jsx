@@ -4,11 +4,13 @@ import { ZONES } from '../data/tataSteel';
 import { drawGlow, drawScanline } from './utils';
 import { tickHoverProgress, dampedPulse } from './easing';
 
-export default function FactoryMap({ w, h, hov, onHov, onClick }) {
+export default function FactoryMap({ w, h, hov, onHov, onClick, cogCluster }) {
   const ref = useRef(null);
   const t = useRef(0);
   const pulses = useRef([]);
   const hoverMap = useRef(new Map());
+  const cogClusterRef = useRef(cogCluster);
+  cogClusterRef.current = cogCluster;
 
   const zonePos = useMemo(() => {
     const pad = .08, usable = 1 - pad * 2;
@@ -94,12 +96,15 @@ export default function FactoryMap({ w, h, hov, onHov, onClick }) {
         ctx.strokeStyle = rgb(C.bd, .1); ctx.lineWidth = .5; ctx.stroke();
       }
 
-      // Flow arrows between zones
+      // Flow arrows between zones — #6: adjust by cogCluster
+      const cc = cogClusterRef.current;
+      const flowLineWidth = cc === 'systems' ? 2 : 1;
+      const flowAlpha = cc === 'systems' ? .35 : .2;
       for (let i = 0; i < zonePos.length - 1; i++) {
         const a = zonePos[i], b = zonePos[i + 1];
         const ax = a.px * w, ay = a.py * h, bx = b.px * w, by = b.py * h;
         ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by);
-        ctx.strokeStyle = rgb(C.bd, .2); ctx.lineWidth = 1;
+        ctx.strokeStyle = rgb(C.bd, flowAlpha); ctx.lineWidth = flowLineWidth;
         ctx.setLineDash([5, 4]); ctx.stroke(); ctx.setLineDash([]);
         const mx = (ax + bx) / 2, my = (ay + by) / 2;
         const angle = Math.atan2(by - ay, bx - ax);
@@ -111,8 +116,10 @@ export default function FactoryMap({ w, h, hov, onHov, onClick }) {
         ctx.fillStyle = rgb(C.bd, .3); ctx.fill();
       }
 
-      // Data pulses
-      if (T % 70 === 0 && pulses.current.length < 5) {
+      // Data pulses — #9: systems=brighter, speed=fewer
+      const pulseSpawnRate = cc === 'speed' ? 100 : 70;
+      const pulseAlphaBoost = cc === 'systems' ? 1.3 : 1;
+      if (T % pulseSpawnRate === 0 && pulses.current.length < 5) {
         const i = Math.floor(Math.random() * (zonePos.length - 1));
         pulses.current.push({ from: i, to: i + 1, t: 0, sp: .008 + Math.random() * .006 });
       }
@@ -121,9 +128,9 @@ export default function FactoryMap({ w, h, hov, onHov, onClick }) {
         if (p.t > 1) return false;
         const a = zonePos[p.from], b = zonePos[p.to];
         const px = lerp(a.px * w, b.px * w, p.t), py = lerp(a.py * h, b.py * h, p.t);
-        const al = Math.sin(p.t * Math.PI) * .8;
+        const al = Math.sin(p.t * Math.PI) * .8 * pulseAlphaBoost;
         // Outer glow
-        drawGlow(ctx, px, py, 8, a.accent, al * 0.15);
+        drawGlow(ctx, px, py, cc === 'systems' ? 12 : 8, a.accent, al * 0.15);
         ctx.beginPath(); ctx.arc(px, py, 1.8, 0, Math.PI * 2);
         ctx.fillStyle = rgb(a.accent, al); ctx.fill();
         return true;

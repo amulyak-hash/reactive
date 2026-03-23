@@ -6,64 +6,86 @@ export default function LensSelector({ lenses, activeLens, onSelect, accent }) {
   const [hovIdx, setHovIdx] = useState(null);
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}>
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 4,
+      padding: 3,
+      background: rgb(C.bg, 0.6),
+      borderRadius: 10,
+      border: `1px solid ${rgb(C.bd, 0.5)}`,
+    }}>
       {lenses.map((lens, i) => {
         const isActive = i === activeLens;
         const isHov = i === hovIdx;
         return (
-          <div
+          <button
             key={i}
-            style={{ position: 'relative' }}
+            onClick={(e) => { e.stopPropagation(); onSelect(i); }}
             onMouseEnter={() => setHovIdx(i)}
             onMouseLeave={() => setHovIdx(null)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '6px 14px',
+              borderRadius: 8,
+              border: 'none',
+              background: isActive
+                ? rgb(accent, 0.15)
+                : isHov
+                  ? rgb(accent, 0.06)
+                  : 'transparent',
+              cursor: 'pointer',
+              transition: 'all .2s ease',
+              position: 'relative',
+              '--accent-r': parseInt(accent.replace('#', '').substring(0, 2), 16),
+              '--accent-g': parseInt(accent.replace('#', '').substring(2, 4), 16),
+              '--accent-b': parseInt(accent.replace('#', '').substring(4, 6), 16),
+            }}
           >
-            <button
-              onClick={(e) => { e.stopPropagation(); onSelect(i); }}
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                border: `1.5px solid ${isActive ? rgb(accent, .5) : isHov ? rgb(accent, .25) : C.bd}`,
-                background: isActive ? rgb(accent, .15) : isHov ? rgb(accent, .06) : C.sf,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 13,
-                color: isActive ? accent : C.t3,
-                transition: 'all .2s ease',
-                animation: isActive ? 'lensPulse 2.5s ease-in-out infinite' : 'none',
-                '--accent-r': parseInt(accent.replace('#', '').substring(0, 2), 16),
-                '--accent-g': parseInt(accent.replace('#', '').substring(2, 4), 16),
-                '--accent-b': parseInt(accent.replace('#', '').substring(4, 6), 16),
-                padding: 0,
-              }}
-            >
-              {ICONS[lens.icon] || '●'}
-            </button>
-            {/* Tooltip */}
-            {isHov && (
+            {/* Active indicator line */}
+            {isActive && (
               <div style={{
                 position: 'absolute',
-                top: 34,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                whiteSpace: 'nowrap',
-                padding: '3px 8px',
-                borderRadius: 4,
-                background: C.bgL,
-                border: `1px solid ${C.bd}`,
-                fontSize: 9,
-                fontFamily: FONT_SANS,
-                fontWeight: 600,
-                color: C.t2,
-                zIndex: 20,
-                pointerEvents: 'none',
-              }}>
-                {lens.name}
-              </div>
+                bottom: 0,
+                left: 10,
+                right: 10,
+                height: 2,
+                borderRadius: 1,
+                background: accent,
+                animation: 'fadeIn 0.3s ease',
+              }} />
             )}
-          </div>
+            <span style={{
+              fontSize: 13,
+              color: isActive ? accent : C.t3,
+              transition: 'color .2s ease',
+              lineHeight: 1,
+            }}>
+              {ICONS[lens.icon] || '●'}
+            </span>
+            <span style={{
+              fontFamily: FONT_SANS,
+              fontSize: 11,
+              fontWeight: isActive ? 600 : 500,
+              color: isActive ? C.t1 : isHov ? C.t2 : C.t3,
+              transition: 'color .2s ease',
+              whiteSpace: 'nowrap',
+            }}>
+              {lens.name}
+            </span>
+            {isActive && (
+              <span style={{
+                fontFamily: FONT_MONO,
+                fontSize: 8,
+                color: rgb(accent, 0.6),
+                fontWeight: 600,
+              }}>
+                {lens.stories?.length || 0}
+              </span>
+            )}
+          </button>
         );
       })}
     </div>

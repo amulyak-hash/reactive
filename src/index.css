@@ -44,3 +44,176 @@ html, body, #root {
   0%, 100% { box-shadow: 0 0 8px 2px rgba(34, 211, 238, 0.15); }
   50% { box-shadow: 0 0 16px 4px rgba(34, 211, 238, 0.3); }
 }
+
+/* Story redesign animations */
+@keyframes narrativeEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes progressPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-r), var(--accent-g), var(--accent-b), .4); }
+  50% { box-shadow: 0 0 8px 3px rgba(var(--accent-r), var(--accent-g), var(--accent-b), .15); }
+}
+
+@keyframes trackFill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+@keyframes lensInvite {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes endFadeIn {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to   { opacity: 1; backdrop-filter: blur(8px); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LENS MORPHING — data-attribute driven dashboard transforms
+   ═══════════════════════════════════════════════════════════ */
+
+/* Base transition for morphing */
+.panel-card {
+  transition: max-height 500ms cubic-bezier(.22,1,.36,1),
+              padding 500ms cubic-bezier(.22,1,.36,1),
+              border-color 200ms ease,
+              box-shadow 200ms ease,
+              transform 300ms cubic-bezier(.22,1,.36,1),
+              opacity 500ms cubic-bezier(.22,1,.36,1) !important;
+}
+
+/* ─── RTR: Real-Time Responder ─── */
+[data-archetype="rtr"] .ai-briefing { max-height: 0; overflow: hidden; opacity: 0; padding: 0 !important; margin: 0 !important; border: none !important; }
+[data-archetype="rtr"] .section-label { display: none; }
+[data-archetype="rtr"] .panel-card { max-height: 140px; overflow: hidden; }
+[data-archetype="rtr"] .panel-subtitle { display: none; }
+[data-archetype="rtr"] .section-divider { margin-bottom: 16px !important; }
+[data-archetype="rtr"] .card-metric { font-size: 28px !important; }
+[data-archetype="rtr"] .card-title { font-size: 11px !important; }
+
+/* ─── OO: Ops Optimizer ─── */
+[data-archetype="oo"] .narrative-text { max-height: 60px; overflow: hidden; }
+[data-archetype="oo"] .panel-card { max-height: 280px; overflow: hidden; }
+
+/* ─── AP: Analytical Planner ─── */
+[data-archetype="ap"] .narrative-text { font-family: 'Newsreader', serif !important; font-size: 16px !important; line-height: 1.8 !important; }
+[data-archetype="ap"] .panel-card { max-height: none; }
+[data-archetype="ap"] .section-label span { font-size: 12px !important; letter-spacing: 0.15em !important; }
+
+/* ─── SDM: Strategic Decision Maker ─── */
+[data-archetype="sdm"] .narrative-text { display: none; }
+[data-archetype="sdm"] .card-metric { font-size: 32px !important; font-weight: 900 !important; }
+[data-archetype="sdm"] .card-sub { display: none; }
+[data-archetype="sdm"] .panel-card { max-height: 220px; overflow: hidden; }
+[data-archetype="sdm"] .signal-card { border-left: 3px solid; }
+
+/* ─── SS: Safety Sentinel ─── */
+[data-archetype="ss"] .intelligence-card[data-status="alert"] { order: -1; border-width: 2px; }
+[data-archetype="ss"] .intelligence-card[data-status="alert"] .card-metric { color: #F06060 !important; }
+[data-archetype="ss"] .risk-section { order: -1; }
+[data-archetype="ss"] .section-divider { margin-bottom: 20px !important; }
+
+/* ─── Cognitive Cluster: Speed ─── */
+[data-cogcluster="speed"] .panel-card { border-radius: 6px !important; padding: 10px 12px !important; }
+[data-cogcluster="speed"] .ai-briefing { padding: 14px 16px !important; }
+[data-cogcluster="speed"] .narrative-text { font-size: 12px !important; line-height: 1.4 !important; }
+[data-cogcluster="speed"] .section-divider { margin-bottom: 20px !important; }
+
+/* ─── Cognitive Cluster: Depth ─── */
+[data-cogcluster="depth"] .panel-card { padding: 20px 22px !important; }
+[data-cogcluster="depth"] .narrative-text { font-size: 15px !important; line-height: 1.8 !important; }
+[data-cogcluster="depth"] .section-label span { letter-spacing: 0.15em !important; }
+[data-cogcluster="depth"] .signal-card { padding: 16px 18px !important; }
+
+/* ─── Cognitive Cluster: Systems ─── */
+[data-cogcluster="systems"] .factory-map-section { order: -1; }
+[data-cogcluster="systems"] .intelligence-grid { gap: 8px !important; }
+[data-cogcluster="systems"] .panel-card { border-left: 3px solid var(--panel-accent, #3B8BF6) !important; }
+
+/* ─── Cognitive Cluster: People ─── */
+[data-cogcluster="people"] .ai-briefing { padding: 24px 28px !important; }
+[data-cogcluster="people"] .narrative-text { font-family: 'Newsreader', serif !important; font-size: 15px !important; }
+[data-cogcluster="people"] .section-label span { font-family: 'DM Sans', sans-serif !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
+
+/* ─── Individual Cognitive Style fine-tuning ─── */
+
+/* Speed cluster */
+[data-cogstyle="rapid-decider"] .panel-card { max-height: calc(var(--panel-max-height, 300px) - 40px); }
+[data-cogstyle="decisive-actor"] .signal-card { font-weight: 800 !important; }
+[data-cogstyle="decisive-actor"] .story-button { font-weight: 700 !important; }
+
+/* Depth cluster */
+[data-cogstyle="deliberate-analyst"] .panel-card { max-height: none !important; }
+[data-cogstyle="deep-investigator"] .intelligence-card { min-height: 120px; }
+[data-cogstyle="deep-investigator"] .card-preview { transform: scale(1.12); }
+
+/* Systems cluster */
+[data-cogstyle="systems-thinker"] .intelligence-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; }
+[data-cogstyle="pattern-recognizer"] .card-metric { font-family: 'JetBrains Mono', monospace !important; }
+[data-cogstyle="pattern-recognizer"] .intelligence-grid { gap: 6px !important; }
+
+/* People cluster */
+[data-cogstyle="collab-facilitator"] .signal-card { border-radius: 14px !important; }
+[data-cogstyle="consensus-builder"] .ai-briefing { border-radius: 20px !important; }
+[data-cogstyle="narrative-interpreter"] .narrative-text { font-style: italic !important; font-size: 16px !important; }
+[data-cogstyle="intuitive-scanner"] .intelligence-card { opacity: 0.85; }
+[data-cogstyle="intuitive-scanner"] .intelligence-card[data-status="alert"] { opacity: 1; transform: scale(1.01); }
+
+/* ─── 2-Axis Differentiation: New Rules ─── */
+
+/* SDM financial summary band */
+.financial-summary-band {
+  display: none;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(34,211,238,0.04), rgba(59,139,246,0.04));
+  border: 1px solid rgba(34,211,238,0.15);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+[data-archetype="sdm"] .financial-summary-band { display: flex; }
+
+/* Surface metric badges (#8) */
+.surface-metric-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(241,245,249,0.6);
+}
+
+/* Story annotation panels (#9) */
+.story-annotation {
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid rgba(34,211,238,0.3);
+  border-radius: 0 6px 6px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: rgba(241,245,249,0.5);
+  animation: fadeIn 0.3s ease;
+}
+
+/* Lens menu entry animation */
+@keyframes lensMenuEnter {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
