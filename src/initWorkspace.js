@@ -1,6 +1,14 @@
 export function initWorkspace() {
+    function makeId() {
+      if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
+        return globalThis.crypto.randomUUID();
+      }
+      return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    }
+
   if (window.__reactiveWorkspaceInitialized) return;
   window.__reactiveWorkspaceInitialized = true;
+  const CHAT_PLACEHOLDER = 'ask a follow-up...';
 
     const landingCards = [
       { key: 'vendor-leaderboard', title: 'Vendor Leaderboard', description: 'Compare vendor performance across pricing, quality, timeline, and NCE risk.' },
@@ -344,10 +352,6 @@ export function initWorkspace() {
       ]
     });
 
-    const historyThreads = [
-      { id: 'current', title: 'Vendor Leaderboard', date: 'Mar 27', count: 0 }
-    ];
-
     const followupMap = {
       'supplier-x': ['Which furnace is most exposed?', 'Compare Supplier X with other silicon suppliers'],
       'bf3-superheat': ['Compare BF-3 with BF-5 superheat', 'Show BF-3 impact on downstream CCMs'],
@@ -371,29 +375,36 @@ export function initWorkspace() {
     const composer = document.getElementById('composer');
     const composerInput = document.getElementById('composerInput');
     const composerStarters = document.getElementById('composerStarters');
+    const historyButtonEl = document.getElementById('historyButton');
+    const bookmarksButtonEl = document.getElementById('bookmarksButton');
     const timelineRail = document.getElementById('timelineRail');
     const timelineSegments = document.getElementById('timelineSegments');
     const timelineTooltip = document.getElementById('timelineTooltip');
     const historyList = document.getElementById('historyList');
-    const historyDivider = document.getElementById('historyDivider');
     const panel = document.getElementById('drillPanel');
     const panelTitle = document.getElementById('panelTitle');
     const panelMeta = document.getElementById('panelMeta');
     const panelBody = document.getElementById('panelBody');
     const bookmarksSheet = document.getElementById('bookmarksSheet');
+    const historySheet = document.getElementById('historySheet');
     const artifactsSheet = document.getElementById('artifactsSheet');
     const bookmarksList = document.getElementById('bookmarksList');
     const artifactsList = document.getElementById('artifactsList');
-    const toggleHistoryIcon = document.getElementById('toggleHistoryIcon');
-    const toggleHistoryLabel = document.getElementById('toggleHistoryLabel');
+    const profileMenu = document.getElementById('profileMenu');
 
     const state = {
       mode: 'landing',
       currentThreadId: 'current',
       centeredInput: false,
       threads: { current: [] },
+      threadMeta: {
+        current: {
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        }
+      },
       historyOpen: false,
-      landingProfileOpen: false,
+      profileMenuOpen: false,
       landingChipCursor: 1,
       landingChipsByThread: { current: [...chipPresets[0]] },
       activePanel: null,
@@ -401,12 +412,64 @@ export function initWorkspace() {
       panelResponseId: null,
       followupContext: null,
       exportOpenFor: null,
+      feedbackForResponseId: null,
       bookmarks: new Set(),
+      liked: new Set(),
       reviewed: new Set()
     };
 
     function currentResponses() {
       return state.threads[state.currentThreadId] || [];
+    }
+
+    function formatThreadTime(value) {
+      return new Date(value).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatResponseTime(response) {
+      const created = response.createdAt ? new Date(response.createdAt) : null;
+      if (!created || Number.isNaN(created.getTime())) return response.timestamp || '';
+      const now = new Date();
+      const isToday = created.getDate() === now.getDate()
+        && created.getMonth() === now.getMonth()
+        && created.getFullYear() === now.getFullYear();
+      const time = created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (isToday) return `Today · ${time}`;
+      const date = created.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      return `${date} · ${time}`;
+    }
+
+    function ensureThreadMeta(threadId) {
+      if (!state.threadMeta[threadId]) {
+        state.threadMeta[threadId] = { createdAt: Date.now(), updatedAt: Date.now() };
+      }
+      return state.threadMeta[threadId];
+    }
+
+    function touchThread(threadId = state.currentThreadId) {
+      const meta = ensureThreadMeta(threadId);
+      meta.updatedAt = Date.now();
+    }
+
+    function setThreadResponses(threadId, responses) {
+      state.threads[threadId] = responses.map(response => {
+        if (!response.createdAt) response.createdAt = Date.now();
+        if (!response.timestamp) response.timestamp = new Date(response.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return response;
+      });
+      touchThread(threadId);
+    }
+
+    function appendResponseToCurrentThread(response) {
+      if (!response.createdAt) response.createdAt = Date.now();
+      if (!response.timestamp) response.timestamp = new Date(response.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      currentResponses().push(response);
+      touchThread(state.currentThreadId);
+    }
+
+    function summarizeText(value, max = 86) {
+      if (!value) return '';
+      return value.length > max ? `${value.slice(0, max - 1)}…` : value;
     }
 
     function ensureLandingChipsForThread(threadId) {
@@ -422,14 +485,15 @@ export function initWorkspace() {
       const nextThreadId = `chat-${Date.now()}`;
       state.currentThreadId = nextThreadId;
       state.threads[nextThreadId] = [];
+      ensureThreadMeta(nextThreadId);
       ensureLandingChipsForThread(nextThreadId);
       state.mode = 'landing';
       state.centeredInput = false;
       state.historyOpen = false;
-      state.landingProfileOpen = false;
+      state.profileMenuOpen = false;
       resetPanels();
       composerInput.value = '';
-      composerInput.placeholder = 'ask a follow-up...';
+      composerInput.placeholder = CHAT_PLACEHOLDER;
       renderAll();
       canvas.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -500,9 +564,44 @@ export function initWorkspace() {
     }
 
     function baseResponse(question = 'Vendor Leaderboard') {
+      const normalizedQuestion = question.toLowerCase().trim();
+      if (normalizedQuestion === 'show overall insights') {
+        return {
+          id: makeId(),
+          topic: 'overall-insights',
+          title: 'Overall Insights Briefing',
+          question,
+          format: 'briefing',
+          formatLabel: 'Briefing Card',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          insight: 'Two contracts are approaching SLA breach and IT services spend is tracking 34% above plan, which should be treated as this week\'s highest-priority intervention.',
+          options: [
+            { key: 'briefing', label: 'briefing', enabled: true },
+            { key: 'bar', label: 'bar', enabled: true },
+            { key: 'text', label: 'text', enabled: true }
+          ],
+          briefing: {
+            headline: 'Two contracts are approaching SLA breach and IT Services spend is 34% above plan, so this needs intervention before end of week.',
+            tiles: [
+              { domain: 'Vendors', status: 'amber', metric: '4/11 need action', note: 'Vendor A and C now carry repeated escalation patterns.' },
+              { domain: 'Budget', status: 'red', metric: '+34% vs plan', note: 'IT Services overrun is driving most variance this cycle.' },
+              { domain: 'Risk', status: 'red', metric: '7 open flags', note: 'Two high-severity flags are within 72-hour breach windows.' },
+              { domain: 'Timelines', status: 'amber', metric: '3 slips this week', note: 'Milestone drift is clustered around procurement dependencies.' }
+            ]
+          },
+          rows: [
+            { id: 'vendors', vendor: 'Vendors', company: '4/11 need action', pricing: 64 },
+            { id: 'budget', vendor: 'Budget', company: '+34% vs plan', pricing: 89 },
+            { id: 'risk', vendor: 'Risk', company: '7 open flags', pricing: 82 },
+            { id: 'timelines', vendor: 'Timelines', company: '3 slips this week', pricing: 58 }
+          ],
+          lenses: ['Drill into budget', 'Show the risk flags', 'What is causing the delays']
+        };
+      }
+
       if (question.toLowerCase() === 'supplier quality flow') {
         return {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'supplier-quality-flow',
           title: 'Supplier Quality Flow',
           question,
@@ -516,7 +615,7 @@ export function initWorkspace() {
       }
       if (question === 'Bid Evaluation summary' || question === 'contract spend tracking') {
         return {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: question.toLowerCase().replaceAll(' ', '-'),
           title: question,
           question,
@@ -530,7 +629,7 @@ export function initWorkspace() {
         };
       }
       return {
-        id: crypto.randomUUID(),
+        id: makeId(),
         topic: 'vendor-leaderboard',
         title: 'Vendor Leaderboard',
         question,
@@ -596,25 +695,6 @@ export function initWorkspace() {
       landing.innerHTML = `
         <div class="landing-shell">
           <section class="landing-hero">
-            <div class="landing-topbar">
-              <div class="landing-topbar-right">
-                <button class="landing-topbar-btn" type="button" data-landing-action="new-chat">+ New Chat</button>
-                <button class="landing-topbar-btn" type="button" data-landing-action="history">⧗ History</button>
-                <button class="landing-topbar-btn" type="button" data-landing-action="bookmarks">⊞ Bookmarks</button>
-                <div class="landing-profile-wrap">
-                  <button class="landing-topbar-btn landing-profile-btn" type="button" data-landing-profile aria-label="Profile">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <circle cx="12" cy="8" r="4"></circle>
-                      <path d="M4 20c0-4.2 3.6-7 8-7s8 2.8 8 7"></path>
-                    </svg>
-                  </button>
-                  <div class="landing-profile-menu" ${state.landingProfileOpen ? '' : 'hidden'}>
-                    <button type="button" data-landing-signout>Sign out</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div class="landing-waves" aria-hidden="true"></div>
 
             <div class="landing-orb-zone">
@@ -664,7 +744,7 @@ export function initWorkspace() {
             state.centeredInput = true;
             resetPanels();
             composerInput.value = '';
-            composerInput.placeholder = 'What would you like to explore?';
+            composerInput.placeholder = CHAT_PLACEHOLDER;
             renderAll();
             setTimeout(() => composerInput.focus(), 180);
             return;
@@ -673,10 +753,10 @@ export function initWorkspace() {
           const next = baseResponse(value);
           state.mode = 'thread';
           state.centeredInput = false;
-          state.threads[state.currentThreadId] = [next];
+          setThreadResponses(state.currentThreadId, [next]);
           resetPanels();
           composerInput.value = value;
-          composerInput.placeholder = 'ask a follow-up...';
+          composerInput.placeholder = CHAT_PLACEHOLDER;
           renderAll();
           canvas.scrollTo({ top: 0, behavior: 'smooth' });
         });
@@ -766,6 +846,44 @@ export function initWorkspace() {
       `;
     }
 
+    function renderBriefingView(response) {
+      const briefing = response.briefing || { headline: '', tiles: [] };
+      return `
+        <div class="briefing-view">
+          <div class="briefing-headline">${escapeHtml(briefing.headline || '')}</div>
+          <div class="briefing-grid">
+            ${briefing.tiles.map(tile => `
+              <button class="briefing-tile" type="button" data-entity="${escapeHtml(tile.domain.toLowerCase())}">
+                <div class="briefing-top">
+                  <span class="status-dot ${escapeHtml(tile.status)}"></span>
+                  <span class="status-label">${escapeHtml(tile.status)}</span>
+                </div>
+                <div class="briefing-domain">${escapeHtml(tile.domain)}</div>
+                <div class="briefing-metric">${escapeHtml(tile.metric)}</div>
+                <div class="briefing-note">${escapeHtml(tile.note)}</div>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInlineElementInsights(response) {
+      return `
+        <div class="inline-insights">
+          <button class="selected-card" type="button" data-followup-source="${escapeHtml(response.followupSource || response.question)}">
+            <div class="selected-title">${escapeHtml(response.title)}</div>
+            <div class="metric-grid">
+              ${(response.selected || []).map(([label, value]) => `<div class="metric-line">${escapeHtml(label)}<strong>${escapeHtml(value)}</strong></div>`).join('')}
+            </div>
+          </button>
+          <div class="insights-stack">
+            ${(response.cards || []).map(card => renderInsightCard(card)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
     function renderFlowView() {
       return `
         <div class="flow-view ${state.selectedEntity ? 'selected-mode' : ''}">
@@ -836,7 +954,7 @@ export function initWorkspace() {
     function followupResponse(prompt) {
       const map = {
         'Which furnace is most exposed?': {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'furnace-exposure',
           title: 'Furnace Exposure Snapshot',
           question: prompt,
@@ -852,7 +970,7 @@ export function initWorkspace() {
           ]
         },
         'Compare Supplier X with other silicon suppliers': {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'supplier-compare',
           title: 'Silicon Supplier Comparison',
           question: prompt,
@@ -869,7 +987,7 @@ export function initWorkspace() {
           ]
         },
         'Compare BF-3 with BF-5 superheat': {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'bf-compare',
           title: 'BF-3 vs BF-5 Superheat',
           question: prompt,
@@ -885,7 +1003,7 @@ export function initWorkspace() {
           ]
         },
         'Show BF-3 impact on downstream CCMs': {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'bf-ccm-impact',
           title: 'Downstream CCM Exposure',
           question: prompt,
@@ -901,7 +1019,7 @@ export function initWorkspace() {
           ]
         },
         'Which grades are most affected?': {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'grade-impact',
           title: 'Grade Exposure',
           question: prompt,
@@ -918,7 +1036,7 @@ export function initWorkspace() {
           ]
         },
         'Compare CCM-3 with CCM-1': {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'ccm-compare',
           title: 'CCM Comparison',
           question: prompt,
@@ -934,7 +1052,7 @@ export function initWorkspace() {
           ]
         },
         'Quantify Automotive revenue risk': {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'revenue-risk',
           title: 'Automotive Revenue Risk',
           question: prompt,
@@ -950,7 +1068,7 @@ export function initWorkspace() {
           ]
         },
         'Show commitment vs projected delivery': {
-          id: crypto.randomUUID(),
+          id: makeId(),
           topic: 'delivery-gap',
           title: 'Commitment vs Projected Delivery',
           question: prompt,
@@ -970,6 +1088,8 @@ export function initWorkspace() {
     }
 
     function renderPrimaryVisual(response) {
+      if (response.format === 'briefing') return renderBriefingView(response);
+      if (response.format === 'insights') return renderInlineElementInsights(response);
       if (response.format === 'flow') return renderFlowView();
       if (response.format === 'line') return renderLineView(response.rows);
       if (response.format === 'bar') return renderBarView(response.rows);
@@ -984,7 +1104,8 @@ export function initWorkspace() {
         { key: 'line', label: 'line', enabled: true },
         { key: 'text', label: 'text', enabled: true }
       ];
-      const showSwitcher = options.length > 1;
+      const showsVisualization = !['insights', 'text'].includes(response.format);
+      const showSwitcher = showsVisualization && options.length > 1;
 
       return `
         <article class="response-card" id="response-${response.id}" data-response-id="${response.id}">
@@ -997,21 +1118,20 @@ export function initWorkspace() {
                   ${options.map(option => `<button class="type-pill ${response.format === option.key ? 'active' : ''}" type="button" data-switch="${option.key}" data-response-id="${response.id}">${option.label}</button>`).join('')}
                 </div>` : ''}
               </div>
-              <div class="header-actions">
-                <button class="icon-btn ${state.bookmarks.has(response.id) ? 'bookmarked' : ''}" type="button" data-bookmark="${response.id}" title="Bookmark">☆</button>
-                <div class="export-wrap">
-                  <button class="icon-btn" type="button" data-export="${response.id}" title="Export">⤴</button>
-                  <div class="export-menu" ${state.exportOpenFor === response.id ? '' : 'hidden'}>
-                    <button class="export-option" type="button">Download as PNG</button>
-                    <button class="export-option" type="button">Download as CSV</button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
           <div class="card-block card-body">
             <div class="agent-insight">${escapeHtml(response.insight)}</div>
             ${renderPrimaryVisual(response)}
+            <div class="response-footer">
+              <div class="response-actions">
+                <button class="icon-btn ${state.bookmarks.has(response.id) ? 'bookmarked' : ''}" type="button" data-bookmark="${response.id}" title="Bookmark">☆</button>
+                <button class="icon-btn ${state.liked.has(response.id) ? 'active' : ''}" type="button" data-like="${response.id}" title="Like">👍</button>
+                <button class="icon-btn" type="button" data-dislike="${response.id}" title="Dislike">👎</button>
+                <button class="icon-btn" type="button" data-regenerate="${response.id}" title="Regenerate">↻</button>
+              </div>
+              <span class="response-time">${escapeHtml(formatResponseTime(response))}</span>
+            </div>
           </div>
         </article>
       `;
@@ -1019,26 +1139,55 @@ export function initWorkspace() {
 
     function renderThread() {
       const responses = currentResponses();
+      if (!responses.length) {
+        thread.innerHTML = `
+          <div class="thread-stack thread-stack-empty">
+            <div class="thread-empty-note">Start with a prompt or select a suggested action to generate responses in this workspace.</div>
+          </div>
+        `;
+        return;
+      }
       thread.innerHTML = `<div class="thread-stack">${responses.map(response => `
         <div class="user-message">${escapeHtml(response.question)}</div>
         ${renderResponseCard(response)}
         ${renderFollowups(response)}
-      `).join('')}</div>`;
+      `).join('')}
+      ${state.feedbackForResponseId ? `
+        <div class="agent-question">
+          <div class="agent-question-label">Assistant</div>
+          <div class="agent-question-copy">What was wrong with this response? Share your reason below and I will regenerate with your feedback.</div>
+        </div>
+      ` : ''}
+      </div>`;
     }
 
     function renderHistory() {
-      if (!currentResponses().length) {
-        historyDivider.style.display = 'none';
+      if (!historyList) return;
+      const threadEntries = Object.entries(state.threads)
+        .map(([id, responses]) => {
+          const meta = ensureThreadMeta(id);
+          const first = responses[0];
+          const last = responses[responses.length - 1];
+          return {
+            id,
+            title: first?.question || 'New Chat',
+            preview: summarizeText(last?.insight || first?.insight || 'No responses yet.', 92),
+            count: responses.length,
+            updatedAt: meta.updatedAt
+          };
+        })
+        .sort((a, b) => b.updatedAt - a.updatedAt);
+
+      if (!threadEntries.length) {
         historyList.innerHTML = '';
         return;
       }
-      historyDivider.style.display = 'block';
-      historyThreads[0].title = currentResponses()[0]?.question || 'Current Thread';
-      historyThreads[0].count = currentResponses().length;
-      historyList.innerHTML = historyThreads.map(item => `
+
+      historyList.innerHTML = threadEntries.map(item => `
         <button class="history-item ${item.id === state.currentThreadId ? 'active' : ''}" type="button" data-thread="${item.id}">
           <div class="history-title">${escapeHtml(item.title)}</div>
-          <div class="history-meta">${escapeHtml(item.date)} · ${item.count} responses</div>
+          <div class="history-meta">${escapeHtml(item.preview)}</div>
+          <div class="history-meta">${escapeHtml(formatThreadTime(item.updatedAt))} · ${item.count} responses</div>
         </button>
       `).join('');
     }
@@ -1060,6 +1209,28 @@ export function initWorkspace() {
 
     function drilldownFor(vendorId) {
       return drilldowns[vendorId] || genericDrilldown(vendorId);
+    }
+
+    function appendElementInsightResponse(entityId, promptLabel) {
+      const data = drilldownFor(entityId);
+      const next = {
+        id: makeId(),
+        topic: entityId,
+        title: data.title,
+        question: promptLabel || `Selected: ${data.title}`,
+        format: 'insights',
+        formatLabel: 'Insights',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        insight: data.meta,
+        selected: data.selected,
+        cards: data.cards,
+        followupSource: entityId,
+        lenses: []
+      };
+      appendResponseToCurrentThread(next);
+      showFollowups(next.id, entityId);
+      renderAll();
+      requestAnimationFrame(() => scrollToResponse(next.id, false));
     }
 
     function renderDrillPanel(vendorId) {
@@ -1089,8 +1260,9 @@ export function initWorkspace() {
           <div class="saved-top">
             <span class="saved-badge">${escapeHtml(item.formatLabel)}</span>
           </div>
-          <div class="saved-question">${escapeHtml(item.question)}</div>
-          <div class="saved-meta">${escapeHtml(item.timestamp)}</div>
+          <div class="saved-question">${escapeHtml(item.title)}</div>
+          <div class="saved-meta">${escapeHtml(summarizeText(item.insight || item.question, 92))}</div>
+          <div class="saved-meta">${escapeHtml(formatResponseTime(item))}</div>
         </button>
       `).join('') : `<div class="saved-item"><div class="saved-question">No bookmarked responses yet.</div><div class="saved-meta">Save a response from the thread to see it here.</div></div>`;
     }
@@ -1258,7 +1430,14 @@ export function initWorkspace() {
         return;
       }
       const active = visibleResponseIndex();
-      timelineSegments.innerHTML = responses.map((response, index) => `<button class="timeline-segment ${index === active ? 'active' : ''}" type="button" data-index="${index}"></button>`).join('');
+      timelineSegments.innerHTML = responses.map((response, index) => `
+        <button
+          class="timeline-segment ${index === active ? 'active' : ''} ${state.bookmarks.has(response.id) ? 'bookmarked' : ''}"
+          type="button"
+          data-index="${index}"
+          title="${state.bookmarks.has(response.id) ? 'Bookmarked response' : 'Response'}"
+        ></button>
+      `).join('');
       document.getElementById('scrollUp').disabled = active <= 0;
       document.getElementById('scrollDown').disabled = active >= responses.length - 1;
     }
@@ -1266,37 +1445,40 @@ export function initWorkspace() {
     function openWorkspaceWithResponse(response) {
       state.mode = 'thread';
       state.centeredInput = false;
-      state.threads[state.currentThreadId] = [response];
+      setThreadResponses(state.currentThreadId, [response]);
       resetPanels();
       composerInput.value = response.question;
-      composerInput.placeholder = 'ask a follow-up...';
+      composerInput.placeholder = CHAT_PLACEHOLDER;
     }
 
     function renderVisibility() {
       app.classList.toggle('landing-mode', state.mode === 'landing');
       app.classList.toggle('history-open', state.historyOpen && state.mode !== 'landing');
-      toggleHistoryIcon.textContent = state.historyOpen ? '◂' : '▸';
-      toggleHistoryLabel.textContent = state.historyOpen ? 'Collapse' : 'Expand';
       landing.style.display = state.mode === 'landing' ? 'grid' : 'none';
       landing.classList.remove('exiting');
       landingFloater.style.display = state.mode === 'landing' ? 'block' : 'none';
-      workspaceTools.style.display = state.mode === 'landing' ? 'none' : 'flex';
+      workspaceTools.style.display = 'flex';
       thread.classList.toggle('active', state.mode === 'thread');
       emptyThread.classList.toggle('active', state.mode === 'empty');
       inputZone.classList.toggle('centered', state.centeredInput);
+      profileMenu.hidden = !state.profileMenuOpen;
+      if (historyButtonEl) historyButtonEl.classList.toggle('active', state.activePanel === 'history');
+      if (bookmarksButtonEl) bookmarksButtonEl.classList.toggle('active', state.activePanel === 'bookmarks');
     }
 
     function renderPanels() {
       const drillOpen = state.mode !== 'landing' && state.activePanel === 'drill';
       const bookmarksOpen = state.mode !== 'landing' && state.activePanel === 'bookmarks';
+      const historyOpen = state.mode !== 'landing' && state.activePanel === 'history';
       const artifactsOpen = state.mode !== 'landing' && state.activePanel === 'artifacts';
       panel.classList.toggle('open', drillOpen);
-      bookmarksSheet.classList.toggle('open', bookmarksOpen);
-      artifactsSheet.classList.toggle('open', artifactsOpen);
+      if (bookmarksSheet) bookmarksSheet.classList.toggle('open', bookmarksOpen);
+      if (historySheet) historySheet.classList.toggle('open', historyOpen);
+      if (artifactsSheet) artifactsSheet.classList.toggle('open', artifactsOpen);
       workspaceMain.classList.toggle('with-panel', drillOpen);
-      workspaceMain.classList.toggle('with-sheet', bookmarksOpen || artifactsOpen);
+      workspaceMain.classList.toggle('with-sheet', bookmarksOpen || historyOpen || artifactsOpen);
       inputZone.classList.toggle('with-panel', drillOpen);
-      inputZone.classList.toggle('with-sheet', bookmarksOpen || artifactsOpen);
+      inputZone.classList.toggle('with-sheet', bookmarksOpen || historyOpen || artifactsOpen);
       canvas.classList.remove('dimmed');
     }
 
@@ -1324,7 +1506,7 @@ export function initWorkspace() {
 
     function addLens(responseId, lens) {
       const next = baseResponse(lens);
-      currentResponses().push(next);
+      appendResponseToCurrentThread(next);
       renderAll();
       requestAnimationFrame(() => scrollToResponse(next.id));
     }
@@ -1341,10 +1523,11 @@ export function initWorkspace() {
       renderAll();
     }
 
-    function scrollToResponse(responseId) {
+    function scrollToResponse(responseId, withHighlight = true) {
       const target = document.getElementById(`response-${responseId}`);
       if (!target) return;
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!withHighlight) return;
       target.classList.add('highlight');
       setTimeout(() => target.classList.remove('highlight'), 500);
     }
@@ -1354,30 +1537,15 @@ export function initWorkspace() {
       state.centeredInput = true;
       resetPanels();
       composerInput.value = '';
-      composerInput.placeholder = 'What would you like to explore?';
+      composerInput.placeholder = CHAT_PLACEHOLDER;
       renderAll();
       setTimeout(() => composerInput.focus(), 200);
     });
 
-    document.getElementById('backToLanding').addEventListener('click', () => {
-      state.mode = 'landing';
-      state.centeredInput = false;
-      state.historyOpen = false;
-      resetPanels();
-      composerInput.value = '';
-      composerInput.placeholder = 'ask a follow-up...';
-      renderAll();
-      canvas.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    document.getElementById('toggleHistory').addEventListener('click', () => {
-      if (state.mode === 'landing') return;
-      state.historyOpen = !state.historyOpen;
-      renderAll();
-    });
-
     document.getElementById('historyButton').addEventListener('click', () => {
-      // Navigation is intentionally disabled for now while preserving the enabled UI affordance.
+      if (state.mode === 'landing') return;
+      state.activePanel = state.activePanel === 'history' ? null : 'history';
+      renderAll();
     });
 
     document.getElementById('newThread').addEventListener('click', () => {
@@ -1385,12 +1553,13 @@ export function initWorkspace() {
     });
 
     document.getElementById('bookmarksButton').addEventListener('click', () => {
-      // Navigation is intentionally disabled for now while preserving the enabled UI affordance.
+      if (state.mode === 'landing') return;
+      state.activePanel = state.activePanel === 'bookmarks' ? null : 'bookmarks';
+      renderAll();
     });
 
-    document.getElementById('artifactsButton').addEventListener('click', () => {
-      if (state.mode === 'landing') return;
-      state.activePanel = state.activePanel === 'artifacts' ? null : 'artifacts';
+    document.getElementById('profileButton').addEventListener('click', () => {
+      state.profileMenuOpen = !state.profileMenuOpen;
       renderAll();
     });
 
@@ -1398,14 +1567,36 @@ export function initWorkspace() {
       event.preventDefault();
       const value = composerInput.value.trim();
       if (!value) return;
+      if (state.feedbackForResponseId) {
+        const next = {
+          id: makeId(),
+          topic: 'feedback',
+          title: 'Feedback Captured',
+          question: value,
+          format: 'text',
+          formatLabel: 'Text',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          insight: 'Thanks, we captured your feedback and will use it to improve subsequent answers.',
+          lenses: [],
+          options: [{ key: 'text', label: 'text', enabled: true }],
+          rows: []
+        };
+        appendResponseToCurrentThread(next);
+        state.feedbackForResponseId = null;
+        composerInput.value = '';
+        composerInput.placeholder = CHAT_PLACEHOLDER;
+        renderAll();
+        requestAnimationFrame(() => scrollToResponse(next.id));
+        return;
+      }
       if (state.mode !== 'thread') {
         state.mode = 'thread';
         state.centeredInput = false;
       }
       const next = baseResponse(value);
-      currentResponses().push(next);
+      appendResponseToCurrentThread(next);
       composerInput.value = '';
-      composerInput.placeholder = 'ask a follow-up...';
+      composerInput.placeholder = CHAT_PLACEHOLDER;
       renderAll();
       requestAnimationFrame(() => scrollToResponse(next.id));
     });
@@ -1419,45 +1610,18 @@ export function initWorkspace() {
     });
 
     document.addEventListener('click', event => {
-      const landingProfileToggle = event.target.closest('[data-landing-profile]');
-      if (landingProfileToggle) {
-        state.landingProfileOpen = !state.landingProfileOpen;
-        renderAll();
-        return;
-      }
-
-      const landingSignOut = event.target.closest('[data-landing-signout]');
-      if (landingSignOut) {
-        state.landingProfileOpen = false;
+      const signOutBtn = event.target.closest('[data-sign-out]');
+      if (signOutBtn) {
+        state.profileMenuOpen = false;
         state.mode = 'landing';
         state.centeredInput = false;
         state.historyOpen = false;
         resetPanels();
         composerInput.value = '';
-        composerInput.placeholder = 'ask a follow-up...';
+        composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
         canvas.scrollTo({ top: 0, behavior: 'smooth' });
         return;
-      }
-
-      const landingAction = event.target.closest('[data-landing-action]');
-      if (landingAction) {
-        const action = landingAction.dataset.landingAction;
-        state.landingProfileOpen = false;
-        if (action === 'new-chat') {
-          startNewChatAtLanding();
-          return;
-        }
-
-        if (action === 'history') {
-          // Navigation is intentionally disabled for now while preserving the enabled UI affordance.
-          return;
-        }
-
-        if (action === 'bookmarks') {
-          // Navigation is intentionally disabled for now while preserving the enabled UI affordance.
-          return;
-        }
       }
 
       const startEmptyTrigger = event.target.closest('[data-start-empty]');
@@ -1467,7 +1631,7 @@ export function initWorkspace() {
         state.historyOpen = false;
         resetPanels();
         composerInput.value = '';
-        composerInput.placeholder = 'What would you like to explore?';
+        composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
         setTimeout(() => composerInput.focus(), 180);
         return;
@@ -1495,10 +1659,10 @@ export function initWorkspace() {
         const next = baseResponse(starter);
         state.mode = 'thread';
         state.centeredInput = false;
-        state.threads[state.currentThreadId] = [next];
+        setThreadResponses(state.currentThreadId, [next]);
         resetPanels();
         composerInput.value = starter;
-        composerInput.placeholder = 'ask a follow-up...';
+        composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
         canvas.scrollTo({ top: 0, behavior: 'smooth' });
         return;
@@ -1506,7 +1670,7 @@ export function initWorkspace() {
 
       const closeBtn = event.target.closest('[data-close]');
       if (closeBtn) {
-        if (closeBtn.dataset.close === 'bookmarks' || closeBtn.dataset.close === 'artifacts' || closeBtn.dataset.close === 'panel') {
+        if (closeBtn.dataset.close === 'bookmarks' || closeBtn.dataset.close === 'artifacts' || closeBtn.dataset.close === 'history' || closeBtn.dataset.close === 'panel') {
           state.activePanel = null;
           if (closeBtn.dataset.close === 'panel') {
             state.selectedEntity = null;
@@ -1530,46 +1694,30 @@ export function initWorkspace() {
       }
 
       const followupSourceBtn = event.target.closest('[data-followup-source]');
-      if (followupSourceBtn && state.activePanel === 'drill') {
-        if (state.panelResponseId) {
-          showFollowups(state.panelResponseId, followupSourceBtn.dataset.followupSource);
+      if (followupSourceBtn) {
+        const responseCard = followupSourceBtn.closest('.response-card');
+        const responseId = responseCard?.dataset.responseId;
+        if (responseId) {
+          showFollowups(responseId, followupSourceBtn.dataset.followupSource);
         }
         return;
       }
 
       const flowNode = event.target.closest('[data-flow-node]');
       if (flowNode) {
-        const responseCard = flowNode.closest('.response-card');
-        state.selectedEntity = flowNode.dataset.flowNode;
-        state.panelResponseId = responseCard?.dataset.responseId || null;
-        renderDrillPanel(flowNode.dataset.flowNode);
-        state.activePanel = 'drill';
-        if (state.panelResponseId) showFollowups(state.panelResponseId, flowNode.dataset.flowNode);
-        renderAll();
+        appendElementInsightResponse(flowNode.dataset.flowNode, flowNode.dataset.flowNode.replaceAll('-', ' '));
         return;
       }
 
       const vendorRow = event.target.closest('[data-vendor]');
       if (vendorRow) {
-        const responseCard = vendorRow.closest('.response-card');
-        state.selectedEntity = vendorRow.dataset.vendor;
-        state.panelResponseId = responseCard?.dataset.responseId || null;
-        renderDrillPanel(vendorRow.dataset.vendor);
-        state.activePanel = 'drill';
-        if (state.panelResponseId) showFollowups(state.panelResponseId, vendorRow.dataset.vendor);
-        renderAll();
+        appendElementInsightResponse(vendorRow.dataset.vendor, vendorRow.dataset.vendor.replaceAll('-', ' '));
         return;
       }
 
       const entityBtn = event.target.closest('[data-entity]');
       if (entityBtn) {
-        const responseCard = entityBtn.closest('.response-card');
-        state.selectedEntity = entityBtn.dataset.entity;
-        state.panelResponseId = responseCard?.dataset.responseId || null;
-        renderDrillPanel(entityBtn.dataset.entity);
-        state.activePanel = 'drill';
-        if (state.panelResponseId) showFollowups(state.panelResponseId, entityBtn.dataset.entity);
-        renderAll();
+        appendElementInsightResponse(entityBtn.dataset.entity, entityBtn.dataset.entity.replaceAll('-', ' '));
         return;
       }
 
@@ -1580,9 +1728,9 @@ export function initWorkspace() {
         state.selectedEntity = null;
         state.panelResponseId = null;
         state.followupContext = null;
-        currentResponses().push(next);
+        appendResponseToCurrentThread(next);
         composerInput.value = '';
-        composerInput.placeholder = 'ask a follow-up...';
+        composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
         requestAnimationFrame(() => scrollToResponse(next.id));
         return;
@@ -1594,31 +1742,54 @@ export function initWorkspace() {
         return;
       }
 
-      const exportBtn = event.target.closest('[data-export]');
-      if (exportBtn) {
-        state.exportOpenFor = state.exportOpenFor === exportBtn.dataset.export ? null : exportBtn.dataset.export;
+      const likeBtn = event.target.closest('[data-like]');
+      if (likeBtn) {
+        const id = likeBtn.dataset.like;
+        if (state.liked.has(id)) state.liked.delete(id);
+        else state.liked.add(id);
+        renderAll();
+        return;
+      }
+
+      const dislikeBtn = event.target.closest('[data-dislike]');
+      if (dislikeBtn) {
+        state.feedbackForResponseId = dislikeBtn.dataset.dislike;
+        composerInput.value = '';
+        composerInput.placeholder = CHAT_PLACEHOLDER;
+        renderAll();
+        setTimeout(() => composerInput.focus(), 100);
+        return;
+      }
+
+      const regenerateBtn = event.target.closest('[data-regenerate]');
+      if (regenerateBtn) {
+        const target = currentResponses().find(item => item.id === regenerateBtn.dataset.regenerate);
+        if (!target) return;
+        const replacement = baseResponse(target.question);
+        replacement.id = target.id;
+        const list = currentResponses();
+        const index = list.findIndex(item => item.id === target.id);
+        if (index >= 0) list[index] = replacement;
+        touchThread();
         renderAll();
         return;
       }
 
       const jumpBtn = event.target.closest('[data-jump]');
       if (jumpBtn) {
-        state.activePanel = null;
-        renderAll();
-        setTimeout(() => scrollToResponse(jumpBtn.dataset.jump), 180);
+        setTimeout(() => scrollToResponse(jumpBtn.dataset.jump), 120);
         return;
       }
 
       const historyBtn = event.target.closest('[data-thread]');
       if (historyBtn) {
         state.currentThreadId = historyBtn.dataset.thread;
-        if (!state.threads[state.currentThreadId]) {
-          state.threads[state.currentThreadId] = [baseResponse('Vendor Leaderboard')];
-        }
+        if (!state.threads[state.currentThreadId]) state.threads[state.currentThreadId] = [];
+        ensureThreadMeta(state.currentThreadId);
         state.mode = 'thread';
         state.centeredInput = false;
         state.historyOpen = false;
-        resetPanels();
+        state.activePanel = 'history';
         renderAll();
         return;
       }
@@ -1629,8 +1800,8 @@ export function initWorkspace() {
         if (target) scrollToResponse(target.id);
       }
 
-      if (state.landingProfileOpen && !event.target.closest('.landing-profile-wrap')) {
-        state.landingProfileOpen = false;
+      if (state.profileMenuOpen && !event.target.closest('.profile-wrap')) {
+        state.profileMenuOpen = false;
         renderAll();
       }
     });

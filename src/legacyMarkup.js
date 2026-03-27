@@ -1,35 +1,26 @@
 const markup = `
   <div class="app landing-mode" id="app">
-    <aside class="sidebar">
-      <button class="rail-btn" id="toggleHistory" type="button">
-        <span class="rail-icon" id="toggleHistoryIcon">▸</span>
-        <span class="rail-label" id="toggleHistoryLabel">Expand</span>
-      </button>
-      <button class="rail-btn" id="newThread" type="button">
-        <span class="rail-icon">+</span>
-        <span class="rail-label">New Thread</span>
-      </button>
-      <button class="rail-btn" id="historyButton" type="button">
-        <span class="rail-icon">⧗</span>
-        <span class="rail-label">History</span>
-      </button>
-      <div class="history-panel">
-        <div class="history-divider" id="historyDivider"></div>
-        <div class="history-list" id="historyList"></div>
-      </div>
-    </aside>
-
     <main class="workspace">
       <div class="canvas-shell">
         <section class="canvas" id="canvas">
           <div class="canvas-inner">
             <div class="workspace-tools" id="workspaceTools">
-              <div class="workspace-tools-left">
-                <button class="back-btn" id="backToLanding" type="button">← <span>Back to Landing</span></button>
-              </div>
+              <div class="workspace-tools-left"></div>
               <div class="workspace-tools-right">
+                <button class="tool-btn" id="newThread" type="button">+ <span>New Chat</span></button>
+                <button class="tool-btn" id="historyButton" type="button">⧗ <span>History</span></button>
                 <button class="tool-btn" id="bookmarksButton" type="button">⊞ <span>Bookmarks</span></button>
-                <button class="tool-btn" id="artifactsButton" type="button">◇ <span>Artifacts</span></button>
+                <div class="profile-wrap">
+                  <button class="tool-btn profile-btn" id="profileButton" type="button" aria-label="Profile">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="8" r="4"></circle>
+                      <path d="M4 20c0-4.2 3.6-7 8-7s8 2.8 8 7"></path>
+                    </svg>
+                  </button>
+                  <div class="profile-menu" id="profileMenu" hidden>
+                    <button type="button" data-sign-out>Sign out</button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -90,6 +81,19 @@ const markup = `
               <button class="close-btn" type="button" data-close="bookmarks">×</button>
             </div>
             <div class="panel-body" id="bookmarksList"></div>
+          </div>
+        </aside>
+
+        <aside class="side-sheet" id="historySheet">
+          <div class="panel-shell">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">History</div>
+                <div class="panel-meta">Recent chats and their latest update</div>
+              </div>
+              <button class="close-btn" type="button" data-close="history">×</button>
+            </div>
+            <div class="panel-body history-list" id="historyList"></div>
           </div>
         </aside>
 
