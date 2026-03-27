@@ -6,22 +6,22 @@
   <title>Reactive Workspace</title>
   <style>
     :root {
-      --bg: #070b12;
-      --bg-soft: #0c1420;
-      --panel: rgba(12, 20, 32, 0.92);
-      --panel-strong: rgba(17, 27, 40, 0.96);
-      --line: rgba(148, 163, 184, 0.16);
-      --line-strong: rgba(148, 163, 184, 0.26);
-      --text: #f4f8ff;
-      --muted: #afbdd2;
-      --muted-soft: #8797ad;
-      --blue: #3b8bf6;
-      --teal: #22d3ee;
-      --teal-soft: rgba(34, 211, 238, 0.14);
-      --gold: #fbbf24;
-      --gold-soft: rgba(251, 191, 36, 0.14);
-      --red: #f06060;
-      --yellow: #fbbf24;
+      --bg: #050914;
+      --bg-soft: #070c17;
+      --panel: rgba(7, 12, 23, 0.94);
+      --panel-strong: rgba(10, 16, 29, 0.98);
+      --line: rgba(109, 123, 156, 0.12);
+      --line-strong: rgba(109, 123, 156, 0.2);
+      --text: #f5f7fb;
+      --muted: rgba(245, 247, 251, 0.72);
+      --muted-soft: rgba(156, 163, 175, 0.9);
+      --blue: #5c83ff;
+      --teal: #29cfd6;
+      --teal-soft: rgba(41, 207, 214, 0.14);
+      --gold: #9eb2ff;
+      --gold-soft: rgba(158, 178, 255, 0.12);
+      --red: #95a0b8;
+      --yellow: #cfd7e6;
       --shadow-sm: 0 12px 30px rgba(0, 0, 0, 0.24);
       --shadow-md: 0 22px 54px rgba(0, 0, 0, 0.30);
       --shadow-lg: 0 28px 78px rgba(0, 0, 0, 0.36);
@@ -33,9 +33,9 @@
       --sidebar-expanded: 232px;
       --insights-width: min(420px, 34vw);
       --canvas-max: 1240px;
-      --sans: "DM Sans", "Avenir Next", "Segoe UI", Arial, sans-serif;
-      --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
-      --mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      --sans: "Satoshi", "Manrope", "Segoe UI", sans-serif;
+      --serif: "Satoshi", "Manrope", "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
       --ease: cubic-bezier(.22, 1, .36, 1);
     }
 
@@ -46,11 +46,9 @@
       min-height: 100%;
       color: var(--text);
       background:
-        radial-gradient(circle at 8% 12%, rgba(59, 139, 246, 0.16), transparent 22%),
-        radial-gradient(circle at 92% 8%, rgba(34, 211, 238, 0.12), transparent 24%),
-        radial-gradient(circle at 92% 92%, rgba(240, 96, 96, 0.10), transparent 24%),
-        linear-gradient(180deg, #070b12 0%, #0c1420 40%, #111b28 100%);
-      font-family: var(--serif);
+        radial-gradient(circle at 50% 82%, rgba(24, 67, 139, 0.24), transparent 18%),
+        linear-gradient(180deg, #040914 0%, #050913 100%);
+      font-family: var(--sans);
     }
 
     body { overflow: hidden; }
@@ -262,10 +260,21 @@
     }
 
     .app.landing-mode .canvas {
-      padding: clamp(28px, 5vw, 50px) clamp(18px, 4vw, 42px) 144px;
+      height: 100vh;
+      padding: 0;
+      overflow: hidden;
     }
 
-    .app.landing-mode .canvas-inner { width: min(100%, 1380px); }
+    .app.landing-mode .canvas-inner {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding-top: 0;
+    }
+
+    .app.landing-mode .workspace-main {
+      min-height: 100vh;
+    }
 
     .workspace-tools {
       position: fixed;
@@ -343,9 +352,9 @@
     .back-btn { color: #a8b8d0; }
 
     .landing {
-      min-height: calc(100vh - 164px);
+      min-height: 100vh;
       display: grid;
-      gap: 22px;
+      gap: 0;
       align-content: start;
       transition: opacity 220ms ease, transform 220ms ease;
     }
@@ -356,140 +365,280 @@
       pointer-events: none;
     }
 
-    .landing-head {
+    .landing-shell {
+      min-height: 100vh;
       display: grid;
-      gap: 6px;
-      padding: 6px 2px 2px;
+      gap: 0;
+      color: #f5f7fb;
     }
 
-    .landing-kicker {
-      font-size: 12px;
-      color: var(--muted);
+    .landing-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      font-family: var(--sans);
     }
+
+    .landing-brand-text {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+      font-size: clamp(28px, 3vw, 42px);
+      letter-spacing: -0.06em;
+    }
+
+    .landing-brand-text strong { font-weight: 500; }
+
+    .landing-head {
+      text-align: center;
+      display: grid;
+      gap: 8px;
+      justify-items: center;
+    }
+
+    .landing-kicker { display: none; }
 
     .landing-title {
-      font-size: clamp(30px, 4vw, 48px);
-      line-height: 1.02;
-      letter-spacing: -0.035em;
-      color: var(--blue);
+      font-size: clamp(36px, 4vw, 60px);
+      line-height: 1.04;
+      letter-spacing: -0.04em;
+      color: #f5f7fb;
+      max-width: 16ch;
     }
 
-    .landing-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-    }
-
+    .landing-util,
+    .landing-avatar,
+    .landing-prompt,
+    .landing-chip,
     .landing-card {
-      min-height: 172px;
-      padding: 18px 18px 16px;
-      border-radius: 24px;
-      border: 1px solid rgba(24, 31, 33, 0.08);
-      background: linear-gradient(180deg, rgba(12, 20, 32, 0.94), rgba(17, 27, 40, 0.94));
-      box-shadow: var(--shadow-md);
-      backdrop-filter: blur(18px);
-      text-align: left;
-      display: grid;
-      align-content: space-between;
-      transition: transform 180ms var(--ease), border-color 180ms ease, box-shadow 180ms ease;
+      transition: transform 180ms var(--ease), border-color 180ms ease, background 180ms ease, opacity 180ms ease, box-shadow 180ms ease;
     }
 
-    .landing-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(59, 139, 246, 0.30);
-      box-shadow: 0 26px 60px rgba(0, 0, 0, 0.24);
-    }
-
-    .landing-card.selected { transform: scale(1.015); }
-
-    .landing-card-header {
-      display: grid;
-      gap: 10px;
-    }
-
-    .landing-card-title {
-      font-size: clamp(18px, 1.7vw, 24px);
-      line-height: 1.08;
-      letter-spacing: -0.02em;
-      max-width: 17ch;
-    }
-
-    .landing-desc {
-      font-size: 12px;
-      line-height: 1.58;
-      color: var(--muted);
-      max-width: 30ch;
-    }
-
-    .card-arrow-wrap {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-    }
-
-    .card-arrow {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: rgba(59, 139, 246, 0.12);
-      font-size: 18px;
-      color: var(--blue);
-      transition: transform 160ms ease, background 160ms ease;
-    }
-
-    .landing-card:hover .card-arrow {
-      transform: translateX(2px);
-      background: rgba(59, 139, 246, 0.20);
-    }
-
-    .landing-floater {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      z-index: 14;
-      transform: translateX(-50%);
-      width: min(540px, calc(100vw - 26px));
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(14, 29, 52, 0.98), rgba(59, 139, 246, 0.88));
-      color: #f8fbff;
-      border: 1px solid rgba(59, 139, 246, 0.28);
-      box-shadow: 0 28px 64px rgba(0, 0, 0, 0.30);
-      transition: transform 180ms var(--ease), box-shadow 180ms ease;
-    }
-
-    .landing-floater:hover {
-      transform: translateX(-50%) translateY(-1px);
-      box-shadow: 0 32px 70px rgba(20, 32, 45, 0.26);
-    }
-
-    .landing-floater-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      padding: 16px 20px;
-      font-family: var(--sans);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    .app.landing-mode .input-zone {
+    .landing-util {
       display: none;
     }
 
-    .floater-plus {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+    .landing-prompt:hover,
+    .landing-chip:hover,
+    .landing-card:hover {
+      transform: translateY(-1px);
+    }
+
+    .landing-avatar {
+      display: none;
+    }
+
+    .landing-hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+      border-radius: 0;
+      background: linear-gradient(180deg, #080c17fa, #070b15);
+      border: 0;
+      box-shadow: none;
+      padding: 28px 18px 22px;
+      display: grid;
+      grid-template-rows: 1fr;
+    }
+
+    .landing-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 82%, rgba(24, 67, 139, 0.34), transparent 18%),
+        linear-gradient(180deg, rgba(4, 9, 20, 0.2), rgba(5, 9, 19, 0.12));
+    }
+
+    .landing-waves,
+    .landing-waves::before,
+    .landing-waves::after {
+      position: absolute;
+      content: "";
+      pointer-events: none;
+      bottom: -5%;
+      height: 38%;
+      background: radial-gradient(circle at 50% 50%, rgba(92, 131, 255, 0.14), transparent 60%);
+      filter: blur(30px);
+      opacity: 0.92;
+      animation: wave-drift 16s ease-in-out infinite alternate;
+    }
+
+    .landing-waves {
+      left: -14%;
+      width: 40%;
+      clip-path: ellipse(48% 36% at 58% 70%);
+    }
+
+    .landing-waves::before {
+      left: 68%;
+      width: 140%;
+      height: 82%;
+      opacity: 0.5;
+      animation-duration: 18s;
+      clip-path: ellipse(44% 28% at 50% 76%);
+    }
+
+    .landing-waves::after {
+      left: 162%;
+      width: 110%;
+      height: 95%;
+      animation-duration: 14s;
+      clip-path: ellipse(44% 36% at 36% 68%);
+    }
+
+    .landing-orb-zone {
+      position: relative;
       display: grid;
       place-items: center;
-      background: rgba(255, 255, 255, 0.14);
+      align-self: stretch;
+      align-content: center;
+      gap: 20px;
+      padding: 10px 0 0;
+    }
+
+    .landing-orb-glow {
+      position: absolute;
+      width: min(34vw, 420px);
+      height: min(24vw, 300px);
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(84, 115, 255, 0.22), rgba(84, 115, 255, 0.06) 42%, transparent 70%);
+      filter: blur(42px);
+      opacity: 0.62;
+      pointer-events: none;
+    }
+
+    .landing-orb {
+      width: min(32vw, 400px);
+      height: min(32vw, 400px);
+      min-width: 220px;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      filter: drop-shadow(0 0 42px rgba(92, 131, 255, 0.18));
+      opacity: 0.98;
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-orb svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .landing-prompt-area {
+      position: relative;
+      width: min(960px, calc(100% - 26px));
+      z-index: 2;
+      display: grid;
+      gap: 14px;
+    }
+
+    .landing-prompt {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 68px;
+      padding: 8px 8px 8px 18px;
+      border-radius: 999px;
+      background: rgba(19, 24, 35, 0.96);
+      border: 1px solid rgba(107, 115, 135, 0.14);
+      box-shadow:
+        0 0 0 1px rgba(93, 236, 242, 0.18),
+        0 0 18px rgba(41, 207, 214, 0.22),
+        0 24px 48px rgba(0, 0, 0, 0.28);
+      text-align: left;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .landing-prompt::before {
+      content: "";
+      position: absolute;
+      inset: -26px -34px -32px;
+      border-radius: inherit;
+      background: radial-gradient(ellipse at center, rgba(41, 207, 214, 0.22) 0%, rgba(41, 207, 214, 0.12) 36%, rgba(41, 207, 214, 0.06) 58%, transparent 78%);
+      filter: blur(18px);
+      pointer-events: none;
+    }
+
+    .landing-prompt-copy,
+    .landing-prompt-send {
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-prompt-copy {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: var(--sans);
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .landing-prompt-copy span:last-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       font-size: 18px;
-      line-height: 1;
+      color: rgba(245, 247, 251, 0.84);
+    }
+
+    .landing-prompt-send {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.10);
+      color: rgba(240, 244, 255, 0.9);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+      font-size: 20px;
+    }
+
+    .landing-chip-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .landing-chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(8, 14, 26, 0.82);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(245, 247, 251, 0.84);
+    }
+
+    .landing-chip.strong {
+      border-color: rgba(93, 236, 242, 0.24);
+      color: #d9feff;
+    }
+
+    .landing-note {
+      display: none;
+    }
+
+    .landing-floater { display: none !important; }
+
+    .app.landing-mode .input-zone {
+      display: none;
     }
 
     .thread,
@@ -1579,9 +1728,13 @@
       from { transform: scaleY(0.2); transform-origin: bottom; }
       to { transform: scaleY(1); transform-origin: bottom; }
     }
+    @keyframes wave-drift {
+      from { transform: translate3d(-2%, 4%, 0) scaleX(0.98); }
+      to { transform: translate3d(2%, -2%, 0) scaleX(1.04); }
+    }
 
     @media (max-width: 1200px) {
-      .landing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .landing-title { font-size: clamp(30px, 4vw, 48px); }
       .table-head,
       .table-row { grid-template-columns: 1.45fr 1fr 1fr 1fr .85fr .7fr; }
     }
@@ -1600,7 +1753,25 @@
         border-radius: 30px;
         padding: 18px 7px 20px;
       }
-      .landing-grid { grid-template-columns: 1fr; }
+      .landing-hero {
+        min-height: 100vh;
+        padding: 24px 12px 18px;
+      }
+      .landing-orb-zone {
+        gap: 18px;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      .landing-orb {
+        width: min(62vw, 320px);
+        height: min(62vw, 320px);
+        min-width: 220px;
+        min-height: 220px;
+      }
+      .landing-orb-glow {
+        width: min(62vw, 360px);
+        height: min(44vw, 260px);
+      }
       .panel {
         width: 100%;
         padding: 10px 0 0;
@@ -1629,12 +1800,57 @@
         top: -14px;
         bottom: -10px;
       }
+      .landing-prompt-area { width: min(760px, calc(100% - 24px)); }
       .input-zone.centered { bottom: 24%; }
       .table-head,
       .table-row {
         grid-template-columns: 1.35fr .9fr .9fr;
       }
       .hide-sm { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .app.landing-mode .canvas {
+        padding: 0;
+      }
+      .app.landing-mode .canvas-inner {
+        width: 100%;
+        padding-top: 0;
+      }
+      .landing-shell { gap: 0; }
+      .landing-brand-text { font-size: clamp(24px, 5vw, 34px); }
+      .landing-title {
+        font-size: 28px;
+        max-width: 12ch;
+      }
+      .landing-hero {
+        min-height: 100vh;
+        padding: 20px 10px 18px;
+      }
+      .landing-orb-zone {
+        gap: 16px;
+        align-content: center;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      .landing-prompt {
+        min-height: 60px;
+        padding-left: 16px;
+      }
+      .landing-prompt-copy { gap: 12px; }
+      .landing-prompt-copy span:last-child {
+        font-size: 15px;
+        white-space: normal;
+      }
+      .landing-prompt-send {
+        width: 44px;
+        height: 44px;
+      }
+      .landing-chip-row { gap: 8px; }
+      .landing-chip {
+        width: 100%;
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -2264,22 +2480,83 @@
       state.exportOpenFor = null;
     }
 
+    function createLandingOrb() {
+      const totalDots = 600;
+      const dotRadius = 1;
+      const duration = 3;
+      const dotColor = '#7ABEBA';
+      const margin = 2;
+      const minOpacity = 0.3;
+      const maxOpacity = 1;
+      const minScale = 0.5;
+      const maxScale = 1.5;
+      const angle = Math.PI * (3 - Math.sqrt(5));
+      const center = 200;
+      const maxRadius = center - margin - dotRadius;
+      let circles = '';
+
+      for (let index = 0; index < totalDots; index += 1) {
+        const step = index + 0.5;
+        const ratio = step / totalDots;
+        const radius = Math.sqrt(ratio) * maxRadius;
+        const theta = step * angle;
+        const x = center + radius * Math.cos(theta);
+        const y = center + radius * Math.sin(theta);
+        const begin = (ratio * duration).toFixed(2);
+        const radiusLow = (dotRadius * minScale).toFixed(2);
+        const radiusHigh = (dotRadius * maxScale).toFixed(2);
+
+        circles += `
+          <circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${dotRadius}" fill="${dotColor}" opacity="0">
+            <animate attributeName="r" values="${radiusLow};${radiusHigh};${radiusLow}" dur="${duration}s" begin="${begin}s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" />
+            <animate attributeName="opacity" values="${minOpacity};${maxOpacity};${minOpacity}" dur="${duration}s" begin="${begin}s" repeatCount="indefinite" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" />
+          </circle>
+        `;
+      }
+
+      return `
+        <svg viewBox="0 0 400 400" aria-hidden="true" focusable="false">
+          ${circles}
+        </svg>
+      `;
+    }
+
     function renderLanding() {
       landing.innerHTML = `
-        <div class="landing-head">
-          <div class="landing-kicker">Hello Ryan,</div>
-          <div class="landing-title">Select a context to begin</div>
-        </div>
-        <div class="landing-grid">
-          ${landingCards.map(card => `
-            <button class="landing-card" type="button" data-topic="${card.key}">
-              <div class="landing-card-header">
-                <div class="landing-card-title">${escapeHtml(card.title)}</div>
-                <div class="landing-desc">${escapeHtml(card.description)}</div>
+        <div class="landing-shell">
+          <section class="landing-hero">
+            <div class="landing-waves" aria-hidden="true"></div>
+
+            <div class="landing-orb-zone">
+              <div class="landing-brand">
+                <div class="landing-brand-text"><span>Enterprise</span><strong>Brain</strong></div>
               </div>
-              <div class="card-arrow-wrap"><div class="card-arrow">→</div></div>
-            </button>
-          `).join('')}
+
+              <div class="landing-head">
+              </div>
+
+              <div class="landing-orb-glow" aria-hidden="true"></div>
+              <div class="landing-orb">${createLandingOrb()}</div>
+
+              <div class="landing-prompt-area">
+                <button class="landing-prompt" type="button" data-start-empty>
+                  <div class="landing-prompt-copy">
+                    <span>+</span>
+                    <span>Choose a question or start your own workspace thread</span>
+                  </div>
+                  <span class="landing-prompt-send" aria-hidden="true">→</span>
+                </button>
+
+                <div class="landing-chip-row">
+                  ${quickStartChips.map((chip, index) => `
+                    <button class="landing-chip ${index === 0 ? 'strong' : ''}" type="button" data-starter="${escapeHtml(chip)}">
+                      ${escapeHtml(chip)}
+                    </button>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       `;
     }
@@ -2738,12 +3015,12 @@
         <div class="trend-chart">
           <svg viewBox="0 0 280 96" aria-hidden="true">
             <path d="M28 76 L252 76" stroke="rgba(148,163,184,0.14)" stroke-width="1"></path>
-            <polyline points="${chartPoints}" fill="none" stroke="rgba(34, 211, 238, 0.92)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
+            <polyline points="${chartPoints}" fill="none" stroke="rgba(41, 207, 214, 0.92)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
             ${numeric.map((item, index) => {
               const x = 28 + (index * (224 / Math.max(numeric.length - 1, 1)));
               const normalized = (item.value - min) / span;
               const y = 76 - normalized * 44;
-              return `<circle cx="${x}" cy="${y}" r="${index === numeric.length - 1 ? 4 : 3}" fill="${index === numeric.length - 1 ? '#fbbf24' : '#7ae8ff'}"></circle>`;
+              return `<circle cx="${x}" cy="${y}" r="${index === numeric.length - 1 ? 4 : 3}" fill="${index === numeric.length - 1 ? '#9eb2ff' : '#7abeBA'}"></circle>`;
             }).join('')}
           </svg>
           <div class="trend-axis">
@@ -3033,6 +3310,19 @@
     });
 
     document.addEventListener('click', event => {
+      const startEmptyTrigger = event.target.closest('[data-start-empty]');
+      if (startEmptyTrigger) {
+        state.mode = 'empty';
+        state.centeredInput = true;
+        state.historyOpen = false;
+        resetPanels();
+        composerInput.value = '';
+        composerInput.placeholder = 'What would you like to explore?';
+        renderAll();
+        setTimeout(() => composerInput.focus(), 180);
+        return;
+      }
+
       const topicCard = event.target.closest('[data-topic]');
       if (topicCard) {
         const card = landingCards.find(item => item.key === topicCard.dataset.topic);
