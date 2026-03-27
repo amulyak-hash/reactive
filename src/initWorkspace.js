@@ -9,6 +9,17 @@ export function initWorkspace() {
   if (window.__reactiveWorkspaceInitialized) return;
   window.__reactiveWorkspaceInitialized = true;
   const CHAT_PLACEHOLDER = 'ask a follow-up...';
+  const FULL_VIZ_OPTIONS = [
+    { key: 'bar', label: 'bar', enabled: true },
+    { key: 'line', label: 'line', enabled: true },
+    { key: 'area', label: 'area', enabled: true },
+    { key: 'pie', label: 'pie', enabled: true },
+    { key: 'donut', label: 'donut', enabled: true },
+    { key: 'sankey', label: 'sankey', enabled: true },
+    { key: 'text', label: 'text', enabled: true }
+  ];
+  const TABLE_PLUS_VIZ_OPTIONS = [{ key: 'table', label: 'table', enabled: true }, ...FULL_VIZ_OPTIONS];
+  const RANGE_OPTIONS = ['7D', '30D', '90D', '1Y'];
 
     const landingCards = [
       { key: 'vendor-leaderboard', title: 'Vendor Leaderboard', description: 'Compare vendor performance across pricing, quality, timeline, and NCE risk.' },
@@ -439,6 +450,54 @@ export function initWorkspace() {
       return `${date} · ${time}`;
     }
 
+    function formatLabelFor(format) {
+      const map = {
+        table: 'Table',
+        bar: 'Bar Chart',
+        line: 'Line Chart',
+        area: 'Area Chart',
+        pie: 'Pie Chart',
+        donut: 'Donut Chart',
+        sankey: 'Sankey Diagram',
+        text: 'Text',
+        flow: 'Flow',
+        briefing: 'Briefing Card',
+        insights: 'Insights'
+      };
+      return map[format] || 'View';
+    }
+
+    function supportsTimeRange(format) {
+      return ['bar', 'line', 'area', 'pie', 'donut', 'sankey', 'flow'].includes(format);
+    }
+
+    function rangeFactor(range) {
+      const map = { '7D': 0.88, '30D': 1, '90D': 1.08, '1Y': 1.18 };
+      return map[range] || 1;
+    }
+
+    function rowsForRange(rows = [], range = '30D') {
+      const factor = rangeFactor(range);
+      return rows.map(row => ({
+        ...row,
+        pricing: Math.max(8, Math.min(100, Math.round((row.pricing || 0) * factor)))
+      }));
+    }
+
+    function deriveInsights(response, rows = []) {
+      if (Array.isArray(response.keyInsights) && response.keyInsights.length) return response.keyInsights.slice(0, 3);
+      const sorted = [...rows].sort((a, b) => (b.pricing || 0) - (a.pricing || 0));
+      const top = sorted[0];
+      const bottom = sorted[sorted.length - 1];
+      const avg = rows.length ? Math.round(rows.reduce((acc, row) => acc + (row.pricing || 0), 0) / rows.length) : null;
+      const insights = [];
+      if (top) insights.push(`${top.vendor} is leading this view at ${top.pricing}.`);
+      if (bottom && bottom !== top) insights.push(`${bottom.vendor} is currently the weakest point at ${bottom.pricing}.`);
+      if (avg !== null) insights.push(`The current portfolio average is ${avg}, indicating ${avg >= 70 ? 'strong' : avg >= 50 ? 'mixed' : 'weak'} overall performance.`);
+      while (insights.length < 3) insights.push('This view indicates a meaningful distribution spread that warrants follow-up on the outliers.');
+      return insights.slice(0, 3);
+    }
+
     function ensureThreadMeta(threadId) {
       if (!state.threadMeta[threadId]) {
         state.threadMeta[threadId] = { createdAt: Date.now(), updatedAt: Date.now() };
@@ -575,11 +634,9 @@ export function initWorkspace() {
           formatLabel: 'Briefing Card',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'Two contracts are approaching SLA breach and IT services spend is tracking 34% above plan, which should be treated as this week\'s highest-priority intervention.',
-          options: [
-            { key: 'briefing', label: 'briefing', enabled: true },
-            { key: 'bar', label: 'bar', enabled: true },
-            { key: 'text', label: 'text', enabled: true }
-          ],
+          options: [{ key: 'briefing', label: 'briefing', enabled: true }, ...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           briefing: {
             headline: 'Two contracts are approaching SLA breach and IT Services spend is 34% above plan, so this needs intervention before end of week.',
             tiles: [
@@ -595,7 +652,12 @@ export function initWorkspace() {
             { id: 'risk', vendor: 'Risk', company: '7 open flags', pricing: 82 },
             { id: 'timelines', vendor: 'Timelines', company: '3 slips this week', pricing: 58 }
           ],
-          lenses: ['Drill into budget', 'Show the risk flags', 'What is causing the delays']
+          lenses: ['Drill into budget', 'Show the risk flags', 'What is causing the delays'],
+          keyInsights: [
+            'Budget and risk are currently the two most unstable domains and need immediate attention.',
+            'Vendor and timeline issues are connected through procurement delay clusters.',
+            'The current pattern suggests avoidable SLA breaches if no intervention is made this week.'
+          ]
         };
       }
 
@@ -610,7 +672,20 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'Material quality is drifting at Supplier X, and the deviation is propagating downstream through BF-3 into CCM-3 before surfacing as Automotive grade risk.',
           lenses: [],
-          options: [{ key: 'flow', label: 'flow', enabled: true }]
+          options: [{ key: 'flow', label: 'flow', enabled: true }, ...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
+          rows: [
+            { id: 'supplier-x', vendor: 'Supplier X', company: 'Source deviation', pricing: 84 },
+            { id: 'bf3-superheat', vendor: 'BF-3', company: 'Thermal variance', pricing: 73 },
+            { id: 'ccm3-solidification', vendor: 'CCM-3', company: 'Solidification risk', pricing: 67 },
+            { id: 'grade-risk', vendor: 'Automotive Grade', company: 'Customer exposure', pricing: 74 }
+          ],
+          keyInsights: [
+            'Supplier X remains the principal upstream trigger for this downstream chain.',
+            'BF-3 and CCM-3 are the highest leverage control points for mitigation.',
+            'Automotive grade risk is now a downstream symptom, not the root cause.'
+          ]
         };
       }
       if (question === 'Bid Evaluation summary' || question === 'contract spend tracking') {
@@ -624,7 +699,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'Starter context selected. This thread is ready for the next configured visualization.',
           lenses: [],
-          options: [{ key: 'text', label: 'text', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: []
         };
       }
@@ -638,6 +715,9 @@ export function initWorkspace() {
         insight: insightForLens(question),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         lenses: ['NCE impact on rank', 'Filter by contract value', 'Compare by region', 'Timeline risk only'],
+        options: TABLE_PLUS_VIZ_OPTIONS,
+        timeRanges: RANGE_OPTIONS,
+        timeRange: '30D',
         rows: rowsForLens(question)
       };
     }
@@ -755,7 +835,7 @@ export function initWorkspace() {
           state.centeredInput = false;
           setThreadResponses(state.currentThreadId, [next]);
           resetPanels();
-          composerInput.value = value;
+          composerInput.value = '';
           composerInput.placeholder = CHAT_PLACEHOLDER;
           renderAll();
           canvas.scrollTo({ top: 0, behavior: 'smooth' });
@@ -821,6 +901,21 @@ export function initWorkspace() {
       `;
     }
 
+    function renderAreaView(rows) {
+      const points = rows.map((row, index) => `${80 + index * 130},${210 - row.pricing * 1.5}`).join(' ');
+      const areaPoints = `${points} 680,210 80,210`;
+      return `
+        <div class="line-view area-view">
+          <svg class="line-svg" viewBox="0 0 760 250" aria-hidden="true">
+            <path class="line-track" d="M80 210 L680 210"></path>
+            <polygon class="area-fill" points="${areaPoints}"></polygon>
+            <polyline class="line-path" points="${points}"></polyline>
+            ${rows.map((row, index) => `<circle cx="${80 + index * 130}" cy="${210 - row.pricing * 1.5}" r="7" fill="#7be1df"></circle>`).join('')}
+          </svg>
+        </div>
+      `;
+    }
+
     function renderBarView(rows) {
       return `
         <div class="bar-view">
@@ -837,11 +932,75 @@ export function initWorkspace() {
       `;
     }
 
-    function renderTextView() {
+    function renderPieView(rows, mode = 'pie') {
+      const total = Math.max(1, rows.reduce((acc, row) => acc + (row.pricing || 0), 0));
+      let cursor = 0;
+      const center = 90;
+      const radius = 72;
+      const innerRadius = mode === 'donut' ? 40 : 0;
+      const colors = ['#6bbcff', '#5fe6dd', '#d7bc6d', '#95a9ff', '#7fb58a', '#ee8a8a'];
+      const slices = rows.map((row, index) => {
+        const value = row.pricing || 0;
+        const angle = (value / total) * Math.PI * 2;
+        const start = cursor;
+        const end = cursor + angle;
+        cursor = end;
+        const x1 = center + radius * Math.cos(start);
+        const y1 = center + radius * Math.sin(start);
+        const x2 = center + radius * Math.cos(end);
+        const y2 = center + radius * Math.sin(end);
+        const largeArc = angle > Math.PI ? 1 : 0;
+        const outer = `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+        const path = innerRadius === 0
+          ? outer
+          : `M ${center + innerRadius * Math.cos(start)} ${center + innerRadius * Math.sin(start)} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} L ${center + innerRadius * Math.cos(end)} ${center + innerRadius * Math.sin(end)} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${center + innerRadius * Math.cos(start)} ${center + innerRadius * Math.sin(start)} Z`;
+        return { row, path, color: colors[index % colors.length] };
+      });
+
+      return `
+        <div class="pie-view">
+          <svg viewBox="0 0 180 180" aria-hidden="true">
+            ${slices.map(slice => `<path d="${slice.path}" fill="${slice.color}" opacity="0.92"></path>`).join('')}
+          </svg>
+          <div class="pie-legend">
+            ${rows.map((row, index) => `<div class="pie-legend-row"><span class="pie-dot" style="background:${colors[index % colors.length]}"></span><span>${escapeHtml(row.vendor)}</span><strong>${row.pricing}</strong></div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSankeyView(rows) {
+      const ordered = [...rows].sort((a, b) => (b.pricing || 0) - (a.pricing || 0)).slice(0, 4);
+      return `
+        <div class="sankey-view">
+          ${ordered.map((row, index) => `
+            <div class="sankey-row">
+              <span class="sankey-label">${escapeHtml(row.vendor)}</span>
+              <div class="sankey-track">
+                <div class="sankey-fill" style="width:${Math.max(14, row.pricing)}%; animation-delay:${index * 70}ms"></div>
+              </div>
+              <span class="sankey-value">${row.pricing}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderTextView(response) {
+      const rows = rowsForRange(response.rows || [], response.timeRange || '30D');
+      const docs = (rows.length ? rows : [
+        { vendor: 'Portfolio', pricing: 68, company: 'Mixed operational pattern this cycle.' },
+        { vendor: 'Risk', pricing: 74, company: 'Open flags are driving most volatility.' }
+      ]).slice(0, 2).map((row, index) => ({
+        title: `Report ${index + 1}: ${row.vendor} Review`,
+        summary: `${row.vendor} is at ${row.pricing} for this period. ${row.company || 'Performance context captured from active workspace signal.'}`
+      }));
       return `
         <div class="text-view">
-          <div>Vendor A is leading on overall rank, but the current mix is uneven. Pricing and headline position look strong, while NCE exposure and contract-level slippage create the main tension in the leaderboard.</div>
-          <div>Vendor B and Vendor D look more operationally stable. Vendor E is currently the weakest on pricing and still carries a high-risk label, making it the least resilient position in the current set.</div>
+          <div class="text-block">Vendor performance remains uneven across this period. The strongest performers are holding output quality, while weaker positions are driven by risk concentration and delivery slippage.</div>
+          <div class="doc-list">
+            ${docs.map(doc => `<article class="doc-card"><h5>${escapeHtml(doc.title)}</h5><p>${escapeHtml(doc.summary)}</p></article>`).join('')}
+          </div>
         </div>
       `;
     }
@@ -963,7 +1122,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'BF-3 is carrying the main supplier quality burden while BF-5 remains within tolerance.',
           lenses: [],
-          options: [{ key: 'bar', label: 'bar', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: [
             { id: 'bf3-superheat', vendor: 'BF-3', company: '22°C · out of spec', pricing: 78 },
             { id: 'bf5-superheat', vendor: 'BF-5', company: '33°C · within tolerance', pricing: 36 }
@@ -979,7 +1140,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'Supplier X stands apart as the only source materially outside the normal silicon range.',
           lenses: [],
-          options: [{ key: 'bar', label: 'bar', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: [
             { id: 'supplier-x', vendor: 'Supplier X', company: '+0.12% · high risk', pricing: 84 },
             { id: 'supplier-y', vendor: 'Supplier Y', company: '+0.01% · low risk', pricing: 18 },
@@ -996,7 +1159,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'The spread confirms BF-3 is the abnormal furnace, not the whole superheat system.',
           lenses: [],
-          options: [{ key: 'bar', label: 'bar', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: [
             { id: 'bf3-superheat', vendor: 'BF-3', company: '22°C current', pricing: 22 },
             { id: 'bf5-superheat', vendor: 'BF-5', company: '33°C current', pricing: 33 }
@@ -1012,7 +1177,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'CCM-3 is structurally more exposed because it receives most of BF-3 output.',
           lenses: [],
-          options: [{ key: 'bar', label: 'bar', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: [
             { id: 'ccm3-solidification', vendor: 'CCM-3', company: '80% of BF-3 output', pricing: 80 },
             { id: 'ccm-1', vendor: 'CCM-1', company: '20% of BF-3 output', pricing: 20 }
@@ -1028,7 +1195,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'Automotive and High Tensile are taking the sharpest quality hit.',
           lenses: [],
-          options: [{ key: 'bar', label: 'bar', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: [
             { id: 'grade-risk', vendor: 'Automotive', company: '74% pass rate', pricing: 74 },
             { id: 'high-tensile-risk', vendor: 'High Tensile', company: '81% pass rate', pricing: 81 },
@@ -1045,7 +1214,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'CCM-1 is normal while CCM-3 is the only caster showing downstream quality breakdown.',
           lenses: [],
-          options: [{ key: 'bar', label: 'bar', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: [
             { id: 'ccm3-solidification', vendor: 'CCM-3', company: '74% pass rate', pricing: 74 },
             { id: 'ccm-1', vendor: 'CCM-1', company: '93% pass rate', pricing: 93 }
@@ -1061,7 +1232,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'The combination of shortfall and premium-grade pricing is creating material revenue exposure.',
           lenses: [],
-          options: [{ key: 'bar', label: 'bar', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: [
             { id: 'grade-risk', vendor: 'Shortfall value', company: '₹32.2 Cr at risk', pricing: 82 },
             { id: 'commitment-gap', vendor: 'Delivery gap', company: '~620 MT shortfall', pricing: 62 }
@@ -1077,7 +1250,9 @@ export function initWorkspace() {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           insight: 'Projected delivery is now materially below the committed quarter volume.',
           lenses: [],
-          options: [{ key: 'bar', label: 'bar', enabled: true }],
+          options: [...FULL_VIZ_OPTIONS],
+          timeRanges: RANGE_OPTIONS,
+          timeRange: '30D',
           rows: [
             { id: 'committed-volume', vendor: 'Committed', company: '2,400 MT', pricing: 100 },
             { id: 'projected-volume', vendor: 'Projected', company: '~1,780 MT', pricing: 74 }
@@ -1088,13 +1263,18 @@ export function initWorkspace() {
     }
 
     function renderPrimaryVisual(response) {
+      const scopedRows = rowsForRange(response.rows || [], response.timeRange || '30D');
       if (response.format === 'briefing') return renderBriefingView(response);
       if (response.format === 'insights') return renderInlineElementInsights(response);
       if (response.format === 'flow') return renderFlowView();
-      if (response.format === 'line') return renderLineView(response.rows);
-      if (response.format === 'bar') return renderBarView(response.rows);
-      if (response.format === 'text') return renderTextView();
-      return renderTable(response.rows);
+      if (response.format === 'line') return renderLineView(scopedRows);
+      if (response.format === 'area') return renderAreaView(scopedRows);
+      if (response.format === 'bar') return renderBarView(scopedRows);
+      if (response.format === 'pie') return renderPieView(scopedRows, 'pie');
+      if (response.format === 'donut') return renderPieView(scopedRows, 'donut');
+      if (response.format === 'sankey') return renderSankeyView(scopedRows);
+      if (response.format === 'text') return renderTextView(response);
+      return renderTable(scopedRows);
     }
 
     function renderResponseCard(response) {
@@ -1104,8 +1284,11 @@ export function initWorkspace() {
         { key: 'line', label: 'line', enabled: true },
         { key: 'text', label: 'text', enabled: true }
       ];
-      const showsVisualization = !['insights', 'text'].includes(response.format);
-      const showSwitcher = showsVisualization && options.length > 1;
+      const showSwitcher = response.format !== 'insights' && options.length > 1;
+      const showRanges = response.format !== 'insights' && supportsTimeRange(response.format) && response.timeRanges?.length;
+      const currentRows = rowsForRange(response.rows || [], response.timeRange || '30D');
+      const showInsights = response.format !== 'table' && response.format !== 'insights';
+      const insights = deriveInsights(response, currentRows);
 
       return `
         <article class="response-card" id="response-${response.id}" data-response-id="${response.id}">
@@ -1118,11 +1301,15 @@ export function initWorkspace() {
                   ${options.map(option => `<button class="type-pill ${response.format === option.key ? 'active' : ''}" type="button" data-switch="${option.key}" data-response-id="${response.id}">${option.label}</button>`).join('')}
                 </div>` : ''}
               </div>
+              ${showRanges ? `<div class="time-range-wrap"><span class="time-range-label">Time Range</span><div class="time-range-switch">
+                ${response.timeRanges.map(range => `<button class="range-pill ${response.timeRange === range ? 'active' : ''}" type="button" data-range="${range}" data-response-id="${response.id}">${range}</button>`).join('')}
+              </div></div>` : ''}
             </div>
           </div>
           <div class="card-block card-body">
             <div class="agent-insight">${escapeHtml(response.insight)}</div>
             ${renderPrimaryVisual(response)}
+            ${showInsights ? `<ul class="key-insight-list">${insights.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
             <div class="response-footer">
               <div class="response-actions">
                 <button class="icon-btn ${state.bookmarks.has(response.id) ? 'bookmarked' : ''}" type="button" data-bookmark="${response.id}" title="Bookmark">☆</button>
@@ -1447,7 +1634,7 @@ export function initWorkspace() {
       state.centeredInput = false;
       setThreadResponses(state.currentThreadId, [response]);
       resetPanels();
-      composerInput.value = response.question;
+      composerInput.value = '';
       composerInput.placeholder = CHAT_PLACEHOLDER;
     }
 
@@ -1499,7 +1686,7 @@ export function initWorkspace() {
       const response = currentResponses().find(item => item.id === responseId);
       if (!response) return;
       response.format = nextFormat;
-      response.formatLabel = nextFormat === 'table' ? 'Table' : nextFormat === 'bar' ? 'Bar Chart' : nextFormat === 'line' ? 'Line Chart' : 'Text';
+      response.formatLabel = formatLabelFor(nextFormat);
       state.exportOpenFor = null;
       renderAll();
     }
@@ -1661,7 +1848,7 @@ export function initWorkspace() {
         state.centeredInput = false;
         setThreadResponses(state.currentThreadId, [next]);
         resetPanels();
-        composerInput.value = starter;
+        composerInput.value = '';
         composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
         canvas.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1684,6 +1871,15 @@ export function initWorkspace() {
       const switchBtn = event.target.closest('[data-switch]');
       if (switchBtn) {
         switchFormat(switchBtn.dataset.responseId, switchBtn.dataset.switch);
+        return;
+      }
+
+      const rangeBtn = event.target.closest('[data-range]');
+      if (rangeBtn) {
+        const response = currentResponses().find(item => item.id === rangeBtn.dataset.responseId);
+        if (!response) return;
+        response.timeRange = rangeBtn.dataset.range;
+        renderAll();
         return;
       }
 
