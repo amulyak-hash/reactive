@@ -778,11 +778,9 @@ export function initWorkspace() {
             <div class="landing-waves" aria-hidden="true"></div>
 
             <div class="landing-orb-zone">
-              <div class="landing-brand">
-                <div class="landing-brand-text"><span>Enterprise</span><strong>Brain</strong></div>
-              </div>
-
               <div class="landing-head">
+                <div class="landing-title">Hi, What would you like to explore today?</div>
+                <div class="landing-subtitle">Start exploring your data, or pick a direction to begin.</div>
               </div>
 
               <div class="landing-orb-glow" aria-hidden="true"></div>

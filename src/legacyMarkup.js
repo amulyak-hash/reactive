@@ -5,7 +5,9 @@ const markup = `
         <section class="canvas" id="canvas">
           <div class="canvas-inner">
             <div class="workspace-tools" id="workspaceTools">
-              <div class="workspace-tools-left"></div>
+              <div class="workspace-tools-left">
+                <div class="workspace-brand">Enterprise Brain</div>
+              </div>
               <div class="workspace-tools-right">
                 <button class="tool-btn" id="newThread" type="button">+ <span>New Chat</span></button>
                 <button class="tool-btn" id="historyButton" type="button">⧗ <span>History</span></button>
