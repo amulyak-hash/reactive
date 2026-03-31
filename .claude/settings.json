@@ -1,0 +1,84 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-no-any.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking for explicit 'any'..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-no-div-span.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking for raw HTML elements (<div>, <span>, <p>, <h1>-<h6>)..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-no-sx-prop.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking for production sx prop..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-no-inline-style.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking for inline style..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-no-hardcoded-colors.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking for hardcoded colors..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-no-raw-dimensions.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking for raw dimensions..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-missing-deps.sh",
+            "timeout": 10000,
+            "statusMessage": "Checking for missing package dependencies..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-shared-platform-imports.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking for platform imports in shared/..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-no-cross-app-imports.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking for cross-app imports..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-tsc.sh",
+            "timeout": 60000,
+            "statusMessage": "Running TypeScript type check..."
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/check-test-colocation.sh",
+            "timeout": 5000,
+            "statusMessage": "Checking test co-location..."
+          }
+        ]
+      }
+    ]
+  }
+}

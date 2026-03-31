@@ -1,14 +1,50 @@
 import { hydrateVisualizationMounts } from './d3Visualizations';
 
-export function initWorkspace() {
-    function makeId() {
-      if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
-        return globalThis.crypto.randomUUID();
-      }
-      return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    }
+declare global {
+  interface Window {
+    __reactiveWorkspaceInitialized?: boolean;
+  }
+}
 
-  if (window.__reactiveWorkspaceInitialized) return;
+function getRequiredElement<T extends HTMLElement>(id: string): T {
+  const element = document.getElementById(id);
+  if (!element) {
+    throw new Error(`Missing required element: ${id}`);
+  }
+  return element as T;
+}
+
+export function initWorkspace() {
+  const controller = new AbortController();
+  const timeoutIds = new Set<number>();
+  const animationFrameIds = new Set<number>();
+
+  function scheduleTimeout(callback: () => void, delay: number) {
+    const timeoutId = window.setTimeout(() => {
+      timeoutIds.delete(timeoutId);
+      callback();
+    }, delay);
+    timeoutIds.add(timeoutId);
+    return timeoutId;
+  }
+
+  function scheduleAnimationFrame(callback: FrameRequestCallback) {
+    const animationFrameId = window.requestAnimationFrame(timestamp => {
+      animationFrameIds.delete(animationFrameId);
+      callback(timestamp);
+    });
+    animationFrameIds.add(animationFrameId);
+    return animationFrameId;
+  }
+
+  function makeId() {
+    if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
+      return globalThis.crypto.randomUUID();
+    }
+    return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  if (window.__reactiveWorkspaceInitialized) return () => {};
   window.__reactiveWorkspaceInitialized = true;
   const CHAT_PLACEHOLDER = 'ask a follow-up...';
   const FULL_VIZ_OPTIONS = [
@@ -531,34 +567,41 @@ export function initWorkspace() {
       { order: '04', category: 'Systemic', priority: 'Monitor', action: 'Connect the risk register to the contract and procurement review cycle.', detail: 'The average 5-month gap between risk flag and cost impact is a process failure, not a data failure. £14–16M could have been avoided with a 30-day risk-to-action protocol.', timeframe: 'Before FY25 planning closes' }
     ];
 
-    const app = document.getElementById('app');
-    const canvas = document.getElementById('canvas');
-    const landing = document.getElementById('landing');
-    const landingFloater = document.getElementById('landingFloater');
-    const workspaceTools = document.getElementById('workspaceTools');
-    const workspaceMain = document.getElementById('workspaceMain');
-    const thread = document.getElementById('thread');
-    const emptyThread = document.getElementById('emptyThread');
-    const inputZone = document.getElementById('inputZone');
-    const composer = document.getElementById('composer');
-    const composerInput = document.getElementById('composerInput');
-    const composerStarters = document.getElementById('composerStarters');
-    const historyButtonEl = document.getElementById('historyButton');
-    const bookmarksButtonEl = document.getElementById('bookmarksButton');
-    const timelineRail = document.getElementById('timelineRail');
-    const timelineSegments = document.getElementById('timelineSegments');
-    const timelineTooltip = document.getElementById('timelineTooltip');
-    const historyList = document.getElementById('historyList');
-    const panel = document.getElementById('drillPanel');
-    const panelTitle = document.getElementById('panelTitle');
-    const panelMeta = document.getElementById('panelMeta');
-    const panelBody = document.getElementById('panelBody');
-    const bookmarksSheet = document.getElementById('bookmarksSheet');
-    const historySheet = document.getElementById('historySheet');
-    const artifactsSheet = document.getElementById('artifactsSheet');
-    const bookmarksList = document.getElementById('bookmarksList');
-    const artifactsList = document.getElementById('artifactsList');
-    const profileMenu = document.getElementById('profileMenu');
+    const app = getRequiredElement<HTMLElement>('app');
+    const canvas = getRequiredElement<HTMLElement>('canvas');
+    const landing = getRequiredElement<HTMLElement>('landing');
+    const landingFloater = getRequiredElement<HTMLElement>('landingFloater');
+    const workspaceTools = getRequiredElement<HTMLElement>('workspaceTools');
+    const workspaceMain = getRequiredElement<HTMLElement>('workspaceMain');
+    const thread = getRequiredElement<HTMLElement>('thread');
+    const emptyThread = getRequiredElement<HTMLElement>('emptyThread');
+    const inputZone = getRequiredElement<HTMLElement>('inputZone');
+    const composer = getRequiredElement<HTMLFormElement>('composer');
+    const composerInput = getRequiredElement<HTMLInputElement>('composerInput');
+    const composerStarters = getRequiredElement<HTMLElement>('composerStarters');
+    const historyButtonEl = getRequiredElement<HTMLButtonElement>('historyButton');
+    const bookmarksButtonEl = getRequiredElement<HTMLButtonElement>('bookmarksButton');
+    const timelineRail = getRequiredElement<HTMLElement>('timelineRail');
+    const timelineSegments = getRequiredElement<HTMLElement>('timelineSegments');
+    const timelineTooltip = getRequiredElement<HTMLElement>('timelineTooltip');
+    const historyList = getRequiredElement<HTMLElement>('historyList');
+    const panel = getRequiredElement<HTMLElement>('drillPanel');
+    const panelTitle = getRequiredElement<HTMLElement>('panelTitle');
+    const panelMeta = getRequiredElement<HTMLElement>('panelMeta');
+    const panelBody = getRequiredElement<HTMLElement>('panelBody');
+    const bookmarksSheet = getRequiredElement<HTMLElement>('bookmarksSheet');
+    const historySheet = getRequiredElement<HTMLElement>('historySheet');
+    const artifactsSheet = getRequiredElement<HTMLElement>('artifactsSheet');
+    const bookmarksList = getRequiredElement<HTMLElement>('bookmarksList');
+    const artifactsList = getRequiredElement<HTMLElement>('artifactsList');
+    const profileMenu = getRequiredElement<HTMLElement>('profileMenu');
+    const starterButton = getRequiredElement<HTMLButtonElement>('starterButton');
+    const historyButton = getRequiredElement<HTMLButtonElement>('historyButton');
+    const newThreadButton = getRequiredElement<HTMLButtonElement>('newThread');
+    const bookmarksButton = getRequiredElement<HTMLButtonElement>('bookmarksButton');
+    const profileButton = getRequiredElement<HTMLButtonElement>('profileButton');
+    const scrollUpButton = getRequiredElement<HTMLButtonElement>('scrollUp');
+    const scrollDownButton = getRequiredElement<HTMLButtonElement>('scrollDown');
 
     const state = {
       mode: 'landing',
@@ -1261,8 +1304,8 @@ export function initWorkspace() {
         </div>
       `;
 
-      const landingPromptForm = document.getElementById('landingPromptForm');
-      const landingPromptInput = document.getElementById('landingPromptInput');
+      const landingPromptForm = document.getElementById('landingPromptForm') as HTMLFormElement | null;
+      const landingPromptInput = document.getElementById('landingPromptInput') as HTMLInputElement | null;
       if (landingPromptForm && landingPromptInput) {
         landingPromptForm.addEventListener('submit', event => {
           event.preventDefault();
@@ -1274,7 +1317,7 @@ export function initWorkspace() {
             composerInput.value = '';
             composerInput.placeholder = CHAT_PLACEHOLDER;
             renderAll();
-            setTimeout(() => composerInput.focus(), 180);
+            scheduleTimeout(() => composerInput.focus(), 180);
             return;
           }
 
@@ -1287,7 +1330,7 @@ export function initWorkspace() {
           composerInput.placeholder = CHAT_PLACEHOLDER;
           renderAll();
           canvas.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        }, { signal: controller.signal });
       }
     }
 
@@ -1798,7 +1841,7 @@ export function initWorkspace() {
       appendResponseToCurrentThread(next);
       showFollowups(next.id, entityId);
       renderAll();
-      requestAnimationFrame(() => scrollToResponse(next.id, false));
+      scheduleAnimationFrame(() => scrollToResponse(next.id, false));
     }
 
     function renderDrillPanel(vendorId) {
@@ -1970,8 +2013,8 @@ export function initWorkspace() {
           title="${state.bookmarks.has(response.id) ? 'Bookmarked response' : 'Response'}"
         ></button>
       `).join('');
-      document.getElementById('scrollUp').disabled = active <= 0;
-      document.getElementById('scrollDown').disabled = active >= responses.length - 1;
+      scrollUpButton.disabled = active <= 0;
+      scrollDownButton.disabled = active >= responses.length - 1;
     }
 
     function openWorkspaceWithResponse(response) {
@@ -2041,7 +2084,7 @@ export function initWorkspace() {
       const next = baseResponse(lens);
       appendResponseToCurrentThread(next);
       renderAll();
-      requestAnimationFrame(() => scrollToResponse(next.id));
+      scheduleAnimationFrame(() => scrollToResponse(next.id));
     }
 
     function toggleBookmark(responseId) {
@@ -2062,39 +2105,39 @@ export function initWorkspace() {
       target.scrollIntoView({ behavior: 'smooth', block: 'center' });
       if (!withHighlight) return;
       target.classList.add('highlight');
-      setTimeout(() => target.classList.remove('highlight'), 500);
+      scheduleTimeout(() => target.classList.remove('highlight'), 500);
     }
 
-    document.getElementById('starterButton').addEventListener('click', () => {
+    starterButton.addEventListener('click', () => {
       state.mode = 'empty';
       state.centeredInput = true;
       resetPanels();
       composerInput.value = '';
       composerInput.placeholder = CHAT_PLACEHOLDER;
       renderAll();
-      setTimeout(() => composerInput.focus(), 200);
-    });
+      scheduleTimeout(() => composerInput.focus(), 200);
+    }, { signal: controller.signal });
 
-    document.getElementById('historyButton').addEventListener('click', () => {
+    historyButton.addEventListener('click', () => {
       if (state.mode === 'landing') return;
       state.activePanel = state.activePanel === 'history' ? null : 'history';
       renderAll();
-    });
+    }, { signal: controller.signal });
 
-    document.getElementById('newThread').addEventListener('click', () => {
+    newThreadButton.addEventListener('click', () => {
       startNewChatAtLanding();
-    });
+    }, { signal: controller.signal });
 
-    document.getElementById('bookmarksButton').addEventListener('click', () => {
+    bookmarksButton.addEventListener('click', () => {
       if (state.mode === 'landing') return;
       state.activePanel = state.activePanel === 'bookmarks' ? null : 'bookmarks';
       renderAll();
-    });
+    }, { signal: controller.signal });
 
-    document.getElementById('profileButton').addEventListener('click', () => {
+    profileButton.addEventListener('click', () => {
       state.profileMenuOpen = !state.profileMenuOpen;
       renderAll();
-    });
+    }, { signal: controller.signal });
 
     composer.addEventListener('submit', event => {
       event.preventDefault();
@@ -2119,7 +2162,7 @@ export function initWorkspace() {
         composerInput.value = '';
         composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
-        requestAnimationFrame(() => scrollToResponse(next.id));
+        scheduleAnimationFrame(() => scrollToResponse(next.id));
         return;
       }
       if (state.mode !== 'thread') {
@@ -2131,8 +2174,8 @@ export function initWorkspace() {
       composerInput.value = '';
       composerInput.placeholder = CHAT_PLACEHOLDER;
       renderAll();
-      requestAnimationFrame(() => scrollToResponse(next.id));
-    });
+      scheduleAnimationFrame(() => scrollToResponse(next.id));
+    }, { signal: controller.signal });
 
     canvas.addEventListener('scroll', () => {
       renderTimeline();
@@ -2140,10 +2183,13 @@ export function initWorkspace() {
         state.historyOpen = false;
         renderAll();
       }
-    });
+    }, { signal: controller.signal });
 
     document.addEventListener('click', event => {
-      const storyActBtn = event.target.closest('[data-story-act]');
+      const clickTarget = event.target as HTMLElement | null;
+      if (!clickTarget) return;
+
+      const storyActBtn = clickTarget.closest('[data-story-act]') as HTMLElement | null;
       if (storyActBtn) {
         const nextIndex = Number(storyActBtn.dataset.storyAct);
         const response = currentResponses().find(item => item.id === storyActBtn.dataset.responseId);
@@ -2155,7 +2201,7 @@ export function initWorkspace() {
         return;
       }
 
-      const storyNavBtn = event.target.closest('[data-story-nav]');
+      const storyNavBtn = clickTarget.closest('[data-story-nav]') as HTMLElement | null;
       if (storyNavBtn) {
         const response = currentResponses().find(item => item.id === storyNavBtn.dataset.responseId);
         if (!response) return;
@@ -2170,7 +2216,7 @@ export function initWorkspace() {
         return;
       }
 
-      const storyCategoryBtn = event.target.closest('[data-story-category]');
+      const storyCategoryBtn = clickTarget.closest('[data-story-category]') as HTMLElement | null;
       if (storyCategoryBtn) {
         const response = currentResponses().find(item => item.id === storyCategoryBtn.dataset.responseId);
         if (response) {
@@ -2180,7 +2226,7 @@ export function initWorkspace() {
         return;
       }
 
-      const signOutBtn = event.target.closest('[data-sign-out]');
+      const signOutBtn = clickTarget.closest('[data-sign-out]') as HTMLElement | null;
       if (signOutBtn) {
         state.profileMenuOpen = false;
         state.mode = 'landing';
@@ -2194,7 +2240,7 @@ export function initWorkspace() {
         return;
       }
 
-      const startEmptyTrigger = event.target.closest('[data-start-empty]');
+      const startEmptyTrigger = clickTarget.closest('[data-start-empty]') as HTMLElement | null;
       if (startEmptyTrigger) {
         state.mode = 'empty';
         state.centeredInput = true;
@@ -2203,18 +2249,18 @@ export function initWorkspace() {
         composerInput.value = '';
         composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
-        setTimeout(() => composerInput.focus(), 180);
+        scheduleTimeout(() => composerInput.focus(), 180);
         return;
       }
 
-      const topicCard = event.target.closest('[data-topic]');
+      const topicCard = clickTarget.closest('[data-topic]') as HTMLElement | null;
       if (topicCard) {
         const card = landingCards.find(item => item.key === topicCard.dataset.topic);
         if (!card) return;
         state.reviewed.add(card.key);
         topicCard.classList.add('selected');
         landing.classList.add('exiting');
-        setTimeout(() => {
+        scheduleTimeout(() => {
           openWorkspaceWithResponse(baseResponse(card.title));
           renderAll();
           canvas.scrollTo({ top: 0, behavior: 'smooth' });
@@ -2222,7 +2268,7 @@ export function initWorkspace() {
         return;
       }
 
-      const starterBtn = event.target.closest('[data-starter]');
+      const starterBtn = clickTarget.closest('[data-starter]') as HTMLElement | null;
       if (starterBtn) {
         const starter = starterBtn.dataset.starter;
         if (!starter) return;
@@ -2238,7 +2284,7 @@ export function initWorkspace() {
         return;
       }
 
-      const closeBtn = event.target.closest('[data-close]');
+      const closeBtn = clickTarget.closest('[data-close]') as HTMLElement | null;
       if (closeBtn) {
         if (closeBtn.dataset.close === 'bookmarks' || closeBtn.dataset.close === 'artifacts' || closeBtn.dataset.close === 'history' || closeBtn.dataset.close === 'panel') {
           state.activePanel = null;
@@ -2251,13 +2297,13 @@ export function initWorkspace() {
         return;
       }
 
-      const switchBtn = event.target.closest('[data-switch]');
+      const switchBtn = clickTarget.closest('[data-switch]') as HTMLElement | null;
       if (switchBtn) {
         switchFormat(switchBtn.dataset.responseId, switchBtn.dataset.switch);
         return;
       }
 
-      const rangeBtn = event.target.closest('[data-range]');
+      const rangeBtn = clickTarget.closest('[data-range]') as HTMLElement | null;
       if (rangeBtn) {
         const response = currentResponses().find(item => item.id === rangeBtn.dataset.responseId);
         if (!response) return;
@@ -2266,15 +2312,15 @@ export function initWorkspace() {
         return;
       }
 
-      const lensBtn = event.target.closest('[data-lens]');
+      const lensBtn = clickTarget.closest('[data-lens]') as HTMLElement | null;
       if (lensBtn) {
         addLens(lensBtn.dataset.responseId, lensBtn.dataset.lens);
         return;
       }
 
-      const followupSourceBtn = event.target.closest('[data-followup-source]');
+      const followupSourceBtn = clickTarget.closest('[data-followup-source]') as HTMLElement | null;
       if (followupSourceBtn) {
-        const responseCard = followupSourceBtn.closest('.response-card');
+        const responseCard = followupSourceBtn.closest('.response-card') as HTMLElement | null;
         const responseId = responseCard?.dataset.responseId;
         if (responseId) {
           showFollowups(responseId, followupSourceBtn.dataset.followupSource);
@@ -2282,25 +2328,25 @@ export function initWorkspace() {
         return;
       }
 
-      const flowNode = event.target.closest('[data-flow-node]');
-      if (flowNode) {
+      const flowNode = clickTarget.closest('[data-flow-node]') as HTMLElement | null;
+      if (flowNode?.dataset.flowNode) {
         appendElementInsightResponse(flowNode.dataset.flowNode, flowNode.dataset.flowNode.replaceAll('-', ' '));
         return;
       }
 
-      const vendorRow = event.target.closest('[data-vendor]');
-      if (vendorRow) {
+      const vendorRow = clickTarget.closest('[data-vendor]') as HTMLElement | null;
+      if (vendorRow?.dataset.vendor) {
         appendElementInsightResponse(vendorRow.dataset.vendor, vendorRow.dataset.vendor.replaceAll('-', ' '));
         return;
       }
 
-      const entityBtn = event.target.closest('[data-entity]');
-      if (entityBtn) {
+      const entityBtn = clickTarget.closest('[data-entity]') as HTMLElement | null;
+      if (entityBtn?.dataset.entity) {
         appendElementInsightResponse(entityBtn.dataset.entity, entityBtn.dataset.entity.replaceAll('-', ' '));
         return;
       }
 
-      const followupBtn = event.target.closest('[data-followup]');
+      const followupBtn = clickTarget.closest('[data-followup]') as HTMLElement | null;
       if (followupBtn) {
         const next = followupResponse(followupBtn.dataset.followup);
         state.activePanel = null;
@@ -2311,17 +2357,17 @@ export function initWorkspace() {
         composerInput.value = '';
         composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
-        requestAnimationFrame(() => scrollToResponse(next.id));
+        scheduleAnimationFrame(() => scrollToResponse(next.id));
         return;
       }
 
-      const bookmarkBtn = event.target.closest('[data-bookmark]');
+      const bookmarkBtn = clickTarget.closest('[data-bookmark]') as HTMLElement | null;
       if (bookmarkBtn) {
         toggleBookmark(bookmarkBtn.dataset.bookmark);
         return;
       }
 
-      const likeBtn = event.target.closest('[data-like]');
+      const likeBtn = clickTarget.closest('[data-like]') as HTMLElement | null;
       if (likeBtn) {
         const id = likeBtn.dataset.like;
         if (state.liked.has(id)) state.liked.delete(id);
@@ -2330,17 +2376,17 @@ export function initWorkspace() {
         return;
       }
 
-      const dislikeBtn = event.target.closest('[data-dislike]');
+      const dislikeBtn = clickTarget.closest('[data-dislike]') as HTMLElement | null;
       if (dislikeBtn) {
         state.feedbackForResponseId = dislikeBtn.dataset.dislike;
         composerInput.value = '';
         composerInput.placeholder = CHAT_PLACEHOLDER;
         renderAll();
-        setTimeout(() => composerInput.focus(), 100);
+        scheduleTimeout(() => composerInput.focus(), 100);
         return;
       }
 
-      const regenerateBtn = event.target.closest('[data-regenerate]');
+      const regenerateBtn = clickTarget.closest('[data-regenerate]') as HTMLElement | null;
       if (regenerateBtn) {
         const target = currentResponses().find(item => item.id === regenerateBtn.dataset.regenerate);
         if (!target) return;
@@ -2354,13 +2400,13 @@ export function initWorkspace() {
         return;
       }
 
-      const jumpBtn = event.target.closest('[data-jump]');
+      const jumpBtn = clickTarget.closest('[data-jump]') as HTMLElement | null;
       if (jumpBtn) {
-        setTimeout(() => scrollToResponse(jumpBtn.dataset.jump), 120);
+        scheduleTimeout(() => scrollToResponse(jumpBtn.dataset.jump), 120);
         return;
       }
 
-      const historyBtn = event.target.closest('[data-thread]');
+      const historyBtn = clickTarget.closest('[data-thread]') as HTMLElement | null;
       if (historyBtn) {
         state.currentThreadId = historyBtn.dataset.thread;
         if (!state.threads[state.currentThreadId]) state.threads[state.currentThreadId] = [];
@@ -2373,45 +2419,56 @@ export function initWorkspace() {
         return;
       }
 
-      const timelineBtn = event.target.closest('[data-index]');
+      const timelineBtn = clickTarget.closest('[data-index]') as HTMLElement | null;
       if (timelineBtn) {
         const target = currentResponses()[Number(timelineBtn.dataset.index)];
         if (target) scrollToResponse(target.id);
       }
 
-      if (state.profileMenuOpen && !event.target.closest('.profile-wrap')) {
+      if (state.profileMenuOpen && !clickTarget.closest('.profile-wrap')) {
         state.profileMenuOpen = false;
         renderAll();
       }
-    });
+    }, { signal: controller.signal });
 
     timelineSegments.addEventListener('mouseover', event => {
-      const segment = event.target.closest('[data-index]');
+      const hoverTarget = event.target as HTMLElement | null;
+      const segment = hoverTarget?.closest('[data-index]') as HTMLElement | null;
       if (!segment) return;
       const response = currentResponses()[Number(segment.dataset.index)];
       if (!response) return;
       timelineTooltip.innerHTML = `${escapeHtml(response.question)}<br>${escapeHtml(response.formatLabel)} · ${escapeHtml(response.timestamp)}`;
       timelineTooltip.style.top = `${segment.offsetTop + 12}px`;
       timelineTooltip.classList.add('visible');
-    });
+    }, { signal: controller.signal });
 
     timelineSegments.addEventListener('mouseout', event => {
-      if (event.target.closest('[data-index]')) timelineTooltip.classList.remove('visible');
-    });
+      const hoverTarget = event.target as HTMLElement | null;
+      if (hoverTarget?.closest('[data-index]')) timelineTooltip.classList.remove('visible');
+    }, { signal: controller.signal });
 
-    document.getElementById('scrollUp').addEventListener('click', () => {
+    scrollUpButton.addEventListener('click', () => {
       const responses = currentResponses();
       const active = visibleResponseIndex();
       if (active > 0) scrollToResponse(responses[active - 1].id);
-    });
+    }, { signal: controller.signal });
 
-    document.getElementById('scrollDown').addEventListener('click', () => {
+    scrollDownButton.addEventListener('click', () => {
       const responses = currentResponses();
       const active = visibleResponseIndex();
       if (active < responses.length - 1) scrollToResponse(responses[active + 1].id);
-    });
+    }, { signal: controller.signal });
 
-    window.addEventListener('resize', renderTimeline);
+    window.addEventListener('resize', renderTimeline, { signal: controller.signal });
 
     renderAll();
+
+    return () => {
+      controller.abort();
+      timeoutIds.forEach(timeoutId => window.clearTimeout(timeoutId));
+      animationFrameIds.forEach(animationFrameId => window.cancelAnimationFrame(animationFrameId));
+      timeoutIds.clear();
+      animationFrameIds.clear();
+      window.__reactiveWorkspaceInitialized = false;
+    };
 }

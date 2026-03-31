@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"shadow\\\\|border-radius\\\\|z-\\\\|transition\\\\|breakpoint\" /c/Users/Imran/Desktop/code/genhrx.ai/ref_app/src/app/components/*.tsx)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(npx tsc:*)",
+      "Bash(grep -roh \"\\\\b\\(?:text|bg|border|p|m|gap|space|px|py|pt|pb|pl|pr|mt|mb|ml|mr|mx|my|rounded|shadow|z|w|h|max-w|min-w|max-h|min-h|opacity|transition|duration|ease|flex|grid|justify|items|sm|md|lg|xl|dark\\)[-:][\\\\w\\\\-\\\\.\\\\[\\\\]/]*\" /c/Users/Imran/Desktop/code/genhrx.ai/ref_app/src --include=*.tsx)",
+      "Bash(grep -roh className=[''][^'']*[''] /c/Users/Imran/Desktop/code/genhrx.ai/ref_app/src/app/components/ui/)",
+      "Bash(grep -rho \"\\\\b\\\\\\(text\\\\|bg\\\\|border\\\\|p\\\\|m\\\\|gap\\\\|space\\\\|px\\\\|py\\\\|pt\\\\|pb\\\\|pl\\\\|pr\\\\|mt\\\\|mb\\\\|ml\\\\|mr\\\\|mx\\\\|my\\\\|rounded\\\\|shadow\\\\|z\\\\|w\\\\|h\\\\|max-w\\\\|min-w\\\\|max-h\\\\|min-h\\\\|opacity\\\\|transition\\\\|duration\\\\|ease\\\\|flex\\\\|grid\\\\|justify\\\\|items\\\\|flex-col\\\\|gap\\\\|leading\\\\|font\\\\|focus\\\\|ring\\\\|border\\\\|hover\\\\|dark\\\\|disabled\\\\|aria\\\\|file\\\\|selection\\\\|outline\\\\\\)-[^\"\" ]*\" /c/Users/Imran/Desktop/code/genhrx.ai/ref_app/src --include=*.tsx)",
+      "Bash(pnpm install:*)",
+      "Bash(./node_modules/.bin/nx run-many:*)",
+      "Bash(./node_modules/.bin/tsc --project shared/tsconfig.json --noEmit)",
+      "Bash(node -e \"const pkg = require\\(''./package.json''\\); const deps = {...pkg.dependencies, ...pkg.devDependencies}; [''framer-motion'',''motion'',''lucide-react'',''@mui/icons-material''].forEach\\(d => console.log\\(d+'':'', deps[d] || ''NOT FOUND''\\)\\)\")",
+      "Bash(tsc --project apps/web/tsconfig.json --noEmit)",
+      "Bash(./node_modules/.bin/tsc --project apps/web/tsconfig.json --noEmit)",
+      "Bash(pnpm:*)",
+      "Bash(netstat -ano)",
+      "Bash(../../node_modules/.bin/vite --host)",
+      "Bash(rm -rf .nx/workspace-data/d)",
+      "Bash(rm -rf .nx/cache)",
+      "Bash(powershell -Command \"Get-Process -Name 'node' -ErrorAction SilentlyContinue | Select-Object Id, ProcessName, Path | Format-Table -AutoSize\")",
+      "Bash(NX_DAEMON=false pnpm exec nx affected --target=typecheck --base=origin/main --head=HEAD)",
+      "Bash(powershell -Command \"Stop-Process -Id 22884,29092,29664,53048 -Force -ErrorAction SilentlyContinue\")",
+      "Bash(powershell -Command \"\\(Get-Process -Name 'node' -ErrorAction SilentlyContinue\\).Count\")",
+      "Bash(wmic process:*)",
+      "Bash(grep -v \"^$\")"
+    ]
+  }
+}

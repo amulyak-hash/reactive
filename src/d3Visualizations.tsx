@@ -1,17 +1,56 @@
-import { useMemo } from 'react';
-import { createRoot } from 'react-dom/client';
+import { type ReactNode, useMemo } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
 import * as d3 from 'd3';
-import { sankey as createSankey, sankeyLinkHorizontal } from 'd3-sankey';
+import { sankey as createSankey, sankeyLinkHorizontal, type SankeyGraph, type SankeyLink, type SankeyNode } from 'd3-sankey';
 
-const roots = [];
+type VizRow = {
+  id?: string;
+  vendor: string;
+  pricing?: number;
+};
+
+type PointPair = [string, string | number];
+
+type SankeyNodeData = {
+  id: string;
+  name: string;
+  valueLabel?: string;
+};
+
+type SankeyLinkData = {
+  source: string;
+  target: string;
+  value: number;
+};
+
+type SizedSankeyGraph = SankeyGraph<SankeyNodeData, SankeyLinkData> & {
+  width: number;
+  height: number;
+};
+
+type VisualizationConfig = {
+  type: 'line' | 'area' | 'bar' | 'pie' | 'donut' | 'sankey';
+  rows: VizRow[];
+} | {
+  type: 'flow';
+  selectedEntity?: string | null;
+} | {
+  type: 'trend';
+  points: PointPair[];
+} | {
+  type: 'mini-bars';
+  rows: [string, number, string][];
+};
+
+const roots: Root[] = [];
 const palette = ['#6bbcff', '#5fe6dd', '#d7bc6d', '#95a9ff', '#7fb58a', '#ee8a8a'];
 
 const flowGraph = {
   nodes: [
-    { id: 'supplier-x', name: 'Supplier X', value: 'Si +0.12%' },
-    { id: 'bf3-superheat', name: 'BF-3 Superheat', value: '22C vs 34C' },
-    { id: 'ccm3-solidification', name: 'CCM-3 Solidification', value: 'Rate deviation' },
-    { id: 'grade-risk', name: 'Grade Risk', value: 'Automotive 74%' }
+    { id: 'supplier-x', name: 'Supplier X', valueLabel: 'Si +0.12%' },
+    { id: 'bf3-superheat', name: 'BF-3 Superheat', valueLabel: '22C vs 34C' },
+    { id: 'ccm3-solidification', name: 'CCM-3 Solidification', valueLabel: 'Rate deviation' },
+    { id: 'grade-risk', name: 'Grade Risk', valueLabel: 'Automotive 74%' }
   ],
   links: [
     { source: 'supplier-x', target: 'bf3-superheat', value: 78 },
@@ -20,9 +59,9 @@ const flowGraph = {
   ]
 };
 
-function decodeConfig(encoded) {
+function decodeConfig(encoded: string): VisualizationConfig | null {
   try {
-    return JSON.parse(decodeURIComponent(encoded));
+    return JSON.parse(decodeURIComponent(encoded)) as VisualizationConfig;
   } catch {
     return null;
   }
@@ -31,14 +70,17 @@ function decodeConfig(encoded) {
 export function cleanupVisualizationMounts() {
   while (roots.length) {
     const root = roots.pop();
+    if (!root) continue;
     root.unmount();
   }
 }
 
 export function hydrateVisualizationMounts() {
   cleanupVisualizationMounts();
-  document.querySelectorAll('[data-d3-viz]').forEach(node => {
-    const config = decodeConfig(node.dataset.d3Viz);
+  document.querySelectorAll<HTMLElement>('[data-d3-viz]').forEach(node => {
+    const encodedConfig = node.dataset.d3Viz;
+    if (!encodedConfig) return;
+    const config = decodeConfig(encodedConfig);
     if (!config) return;
     const root = createRoot(node);
     roots.push(root);
@@ -46,7 +88,7 @@ export function hydrateVisualizationMounts() {
   });
 }
 
-function VisualizationRenderer({ config }) {
+function VisualizationRenderer({ config }: { config: VisualizationConfig }) {
   if (config.type === 'line') return <SeriesChart rows={config.rows} variant="line" />;
   if (config.type === 'area') return <SeriesChart rows={config.rows} variant="area" />;
   if (config.type === 'bar') return <BarChart rows={config.rows} />;
@@ -59,11 +101,11 @@ function VisualizationRenderer({ config }) {
   return <div className="viz-empty">Visualization unavailable</div>;
 }
 
-function ChartFrame({ children, className = '' }) {
+function ChartFrame({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <div className={`d3-chart ${className}`.trim()}>{children}</div>;
 }
 
-function SeriesChart({ rows = [], variant }) {
+function SeriesChart({ rows = [], variant }: { rows?: VizRow[]; variant: 'line' | 'area' }) {
   const width = 760;
   const height = 250;
   const margin = { top: 24, right: 24, bottom: 44, left: 24 };
@@ -73,8 +115,8 @@ function SeriesChart({ rows = [], variant }) {
   const yMax = Math.max(100, d3.max(values) || 0);
   const x = d3.scalePoint().domain(rows.map(row => row.vendor)).range([margin.left, margin.left + plotWidth]);
   const y = d3.scaleLinear().domain([0, yMax]).nice().range([margin.top + plotHeight, margin.top]);
-  const line = d3.line().x(row => x(row.vendor)).y(row => y(row.pricing || 0)).curve(d3.curveMonotoneX);
-  const area = d3.area().x(row => x(row.vendor)).y0(y(0)).y1(row => y(row.pricing || 0)).curve(d3.curveMonotoneX);
+  const line = d3.line<VizRow>().x(row => x(row.vendor) ?? 0).y(row => y(row.pricing || 0)).curve(d3.curveMonotoneX);
+  const area = d3.area<VizRow>().x(row => x(row.vendor) ?? 0).y0(y(0)).y1(row => y(row.pricing || 0)).curve(d3.curveMonotoneX);
   const path = line(rows) || '';
   const areaPath = area(rows) || '';
 
@@ -97,7 +139,7 @@ function SeriesChart({ rows = [], variant }) {
   );
 }
 
-function BarChart({ rows = [] }) {
+function BarChart({ rows = [] }: { rows?: VizRow[] }) {
   const width = 760;
   const height = 280;
   const margin = { top: 24, right: 24, bottom: 56, left: 24 };
@@ -136,10 +178,10 @@ function BarChart({ rows = [] }) {
   );
 }
 
-function PieChart({ rows = [], variant }) {
+function PieChart({ rows = [], variant }: { rows?: VizRow[]; variant: 'pie' | 'donut' }) {
   const radius = 78;
-  const arc = d3.arc().innerRadius(variant === 'donut' ? 42 : 0).outerRadius(radius);
-  const pie = d3.pie().sort(null).value(row => row.pricing || 0);
+  const arc = d3.arc<d3.PieArcDatum<VizRow>>().innerRadius(variant === 'donut' ? 42 : 0).outerRadius(radius);
+  const pie = d3.pie<VizRow>().sort(null).value(row => row.pricing || 0);
   const slices = pie(rows);
 
   return (
@@ -162,7 +204,7 @@ function PieChart({ rows = [], variant }) {
   );
 }
 
-function RankingSankey({ rows = [] }) {
+function RankingSankey({ rows = [] }: { rows?: VizRow[] }) {
   const graph = useMemo(() => {
     const topRows = rows.slice(0, 5);
     const nodes = [{ id: 'score', name: 'Portfolio Score' }, ...topRows.map(row => ({ id: row.id || row.vendor, name: row.vendor }))];
@@ -178,38 +220,45 @@ function RankingSankey({ rows = [] }) {
   return <SankeySvg graph={graph} ariaLabel="sankey chart" />;
 }
 
-function ProcessSankey({ selectedEntity }) {
+function ProcessSankey({ selectedEntity }: { selectedEntity?: string | null }) {
   const graph = useMemo(() => createSankeyGraph(flowGraph.nodes, flowGraph.links, 960, 280), []);
   return <SankeySvg graph={graph} ariaLabel="process flow chart" selectedEntity={selectedEntity} />;
 }
 
-function SankeySvg({ graph, ariaLabel, selectedEntity }) {
+function isResolvedSankeyLink(link: SankeyLink<SankeyNodeData, SankeyLinkData>): link is SankeyLink<SankeyNodeData, SankeyLinkData> & {
+  source: SankeyNode<SankeyNodeData, SankeyLinkData>;
+  target: SankeyNode<SankeyNodeData, SankeyLinkData>;
+} {
+  return typeof link.source !== 'string' && typeof link.source !== 'number' && typeof link.target !== 'string' && typeof link.target !== 'number';
+}
+
+function SankeySvg({ graph, ariaLabel, selectedEntity }: { graph: SizedSankeyGraph; ariaLabel: string; selectedEntity?: string | null }) {
   return (
     <ChartFrame className="d3-sankey-frame">
       <svg viewBox={`0 0 ${graph.width} ${graph.height}`} className="d3-svg" role="img" aria-label={ariaLabel}>
         {graph.links.map((link, index) => (
           <path
             key={`link-${index}`}
-            d={sankeyLinkHorizontal()(link)}
-            className={`d3-sankey-link${selectedEntity && (link.source.id === selectedEntity || link.target.id === selectedEntity) ? ' active' : ''}`}
+            d={sankeyLinkHorizontal<SankeyNodeData, SankeyLinkData>()(link) ?? undefined}
+            className={`d3-sankey-link${selectedEntity && isResolvedSankeyLink(link) && (link.source.id === selectedEntity || link.target.id === selectedEntity) ? ' active' : ''}`}
           />
         ))}
         {graph.nodes.map(node => (
           <g key={node.id}>
             <rect
-              x={node.x0}
-              y={node.y0}
-              width={Math.max(14, node.x1 - node.x0)}
-              height={Math.max(18, node.y1 - node.y0)}
+              x={node.x0 ?? 0}
+              y={node.y0 ?? 0}
+              width={Math.max(14, (node.x1 ?? 0) - (node.x0 ?? 0))}
+              height={Math.max(18, (node.y1 ?? 0) - (node.y0 ?? 0))}
               rx="16"
               className={`d3-sankey-node${selectedEntity === node.id ? ' active' : ''}`}
             />
-            <text x={node.x0 + 12} y={node.y0 - 8} className="d3-sankey-label">
+            <text x={(node.x0 ?? 0) + 12} y={(node.y0 ?? 0) - 8} className="d3-sankey-label">
               {node.name}
             </text>
-            {'value' in node && node.value ? (
-              <text x={node.x0 + 12} y={node.y1 + 18} className="d3-sankey-value">
-                {node.value}
+            {node.valueLabel ? (
+              <text x={(node.x0 ?? 0) + 12} y={(node.y1 ?? 0) + 18} className="d3-sankey-value">
+                {node.valueLabel}
               </text>
             ) : null}
           </g>
@@ -219,7 +268,7 @@ function SankeySvg({ graph, ariaLabel, selectedEntity }) {
   );
 }
 
-function TrendChart({ points = [] }) {
+function TrendChart({ points = [] }: { points?: PointPair[] }) {
   const parsed = points.map(([label, rawValue]) => {
     const match = String(rawValue).match(/-?\d+(\.\d+)?/);
     return { label, value: match ? Number(match[0]) : 0 };
@@ -231,7 +280,7 @@ function TrendChart({ points = [] }) {
   const domainMin = d3.min(parsed, point => point.value) || 0;
   const domainMax = d3.max(parsed, point => point.value) || 1;
   const y = d3.scaleLinear().domain([domainMin, domainMax]).nice().range([height - margin.bottom, margin.top]);
-  const line = d3.line().x(point => x(point.label)).y(point => y(point.value)).curve(d3.curveMonotoneX);
+  const line = d3.line<{ label: string; value: number }>().x(point => x(point.label) ?? 0).y(point => y(point.value)).curve(d3.curveMonotoneX);
 
   return (
     <ChartFrame className="d3-trend-frame">
@@ -249,7 +298,7 @@ function TrendChart({ points = [] }) {
   );
 }
 
-function MiniBars({ rows = [] }) {
+function MiniBars({ rows = [] }: { rows?: [string, number, string][] }) {
   return (
     <div className="d3-mini-bars">
       {rows.map(([label, value, status], index) => (
@@ -268,9 +317,9 @@ function MiniBars({ rows = [] }) {
   );
 }
 
-function createSankeyGraph(nodes, links, width, height) {
-  const generator = createSankey()
-    .nodeId(node => node.id)
+function createSankeyGraph(nodes: SankeyNodeData[], links: SankeyLinkData[], width: number, height: number): SizedSankeyGraph {
+  const generator = createSankey<SankeyNodeData, SankeyLinkData>()
+    .nodeId((node: SankeyNode<SankeyNodeData, SankeyLinkData>) => node.id)
     .nodeWidth(22)
     .nodePadding(42)
     .extent([[24, 24], [width - 24, height - 24]]);
