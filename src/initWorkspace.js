@@ -1,3 +1,5 @@
+import { hydrateVisualizationMounts } from './d3Visualizations';
+
 export function initWorkspace() {
     function makeId() {
       if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') {
@@ -374,6 +376,161 @@ export function initWorkspace() {
       'Historical frequency of BF-3 going below 28°C': ['Compare BF-3 with BF-5 superheat', 'Quantify Automotive revenue risk']
     };
 
+    const storyHeader = {
+      title: 'Hidden Cost Overrun',
+      subtitle: 'FY 2024 hidden manufacturing cost traced across procurement, operations, logistics, quality, supplier, planning, and contract performance.',
+      context: 'Manufacturing hidden cost investigation'
+    };
+
+    const storyActs = [
+      { id: 'act-1', label: 'Act 1', name: 'Total Hidden Cost Magnitude', kicker: 'Scale first', blurb: 'Let the size of the overrun hit before the causes fragment into detail.' },
+      { id: 'act-2', label: 'Act 2', name: 'Category Drill Down', kicker: 'Diagnosis', blurb: 'Move into one category at a time and isolate the three most expensive bleeding points.' },
+      { id: 'act-3', label: 'Act 3', name: 'Risk Connection', kicker: 'Signals ignored', blurb: 'Show where early warning signals appeared months before the cost actually hit.' },
+      { id: 'act-4', label: 'Act 4', name: 'Comparison & Recommendations', kicker: 'Decide what to do', blurb: 'Shift from analysis to priority, action, and execution windows.' }
+    ];
+
+    const storyCategories = [
+      {
+        key: 'procurement',
+        label: 'Procurement',
+        value: 18.2,
+        valueLabel: '£18.2M',
+        share: 39,
+        tone: 'critical',
+        factors: [
+          { label: 'Spot purchasing', value: 7.1, valueLabel: '£7.1M', cause: 'Contracted supplier delivery failures in Q3', trend: 'worsening' },
+          { label: 'Demurrage charges', value: 6.3, valueLabel: '£6.3M', cause: 'Port congestion Rotterdam and Immingham, 14 vessel delays', trend: 'worsening' },
+          { label: 'Rejected material', value: 4.8, valueLabel: '£4.8M', cause: 'Off-spec iron ore, sulphur content exceeded tolerance', trend: 'stable' }
+        ],
+        insight: 'Spot purchasing alone is £7.1M — driven by 3 supplier failures. Single-source dependency is the root cause.'
+      },
+      {
+        key: 'operations',
+        label: 'Operations',
+        value: 10.5,
+        valueLabel: '£10.5M',
+        share: 22,
+        tone: 'critical',
+        factors: [
+          { label: 'Unplanned downtime', value: 4.9, valueLabel: '£4.9M', cause: '4 blast furnace stoppages in H2, avg 31 hours each', trend: 'worsening' },
+          { label: 'Yield loss', value: 3.6, valueLabel: '£3.6M', cause: 'Hot rolling mill running 2.3% below target yield', trend: 'stable' },
+          { label: 'Energy overconsumption', value: 2.0, valueLabel: '£2.0M', cause: 'Extended furnace reheat cycles after stoppages', trend: 'improving' }
+        ],
+        insight: 'Downtime doubled from FY23 — 2 stoppages to 4. Fixed costs kept running with zero output each time.'
+      },
+      {
+        key: 'logistics',
+        label: 'Logistics',
+        value: 7.1,
+        valueLabel: '£7.1M',
+        share: 15,
+        tone: 'elevated',
+        factors: [
+          { label: 'Freight variance', value: 3.2, valueLabel: '£3.2M', cause: 'Red Sea disruption pushed spot rates above contracted levels', trend: 'improving' },
+          { label: 'Late delivery penalties', value: 2.6, valueLabel: '£2.6M', cause: '12 customer delivery failures in Q4, penalty clauses triggered', trend: 'worsening' },
+          { label: 'Warehousing overflow', value: 1.3, valueLabel: '£1.3M', cause: 'Finished goods held longer than planned at third-party warehouses', trend: 'stable' }
+        ],
+        insight: 'Late delivery penalties trace directly back to Operations downtime — these two categories are connected.'
+      },
+      {
+        key: 'quality',
+        label: 'Quality',
+        value: 4.7,
+        valueLabel: '£4.7M',
+        share: 10,
+        tone: 'elevated',
+        factors: [
+          { label: 'Customer claims', value: 2.8, valueLabel: '£2.8M', cause: 'Below-spec HSLA steel delivered to 2 automotive customers', trend: 'worsening' },
+          { label: 'Rework costs', value: 1.2, valueLabel: '£1.2M', cause: '8.4% of batches failed first-pass inspection', trend: 'stable' },
+          { label: 'Compliance fines', value: 0.7, valueLabel: '£0.7M', cause: '2 environmental breaches, Port Talbot and Scunthorpe', trend: 'improving' }
+        ],
+        insight: 'Customer claims doubled from £1.4M in FY23. Concentrated in one product grade and two customers.'
+      },
+      {
+        key: 'supplier',
+        label: 'Supplier',
+        value: 3.5,
+        valueLabel: '£3.5M',
+        share: 7,
+        tone: 'monitor',
+        factors: [
+          { label: 'Short deliveries', value: 1.8, valueLabel: '£1.8M', cause: '6 suppliers delivered below contracted volumes', trend: 'worsening' },
+          { label: 'Substitution costs', value: 1.1, valueLabel: '£1.1M', cause: '3 grade substitutions required at higher cost and disrupted schedule', trend: 'stable' },
+          { label: 'Supplier financial distress', value: 0.6, valueLabel: '£0.6M', cause: '1 tier-2 supplier went into administration, emergency sourcing required', trend: 'watch' }
+        ],
+        insight: '2 more suppliers currently showing financial health flags in the risk register.'
+      },
+      {
+        key: 'planning',
+        label: 'Planning',
+        value: 2.1,
+        valueLabel: '£2.1M',
+        share: 4,
+        tone: 'monitor',
+        factors: [
+          { label: 'Demand forecast error', value: 1.1, valueLabel: '£1.1M', cause: 'Q2 demand overforecast by 14%, overproduction and inventory holding', trend: 'stable' },
+          { label: 'Schedule change costs', value: 0.7, valueLabel: '£0.7M', cause: '11 last-minute production schedule changes, setup and overtime costs', trend: 'worsening' },
+          { label: 'Inventory write-offs', value: 0.3, valueLabel: '£0.3M', cause: '2 specialist alloy batches obsolete after customer order cancellation', trend: 'stable' }
+        ],
+        insight: 'Schedule changes are increasing and directly amplify costs in Operations and Logistics downstream.'
+      },
+      {
+        key: 'contract',
+        label: 'Contract',
+        value: 1.1,
+        valueLabel: '£1.1M',
+        share: 2,
+        tone: 'monitor',
+        factors: [
+          { label: 'Escalation clause triggers', value: 0.5, valueLabel: '£0.5M', cause: '4 contracts with CPI-linked clauses triggered in H1 as inflation stayed elevated', trend: 'stable' },
+          { label: 'Take-or-pay penalties', value: 0.4, valueLabel: '£0.4M', cause: 'Production shortfall meant minimum volumes not consumed in 2 utility agreements', trend: 'improving' },
+          { label: 'Volume shortfall penalties', value: 0.2, valueLabel: '£0.2M', cause: 'Raw material purchase commitments not met due to schedule changes', trend: 'stable' }
+        ],
+        insight: 'Contract costs are the smallest category but are symptoms of failures in Planning and Operations.'
+      }
+    ];
+
+    const storyCategoryPositions = {
+      procurement: { size: 220, left: '8%', top: '20%' },
+      operations: { size: 182, left: '38%', top: '14%' },
+      logistics: { size: 144, left: '66%', top: '28%' },
+      quality: { size: 120, left: '26%', top: '55%' },
+      supplier: { size: 104, left: '54%', top: '54%' },
+      planning: { size: 86, left: '73%', top: '57%' },
+      contract: { size: 72, left: '14%', top: '68%' }
+    };
+
+    const historicalRiskRows = [
+      { title: 'Supplier X delivery failure', riskMonth: 'Feb', costMonth: 'Jul', gap: '5 months', costImpact: '£7.1M', risk: 'Single-source dependency on coking coal supplier, capacity constraint signals noted.', action: 'None.', outcome: 'Forced spot purchasing begins.', status: 'Still unresolved. Supplier X remains sole source.' },
+      { title: 'Port congestion — Rotterdam and Immingham', riskMonth: 'Apr', costMonth: 'Jul', gap: '3 months', costImpact: '£6.3M', risk: 'Congestion alerts from port authority bulletins logged in logistics risk register.', action: 'Escalated June 2024 — too late to reroute.', outcome: 'Demurrage charges begin.', status: 'Partially resolved. Alternative berth arrangements for Q1 FY25.' },
+      { title: 'Blast furnace reliability — Port Talbot Furnace 2', riskMonth: 'Feb', costMonth: 'Sep', gap: '7 months', costImpact: '£4.9M', risk: 'Overdue inspection flag, increasing vibration readings logged in maintenance risk log.', action: 'Escalated August 2024 after first stoppage — reactive not preventive.', outcome: 'Second and third stoppages drive cost spike.', status: 'Furnace 2 maintenance scheduled Q1 FY25.' },
+      { title: 'HSLA steel quality — automotive customers', riskMonth: 'May', costMonth: 'Aug', gap: '3 months', costImpact: '£2.8M', risk: 'Borderline sulphur readings in quality control log.', action: 'None — never formally escalated.', outcome: 'First customer claim received.', status: 'Process parameters tightened but raw material root cause unresolved.' }
+    ];
+
+    const forwardRiskRows = [
+      { title: 'Furnace 1 vibration readings', riskMonth: 'Nov', exposure: '£4.9M', window: 'Estimated 3 months', detail: 'Identical early signals to Furnace 2 in February 2024.' },
+      { title: 'Supplier financial health — 2 suppliers', riskMonth: 'Oct', exposure: '£2.2M', window: 'Immediate review', detail: '2 tier-2 suppliers showing deteriorating payment behaviour and credit score decline.' },
+      { title: 'Freight contract renewal', riskMonth: 'Dec', exposure: '£1.8M', window: '60 days', detail: 'Current spot market rates are 22% above expiring contracted rates.' },
+      { title: 'Automotive customer quality penalty clauses', riskMonth: 'Dec', exposure: '£1.2M', window: 'Before Q2 FY25', detail: 'Major automotive customer renewal includes tighter quality penalty clauses.' }
+    ];
+
+    const scoreMatrix = [
+      { key: 'procurement', label: 'Procurement', magnitude: 5, fixability: 4, risk: 5, total: 14, priority: 'High' },
+      { key: 'operations', label: 'Operations', magnitude: 4, fixability: 3, risk: 4, total: 11, priority: 'High' },
+      { key: 'logistics', label: 'Logistics', magnitude: 3, fixability: 5, risk: 3, total: 11, priority: 'High' },
+      { key: 'quality', label: 'Quality', magnitude: 2, fixability: 4, risk: 2, total: 8, priority: 'Medium' },
+      { key: 'supplier', label: 'Supplier', magnitude: 2, fixability: 2, risk: 4, total: 8, priority: 'Medium' },
+      { key: 'planning', label: 'Planning', magnitude: 1, fixability: 3, risk: 3, total: 7, priority: 'Monitor' },
+      { key: 'contract', label: 'Contract', magnitude: 1, fixability: 3, risk: 2, total: 6, priority: 'Monitor' }
+    ];
+
+    const recommendationCards = [
+      { order: '01', category: 'Procurement', priority: 'High', action: 'Dual-source the top 3 single-source supplier relationships before Q2 FY25.', detail: 'Supplier X for coking coal, Supplier Y for iron ore, Supplier Z for specialist alloys. Single-source dependency generated £7.1M in spot purchasing costs in FY24 alone.', timeframe: 'Within 90 days' },
+      { order: '02', category: 'Operations', priority: 'High', action: 'Schedule Furnace 1 full maintenance in Q1 FY25.', detail: 'Vibration readings are 4 months into the same pattern that preceded Furnace 2 failure. There are approximately 3 months remaining before the pattern escalates.', timeframe: 'Schedule within 30 days' },
+      { order: '03', category: 'Logistics', priority: 'High', action: 'Renegotiate outbound freight contracts before expiry.', detail: 'Current market rates are 22% above expiring contracted levels. This is the highest-fixability action in the dataset.', timeframe: 'Hard deadline — 60 days' },
+      { order: '04', category: 'Systemic', priority: 'Monitor', action: 'Connect the risk register to the contract and procurement review cycle.', detail: 'The average 5-month gap between risk flag and cost impact is a process failure, not a data failure. £14–16M could have been avoided with a 30-day risk-to-action protocol.', timeframe: 'Before FY25 planning closes' }
+    ];
+
     const app = document.getElementById('app');
     const canvas = document.getElementById('canvas');
     const landing = document.getElementById('landing');
@@ -416,6 +573,9 @@ export function initWorkspace() {
       },
       historyOpen: false,
       profileMenuOpen: false,
+      storyActIndex: 0,
+      storyCategoryKey: 'procurement',
+      storyDirection: 'next',
       landingChipCursor: 1,
       landingChipsByThread: { current: [...chipPresets[0]] },
       activePanel: null,
@@ -565,6 +725,14 @@ export function initWorkspace() {
         .replaceAll('"', '&quot;');
     }
 
+    function serializeVizConfig(config) {
+      return encodeURIComponent(JSON.stringify(config));
+    }
+
+    function renderVizMount(config, className = 'd3-mount') {
+      return `<div class="${className}" data-d3-viz="${serializeVizConfig(config)}"></div>`;
+    }
+
     function rowsForLens(question) {
       const key = question.toLowerCase();
       if (key.includes('compare by region')) {
@@ -624,6 +792,25 @@ export function initWorkspace() {
 
     function baseResponse(question = 'Vendor Leaderboard') {
       const normalizedQuestion = question.toLowerCase().trim();
+      if (normalizedQuestion.includes('hidden cost') && (normalizedQuestion.includes('overrun') || normalizedQuestion.includes('overruns'))) {
+        return {
+          id: makeId(),
+          topic: 'hidden-cost-overrun',
+          title: 'Hidden Cost Overrun',
+          question,
+          format: 'story',
+          formatLabel: 'Story',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          insight: 'This walkthrough traces total hidden cost, the worst categories, the missed risk signals, and the actions with the highest leverage.',
+          options: [{ key: 'story', label: 'story', enabled: true }],
+          storyActIndex: 0,
+          storyCategoryKey: 'procurement',
+          storyDirection: 'next',
+          rows: [],
+          lenses: [],
+          keyInsights: []
+        };
+      }
       if (normalizedQuestion === 'show overall insights') {
         return {
           id: makeId(),
@@ -771,6 +958,269 @@ export function initWorkspace() {
       `;
     }
 
+    function storyToneClass(tone) {
+      const map = {
+        critical: 'tone-critical',
+        elevated: 'tone-elevated',
+        monitor: 'tone-monitor'
+      };
+      return map[tone] || 'tone-monitor';
+    }
+
+    function storyTrendMeta(trend) {
+      const map = {
+        worsening: { label: 'Worsening', icon: '↑', className: 'trend-worsening' },
+        improving: { label: 'Improving', icon: '↓', className: 'trend-improving' },
+        stable: { label: 'Stable', icon: '—', className: 'trend-stable' },
+        watch: { label: 'Watch', icon: '•', className: 'trend-watch' }
+      };
+      return map[trend] || map.stable;
+    }
+
+    function monthToPercent(month) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const index = months.indexOf(month);
+      if (index < 0) return 0;
+      return (index / 11) * 100;
+    }
+
+    function renderStoryDotScore(count) {
+      return `
+        <div class="story-dot-score" aria-label="${count} out of 5">
+          ${Array.from({ length: 5 }, (_, index) => `<span class="${index < count ? 'filled' : ''}"></span>`).join('')}
+        </div>
+      `;
+    }
+
+    function renderActOne() {
+      return `
+        <div class="story-panel story-panel-magnitude">
+          <div class="magnitude-copy">
+            <div class="magnitude-kicker">Operational hidden cost</div>
+            <div class="magnitude-total">£47.2M</div>
+            <div class="magnitude-meta">FY 2024</div>
+            <div class="magnitude-delta-grid">
+              <div class="magnitude-stat"><strong>18.4%</strong><span>above budgeted operational cost</span></div>
+              <div class="magnitude-stat"><strong>48%</strong><span>up from £31.8M in FY 2023</span></div>
+            </div>
+            <div class="story-insight-card">
+              <div class="story-insight-label">Lead signal</div>
+              <div class="story-insight-text">Procurement and Operations together account for 61% of total hidden cost. Both are worsening year on year.</div>
+            </div>
+          </div>
+          <div class="magnitude-bubble-field">
+            ${storyCategories.map(category => {
+              const pos = storyCategoryPositions[category.key];
+              return `
+                <div class="magnitude-bubble ${storyToneClass(category.tone)}" style="--bubble-size:${pos.size}px; --bubble-left:${pos.left}; --bubble-top:${pos.top};">
+                  <span class="bubble-name">${escapeHtml(category.label)}</span>
+                  <strong>${escapeHtml(category.valueLabel)}</strong>
+                  <span>${category.share}%</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActTwo(response) {
+      const category = storyCategories.find(item => item.key === response.storyCategoryKey) || storyCategories[0];
+      const peak = Math.max(...category.factors.map(item => item.value));
+      const toneColor = category.tone === 'critical' ? '#f46a72' : category.tone === 'elevated' ? '#f0b35f' : '#93a2bb';
+      return `
+        <div class="story-panel story-panel-drill">
+          <div class="story-pill-row">
+            ${storyCategories.map(item => `
+              <button type="button" class="story-switch-pill ${item.key === category.key ? 'active' : ''}" data-story-category="${item.key}" data-response-id="${response.id}">
+                ${escapeHtml(item.label)}
+              </button>
+            `).join('')}
+          </div>
+          <div class="drill-grid">
+            <div class="drill-bars">
+              ${category.factors.map((factor, index) => {
+                const trend = storyTrendMeta(factor.trend);
+                return `
+                  <div class="drill-card">
+                    <div class="drill-card-header">
+                      <div>
+                        <div class="drill-factor">${index + 1}. ${escapeHtml(factor.label)}</div>
+                        <div class="drill-cause-pill">${escapeHtml(factor.cause)}</div>
+                      </div>
+                      <div class="drill-trend ${trend.className}">
+                        <span>${trend.icon}</span>
+                        <span>${trend.label}</span>
+                      </div>
+                    </div>
+                    <div class="drill-track">
+                      <div class="drill-fill ${storyToneClass(category.tone)}" style="width:${(factor.value / peak) * 100}%"></div>
+                    </div>
+                    <div class="drill-value">${escapeHtml(factor.valueLabel)}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <div class="drill-context-card">
+              <div class="drill-context-meta">Share of £47.2M total</div>
+              <div class="drill-donut" style="background: conic-gradient(${toneColor} 0 ${category.share}%, rgba(255,255,255,0.08) ${category.share}% 100%);">
+                <div class="drill-donut-center">
+                  <strong>${category.share}%</strong>
+                  <span>${escapeHtml(category.label)}</span>
+                </div>
+              </div>
+              <div class="drill-context-value">${escapeHtml(category.valueLabel)}</div>
+              <div class="story-insight-card">
+                <div class="story-insight-label">Most important finding</div>
+                <div class="story-insight-text">${escapeHtml(category.insight)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActThreeRow(row, forward = false) {
+      const riskPos = monthToPercent(row.riskMonth);
+      const costPos = forward ? riskPos : monthToPercent(row.costMonth);
+      return `
+        <div class="timeline-row ${forward ? 'timeline-row-forward' : ''}">
+          <div class="timeline-row-header">
+            <div class="timeline-row-title">${escapeHtml(row.title)}</div>
+            <div class="timeline-badges">
+              ${forward ? `<span class="timeline-badge exposure">${escapeHtml(row.exposure)}</span>` : `<span class="timeline-badge gap">${escapeHtml(row.gap)}</span><span class="timeline-badge cost">${escapeHtml(row.costImpact)}</span>`}
+            </div>
+          </div>
+          <div class="timeline-track-shell">
+            <div class="timeline-track-line"></div>
+            <div class="timeline-risk-dot" style="left:${riskPos}%"></div>
+            ${forward ? '' : `<div class="timeline-gap-line" style="left:${riskPos}%; width:${Math.max(costPos - riskPos, 2)}%"></div><div class="timeline-cost-dot" style="left:${costPos}%"></div>`}
+          </div>
+          <div class="timeline-row-copy">
+            ${forward
+              ? `<span><strong>Detail:</strong> ${escapeHtml(row.detail)}</span><span><strong>Window to act:</strong> ${escapeHtml(row.window)}</span>`
+              : `<span><strong>Risk flagged:</strong> ${escapeHtml(row.riskMonth)} — ${escapeHtml(row.risk)}</span><span><strong>Action taken:</strong> ${escapeHtml(row.action)}</span><span><strong>Cost hit:</strong> ${escapeHtml(row.outcome)} ${escapeHtml(row.status)}</span>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActThree() {
+      return `
+        <div class="story-panel story-panel-risk">
+          <div class="timeline-months">
+            ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(month => `<span>${month}</span>`).join('')}
+          </div>
+          <div class="timeline-section">
+            ${historicalRiskRows.map(row => renderActThreeRow(row)).join('')}
+          </div>
+          <div class="timeline-summary-card">£18.3M in cost was preceded by a known risk signal. Average gap between signal and cost: 5 months.</div>
+          <div class="timeline-forward-heading">Forward risks — amber signal visible, cost window still open</div>
+          <div class="timeline-section timeline-section-forward">
+            ${forwardRiskRows.map(row => renderActThreeRow(row, true)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActFour() {
+      const maxTotal = Math.max(...scoreMatrix.map(item => item.total));
+      return `
+        <div class="story-panel story-panel-recommend">
+          <div class="scorecard-matrix">
+            <div class="scorecard-head">Category</div>
+            <div class="scorecard-head">Cost magnitude</div>
+            <div class="scorecard-head">Fixability</div>
+            <div class="scorecard-head">Forward risk</div>
+            <div class="scorecard-head">Priority</div>
+            ${scoreMatrix.map(item => `
+              <div class="scorecard-cell scorecard-category">${escapeHtml(item.label)}</div>
+              <div class="scorecard-cell">${renderStoryDotScore(item.magnitude)}</div>
+              <div class="scorecard-cell">${renderStoryDotScore(item.fixability)}</div>
+              <div class="scorecard-cell">${renderStoryDotScore(item.risk)}</div>
+              <div class="scorecard-cell"><span class="priority-pill priority-${item.priority.toLowerCase()}">${escapeHtml(item.priority)}</span></div>
+            `).join('')}
+          </div>
+          <div class="scorecard-footnote">Cost magnitude is based on £ value relative to £47.2M total. Fixability reflects how much of the root cause sits within direct control. Forward risk reflects the number and severity of active FY25 signals.</div>
+          <div class="priority-bars">
+            ${scoreMatrix.map(item => `
+              <div class="priority-bar-row">
+                <div class="priority-bar-label">${escapeHtml(item.label)}</div>
+                <div class="priority-bar-track">
+                  <div class="priority-bar-fill priority-${item.priority.toLowerCase()}" style="width:${(item.total / maxTotal) * 100}%"></div>
+                </div>
+                <div class="priority-bar-score">${item.total}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="recommendation-stack">
+            ${recommendationCards.map(card => `
+              <article class="recommendation-card priority-${card.priority.toLowerCase()}">
+                <div class="recommendation-order">${card.order}</div>
+                <div class="recommendation-body">
+                  <div class="recommendation-meta">${escapeHtml(card.category)} · ${escapeHtml(card.timeframe)}</div>
+                  <div class="recommendation-action">${escapeHtml(card.action)}</div>
+                  <div class="recommendation-detail">${escapeHtml(card.detail)}</div>
+                </div>
+              </article>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStoryStage(response) {
+      const act = storyActs[response.storyActIndex || 0] || storyActs[0];
+      if (act.id === 'act-1') return renderActOne();
+      if (act.id === 'act-2') return renderActTwo(response);
+      if (act.id === 'act-3') return renderActThree();
+      return renderActFour();
+    }
+
+    function renderHiddenCostStory(response) {
+      const actIndex = response.storyActIndex || 0;
+      const act = storyActs[actIndex] || storyActs[0];
+      const direction = response.storyDirection || 'next';
+      return `
+        <div class="story-shell response-story-shell">
+          <section class="story-hero">
+            <div class="story-overline">${escapeHtml(storyHeader.context)}</div>
+            <div class="story-head-row">
+              <div class="story-head-copy">
+                <div class="story-title">${escapeHtml(storyHeader.title)}</div>
+                <div class="story-subtitle">${escapeHtml(storyHeader.subtitle)}</div>
+              </div>
+              <div class="story-nav-cluster">
+                <div class="story-act-marker">
+                  <span>${escapeHtml(act.label)}</span>
+                  <strong>${escapeHtml(act.name)}</strong>
+                </div>
+                <div class="story-nav-controls">
+                  <button type="button" class="story-nav-btn" data-story-nav="prev" data-response-id="${response.id}" ${actIndex === 0 ? 'disabled' : ''}>Previous</button>
+                  <button type="button" class="story-nav-btn" data-story-nav="next" data-response-id="${response.id}" ${actIndex === storyActs.length - 1 ? 'disabled' : ''}>Next</button>
+                </div>
+              </div>
+            </div>
+            <div class="story-act-tabs">
+              ${storyActs.map((item, index) => `
+                <button type="button" class="story-act-tab ${index === actIndex ? 'active' : ''}" data-story-act="${index}" data-response-id="${response.id}">
+                  <span>${escapeHtml(item.label)}</span>
+                  <strong>${escapeHtml(item.name)}</strong>
+                </button>
+              `).join('')}
+            </div>
+          </section>
+          <section class="story-stage story-stage-${direction}">
+            <div class="story-stage-copy">
+              <div class="story-stage-kicker">${escapeHtml(act.kicker)}</div>
+              <div class="story-stage-blurb">${escapeHtml(act.blurb)}</div>
+            </div>
+            ${renderStoryStage(response)}
+          </section>
+        </div>
+      `;
+    }
+
     function renderLanding() {
       landing.innerHTML = `
         <div class="landing-shell">
@@ -887,42 +1337,30 @@ export function initWorkspace() {
     }
 
     function renderLineView(rows) {
-      const points = rows.map((row, index) => `${80 + index * 130},${210 - row.pricing * 1.5}`).join(' ');
       return `
-        <div class="line-view">
-          <svg class="line-svg" viewBox="0 0 760 250" aria-hidden="true">
-            <path class="line-track" d="M80 210 L680 210"></path>
-            <polyline class="line-path" points="${points}"></polyline>
-            ${rows.map((row, index) => `<circle cx="${80 + index * 130}" cy="${210 - row.pricing * 1.5}" r="8" fill="#cdaa58"></circle>`).join('')}
-          </svg>
+        <div class="line-view viz-view">
+          ${renderVizMount({ type: 'line', rows })}
         </div>
       `;
     }
 
     function renderAreaView(rows) {
-      const points = rows.map((row, index) => `${80 + index * 130},${210 - row.pricing * 1.5}`).join(' ');
-      const areaPoints = `${points} 680,210 80,210`;
       return `
-        <div class="line-view area-view">
-          <svg class="line-svg" viewBox="0 0 760 250" aria-hidden="true">
-            <path class="line-track" d="M80 210 L680 210"></path>
-            <polygon class="area-fill" points="${areaPoints}"></polygon>
-            <polyline class="line-path" points="${points}"></polyline>
-            ${rows.map((row, index) => `<circle cx="${80 + index * 130}" cy="${210 - row.pricing * 1.5}" r="7" fill="#7be1df"></circle>`).join('')}
-          </svg>
+        <div class="line-view area-view viz-view">
+          ${renderVizMount({ type: 'area', rows })}
         </div>
       `;
     }
 
     function renderBarView(rows) {
       return `
-        <div class="bar-view">
-          <div class="bar-view-grid">
-            ${rows.map((row, index) => `
-              <button class="bar-col" type="button" data-entity="${row.id}">
-                <div class="bar-visual" style="height:${Math.max(row.pricing * 2, 70)}px; animation-delay:${index * 60}ms"></div>
-                <div class="bar-value">${row.pricing}</div>
-                <div class="bar-label">${escapeHtml(row.vendor)}</div>
+        <div class="bar-view viz-view">
+          ${renderVizMount({ type: 'bar', rows })}
+          <div class="viz-action-list">
+            ${rows.map(row => `
+              <button class="viz-action-chip" type="button" data-entity="${row.id}">
+                <strong>${escapeHtml(row.vendor)}</strong>
+                <span>${row.pricing}</span>
               </button>
             `).join('')}
           </div>
@@ -931,55 +1369,17 @@ export function initWorkspace() {
     }
 
     function renderPieView(rows, mode = 'pie') {
-      const total = Math.max(1, rows.reduce((acc, row) => acc + (row.pricing || 0), 0));
-      let cursor = 0;
-      const center = 90;
-      const radius = 72;
-      const innerRadius = mode === 'donut' ? 40 : 0;
-      const colors = ['#6bbcff', '#5fe6dd', '#d7bc6d', '#95a9ff', '#7fb58a', '#ee8a8a'];
-      const slices = rows.map((row, index) => {
-        const value = row.pricing || 0;
-        const angle = (value / total) * Math.PI * 2;
-        const start = cursor;
-        const end = cursor + angle;
-        cursor = end;
-        const x1 = center + radius * Math.cos(start);
-        const y1 = center + radius * Math.sin(start);
-        const x2 = center + radius * Math.cos(end);
-        const y2 = center + radius * Math.sin(end);
-        const largeArc = angle > Math.PI ? 1 : 0;
-        const outer = `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-        const path = innerRadius === 0
-          ? outer
-          : `M ${center + innerRadius * Math.cos(start)} ${center + innerRadius * Math.sin(start)} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} L ${center + innerRadius * Math.cos(end)} ${center + innerRadius * Math.sin(end)} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${center + innerRadius * Math.cos(start)} ${center + innerRadius * Math.sin(start)} Z`;
-        return { row, path, color: colors[index % colors.length] };
-      });
-
       return `
-        <div class="pie-view">
-          <svg viewBox="0 0 180 180" aria-hidden="true">
-            ${slices.map(slice => `<path d="${slice.path}" fill="${slice.color}" opacity="0.92"></path>`).join('')}
-          </svg>
-          <div class="pie-legend">
-            ${rows.map((row, index) => `<div class="pie-legend-row"><span class="pie-dot" style="background:${colors[index % colors.length]}"></span><span>${escapeHtml(row.vendor)}</span><strong>${row.pricing}</strong></div>`).join('')}
-          </div>
+        <div class="pie-view viz-view">
+          ${renderVizMount({ type: mode, rows })}
         </div>
       `;
     }
 
     function renderSankeyView(rows) {
-      const ordered = [...rows].sort((a, b) => (b.pricing || 0) - (a.pricing || 0)).slice(0, 4);
       return `
-        <div class="sankey-view">
-          ${ordered.map((row, index) => `
-            <div class="sankey-row">
-              <span class="sankey-label">${escapeHtml(row.vendor)}</span>
-              <div class="sankey-track">
-                <div class="sankey-fill" style="width:${Math.max(14, row.pricing)}%; animation-delay:${index * 70}ms"></div>
-              </div>
-              <span class="sankey-value">${row.pricing}</span>
-            </div>
-          `).join('')}
+        <div class="sankey-view viz-view">
+          ${renderVizMount({ type: 'sankey', rows })}
         </div>
       `;
     }
@@ -1044,55 +1444,37 @@ export function initWorkspace() {
     function renderFlowView() {
       return `
         <div class="flow-view ${state.selectedEntity ? 'selected-mode' : ''}">
-          <svg class="flow-canvas" viewBox="0 0 1200 380" aria-hidden="true" preserveAspectRatio="none">
-            <path class="flow-track" d="M130 246 C248 146, 320 122, 436 134"></path>
-            <path class="flow-track" d="M436 134 C592 150, 666 224, 748 266"></path>
-            <path class="flow-track" d="M748 266 C858 190, 960 158, 1068 132"></path>
-            <path class="flow-line-blue" d="M130 246 C248 146, 320 122, 436 134"></path>
-            <path class="flow-line-cyan" d="M436 134 C592 150, 666 224, 748 266"></path>
-            <path class="flow-line-amber" d="M748 266 C858 190, 960 158, 1068 132"></path>
-            <path class="flow-line-red" d="M748 266 C858 190, 960 158, 1068 132" style="opacity:.55"></path>
-            <circle r="2.6" fill="#4cb0ff"><animateMotion dur="3.2s" repeatCount="indefinite" path="M130 246 C248 146, 320 122, 436 134"></animateMotion></circle>
-            <circle r="2.2" fill="#4cb0ff" opacity=".82"><animateMotion dur="3.8s" begin="-1.1s" repeatCount="indefinite" path="M130 246 C248 146, 320 122, 436 134"></animateMotion></circle>
-            <circle r="2.8" fill="#4cb0ff" opacity=".62"><animateMotion dur="4.1s" begin="-2.4s" repeatCount="indefinite" path="M130 246 C248 146, 320 122, 436 134"></animateMotion></circle>
-            <circle r="2.3" fill="#4cb0ff" opacity=".58"><animateMotion dur="3.5s" begin="-0.7s" repeatCount="indefinite" path="M130 246 C248 146, 320 122, 436 134"></animateMotion></circle>
-            <circle r="2.6" fill="#67efff"><animateMotion dur="3.4s" repeatCount="indefinite" path="M436 134 C592 150, 666 224, 748 266"></animateMotion></circle>
-            <circle r="2.2" fill="#67efff" opacity=".76"><animateMotion dur="4s" begin="-1.4s" repeatCount="indefinite" path="M436 134 C592 150, 666 224, 748 266"></animateMotion></circle>
-            <circle r="2.8" fill="#67efff" opacity=".60"><animateMotion dur="4.4s" begin="-2.8s" repeatCount="indefinite" path="M436 134 C592 150, 666 224, 748 266"></animateMotion></circle>
-            <circle r="2.1" fill="#67efff" opacity=".52"><animateMotion dur="3.1s" begin="-0.9s" repeatCount="indefinite" path="M436 134 C592 150, 666 224, 748 266"></animateMotion></circle>
-            <circle r="2.6" fill="#ff9c58"><animateMotion dur="3.0s" repeatCount="indefinite" path="M748 266 C858 190, 960 158, 1068 132"></animateMotion></circle>
-            <circle r="2.4" fill="#ff9c58" opacity=".78"><animateMotion dur="3.7s" begin="-1.2s" repeatCount="indefinite" path="M748 266 C858 190, 960 158, 1068 132"></animateMotion></circle>
-            <circle r="2.7" fill="#ff7474" opacity=".68"><animateMotion dur="4.0s" begin="-2.2s" repeatCount="indefinite" path="M748 266 C858 190, 960 158, 1068 132"></animateMotion></circle>
-            <circle r="2.1" fill="#ff7474" opacity=".54"><animateMotion dur="3.3s" begin="-0.5s" repeatCount="indefinite" path="M748 266 C858 190, 960 158, 1068 132"></animateMotion></circle>
-          </svg>
-          <button class="flow-node ${state.selectedEntity === 'supplier-x' ? 'active' : ''}" type="button" data-flow-node="supplier-x">
-            <div class="flow-orb blue"></div>
-            <div class="flow-label">
-              <div class="flow-title blue">Supplier X</div>
-              <div class="flow-subtitle">Si +0.12%</div>
-            </div>
-          </button>
-          <button class="flow-node ${state.selectedEntity === 'bf3-superheat' ? 'active' : ''}" type="button" data-flow-node="bf3-superheat">
-            <div class="flow-orb cyan"></div>
-            <div class="flow-label">
-              <div class="flow-title cyan">BF-3 Superheat</div>
-              <div class="flow-subtitle">22°C (target 34)</div>
-            </div>
-          </button>
-          <button class="flow-node ${state.selectedEntity === 'ccm3-solidification' ? 'active' : ''}" type="button" data-flow-node="ccm3-solidification">
-            <div class="flow-orb amber"></div>
-            <div class="flow-label">
-              <div class="flow-title amber">CCM-3 Solidification</div>
-              <div class="flow-subtitle">Rate deviation</div>
-            </div>
-          </button>
-          <button class="flow-node ${state.selectedEntity === 'grade-risk' ? 'active' : ''}" type="button" data-flow-node="grade-risk">
-            <div class="flow-orb red"></div>
-            <div class="flow-label">
-              <div class="flow-title red">Grade Risk</div>
-              <div class="flow-subtitle">Automotive 74%</div>
-            </div>
-          </button>
+          ${renderVizMount({ type: 'flow', selectedEntity: state.selectedEntity })}
+          <div class="flow-node-list">
+            <button class="flow-node ${state.selectedEntity === 'supplier-x' ? 'active' : ''}" type="button" data-flow-node="supplier-x">
+              <div class="flow-orb blue"></div>
+              <div class="flow-label">
+                <div class="flow-title blue">Supplier X</div>
+                <div class="flow-subtitle">Si +0.12%</div>
+              </div>
+            </button>
+            <button class="flow-node ${state.selectedEntity === 'bf3-superheat' ? 'active' : ''}" type="button" data-flow-node="bf3-superheat">
+              <div class="flow-orb cyan"></div>
+              <div class="flow-label">
+                <div class="flow-title cyan">BF-3 Superheat</div>
+                <div class="flow-subtitle">22°C (target 34)</div>
+              </div>
+            </button>
+            <button class="flow-node ${state.selectedEntity === 'ccm3-solidification' ? 'active' : ''}" type="button" data-flow-node="ccm3-solidification">
+              <div class="flow-orb amber"></div>
+              <div class="flow-label">
+                <div class="flow-title amber">CCM-3 Solidification</div>
+                <div class="flow-subtitle">Rate deviation</div>
+              </div>
+            </button>
+            <button class="flow-node ${state.selectedEntity === 'grade-risk' ? 'active' : ''}" type="button" data-flow-node="grade-risk">
+              <div class="flow-orb red"></div>
+              <div class="flow-label">
+                <div class="flow-title red">Grade Risk</div>
+                <div class="flow-subtitle">Automotive 74%</div>
+              </div>
+            </button>
+          </div>
         </div>
       `;
     }
@@ -1262,6 +1644,7 @@ export function initWorkspace() {
 
     function renderPrimaryVisual(response) {
       const scopedRows = rowsForRange(response.rows || [], response.timeRange || '30D');
+      if (response.format === 'story') return renderHiddenCostStory(response);
       if (response.format === 'briefing') return renderBriefingView(response);
       if (response.format === 'insights') return renderInlineElementInsights(response);
       if (response.format === 'flow') return renderFlowView();
@@ -1282,10 +1665,10 @@ export function initWorkspace() {
         { key: 'line', label: 'line', enabled: true },
         { key: 'text', label: 'text', enabled: true }
       ];
-      const showSwitcher = response.format !== 'insights' && options.length > 1;
-      const showRanges = response.format !== 'insights' && supportsTimeRange(response.format) && response.timeRanges?.length;
+      const showSwitcher = response.format !== 'insights' && response.format !== 'story' && options.length > 1;
+      const showRanges = response.format !== 'insights' && response.format !== 'story' && supportsTimeRange(response.format) && response.timeRanges?.length;
       const currentRows = rowsForRange(response.rows || [], response.timeRange || '30D');
-      const showInsights = response.format !== 'table' && response.format !== 'insights';
+      const showInsights = response.format !== 'table' && response.format !== 'insights' && response.format !== 'story';
       const insights = deriveInsights(response, currentRows);
 
       return `
@@ -1476,35 +1859,9 @@ export function initWorkspace() {
     }
 
     function renderTrendChart(points = []) {
-      const numeric = points.map(([label, value]) => {
-        const match = String(value).match(/-?\d+(\.\d+)?/);
-        return { label, value: match ? Number(match[0]) : 0 };
-      });
-      const values = numeric.map(item => item.value);
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const span = Math.max(max - min, 1);
-      const chartPoints = numeric.map((item, index) => {
-        const x = 28 + (index * (224 / Math.max(numeric.length - 1, 1)));
-        const normalized = (item.value - min) / span;
-        const y = 76 - normalized * 44;
-        return `${x},${y}`;
-      }).join(' ');
       return `
-        <div class="trend-chart">
-          <svg viewBox="0 0 280 96" aria-hidden="true">
-            <path d="M28 76 L252 76" stroke="rgba(148,163,184,0.14)" stroke-width="1"></path>
-            <polyline points="${chartPoints}" fill="none" stroke="rgba(41, 207, 214, 0.92)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></polyline>
-            ${numeric.map((item, index) => {
-              const x = 28 + (index * (224 / Math.max(numeric.length - 1, 1)));
-              const normalized = (item.value - min) / span;
-              const y = 76 - normalized * 44;
-              return `<circle cx="${x}" cy="${y}" r="${index === numeric.length - 1 ? 4 : 3}" fill="${index === numeric.length - 1 ? '#9eb2ff' : '#7abeBA'}"></circle>`;
-            }).join('')}
-          </svg>
-          <div class="trend-axis">
-            ${numeric.map(item => `<span>${escapeHtml(item.label.replace('Day ', 'D'))}</span>`).join('')}
-          </div>
+        <div class="trend-chart viz-view">
+          ${renderVizMount({ type: 'trend', points })}
         </div>
       `;
     }
@@ -1528,19 +1885,9 @@ export function initWorkspace() {
       };
       let body = '';
       if (card.type === 'line') {
-        body = card.points ? renderTrendChart(card.points) : `<div class="mini-chart"></div>`;
+        body = card.points ? renderTrendChart(card.points) : `<div class="mini-chart viz-placeholder"></div>`;
       } else if (card.type === 'bars') {
-        body = `
-          <div class="mini-bars">
-            ${card.rows.map(([label, value, status]) => `
-              <div class="mini-bar-row">
-                <span>${escapeHtml(label)}</span>
-                <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${value}%"></div></div>
-                <span>${escapeHtml(status)}</span>
-              </div>
-            `).join('')}
-          </div>
-        `;
+        body = renderVizMount({ type: 'mini-bars', rows: card.rows }, 'd3-mount d3-mount-mini');
       } else if (card.type === 'flags') {
         body = `
           <div class="mini-flags">
@@ -1678,6 +2025,7 @@ export function initWorkspace() {
       renderVisibility();
       renderPanels();
       renderTimeline();
+      hydrateVisualizationMounts();
     }
 
     function switchFormat(responseId, nextFormat) {
@@ -1795,6 +2143,43 @@ export function initWorkspace() {
     });
 
     document.addEventListener('click', event => {
+      const storyActBtn = event.target.closest('[data-story-act]');
+      if (storyActBtn) {
+        const nextIndex = Number(storyActBtn.dataset.storyAct);
+        const response = currentResponses().find(item => item.id === storyActBtn.dataset.responseId);
+        if (response && !Number.isNaN(nextIndex) && nextIndex >= 0 && nextIndex < storyActs.length) {
+          response.storyDirection = nextIndex >= (response.storyActIndex || 0) ? 'next' : 'prev';
+          response.storyActIndex = nextIndex;
+          renderAll();
+        }
+        return;
+      }
+
+      const storyNavBtn = event.target.closest('[data-story-nav]');
+      if (storyNavBtn) {
+        const response = currentResponses().find(item => item.id === storyNavBtn.dataset.responseId);
+        if (!response) return;
+        const delta = storyNavBtn.dataset.storyNav === 'next' ? 1 : -1;
+        const currentIndex = response.storyActIndex || 0;
+        const nextIndex = Math.max(0, Math.min(storyActs.length - 1, currentIndex + delta));
+        if (nextIndex !== currentIndex) {
+          response.storyDirection = delta > 0 ? 'next' : 'prev';
+          response.storyActIndex = nextIndex;
+          renderAll();
+        }
+        return;
+      }
+
+      const storyCategoryBtn = event.target.closest('[data-story-category]');
+      if (storyCategoryBtn) {
+        const response = currentResponses().find(item => item.id === storyCategoryBtn.dataset.responseId);
+        if (response) {
+          response.storyCategoryKey = storyCategoryBtn.dataset.storyCategory;
+          renderAll();
+        }
+        return;
+      }
+
       const signOutBtn = event.target.closest('[data-sign-out]');
       if (signOutBtn) {
         state.profileMenuOpen = false;
