@@ -2,3 +2,9 @@ node_modules
 dist
 .vite
 .DS_Store
+
+package-lock.json
+yarn.lock
+.env
+.vscode
+*.log
