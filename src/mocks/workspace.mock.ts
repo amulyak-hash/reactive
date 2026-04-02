@@ -24,17 +24,12 @@ export const landingCards = [
 ];
 
 export const quickStartChips = [
-  'supplier quality flow',
-  'Bid Evaluation summary',
-  'contract spend tracking'
+  'What is the total contract value across all vendors?',
+  'Show the contract value breakdown per vendor',
+  'Which vendors have the highest total commitment percentage?',
 ];
 
-export const chipPresets = [
-  ['supplier quality flow', 'Bid Evaluation summary', 'contract spend tracking'],
-  ['nce alerts summary', 'downline products status', 'milestone slippages overview'],
-  ['risk flags by vendor', 'compare vendors by region', 'contract spend tracking'],
-  ['timeline risk only', 'filter by contract value', 'vendor leaderboard snapshot']
-];
+export const chipPresets = [quickStartChips];
 
 export const vendorRows = [
   {
@@ -602,3 +597,163 @@ export const quotationTrend = [
   { week: 'W11', count: 5, value: 4.8 },
   { week: 'W12', count: 9, value: 8.3 },
 ];
+
+// ─── Narrative Chain (Dashboard Questions → Chat Flow) ──────────────────────
+
+import type { NarrativeStep } from '../types';
+
+export const NARRATIVE_CHAIN: NarrativeStep[] = [
+  {
+    id: 'q1',
+    questionText: 'What is the total contract value across all vendors?',
+    title: 'Total Contract Value',
+    insight: 'Total portfolio commitment is £752.2M — £659M base value plus £93.2M in approved variations. Each bar shows one contractor\'s total; the solid segment is base value, the lighter segment is variations.',
+    vizConfigs: [{ type: 'contract-value-orb', data: contractData }],
+    followupIds: ['q2'],
+    keyInsights: [
+      'L&T Construction holds the largest share at £210.6M total commitment.',
+      'KEC International has the highest variation-to-base ratio at 42%.',
+      'Total variations across all vendors account for 12.4% of the portfolio.',
+    ],
+  },
+  {
+    id: 'q2',
+    questionText: 'Show the contract value breakdown per vendor',
+    title: 'Contract Value Breakdown',
+    insight: 'Each triangle maps three KPIs per contractor — Base value (top), Variations (lower-right), Commitment % (lower-left). L&T\'s constellation is the widest at £210.6M base; KEC\'s top corner is notably shorter, reflecting its smaller base relative to peers.',
+    vizConfigs: [{ type: 'contract-bars', contractors: contractData.contractors }],
+    followupIds: ['q3'],
+    keyInsights: [
+      'L&T has the highest base value at £198M, nearly triple KEC\'s £74M.',
+      'KEC\'s variation load (£31.2M) is the largest despite having the smallest base.',
+      'NCC shows the tightest base-to-commitment spread — disciplined delivery.',
+    ],
+  },
+  {
+    id: 'q3',
+    questionText: 'Which vendors have the highest total commitment percentage?',
+    title: 'Commitment Race',
+    insight: 'NCC Ltd leads at 95% commitment, closely followed by L&T at 92%. KEC International lags at 69% — the widest gap from the finish line and the highest variation-to-base ratio in the portfolio.',
+    vizConfigs: [{ type: 'commitment-race', contractors: contractData.contractors }],
+    followupIds: ['q4q5'],
+    keyInsights: [
+      'NCC and L&T are both above 90% — nearing full commitment.',
+      'KEC at 69% has the most headroom — and the most variation risk.',
+      'The average commitment across all five contractors is 84%.',
+    ],
+  },
+  {
+    id: 'q4q5',
+    questionText: 'What is the EW status split and which category has the most Early Warnings?',
+    title: 'Early Warning Overview',
+    insight: '40 Early Warnings total. 18 remain Open (45%) — the largest cohort — while 12 are Closed and 10 are Submitted awaiting decision. Ground Conditions dominate with 12 EWs (30% of all warnings), followed by Design Issues at 8.',
+    vizConfigs: [
+      { type: 'status-arc', segments: ewStatusData, title: 'Early Warning Status Split' },
+      { type: 'ew-category', categories: ewCategoryData },
+    ],
+    followupIds: ['q6q7'],
+    keyInsights: [
+      'Nearly half of all Early Warnings are still Open — decision backlog is building.',
+      'Ground Conditions account for 30% of all EWs — the single largest category.',
+      'Design Issues (8) and Employer Risk (7) together rival Ground Conditions.',
+    ],
+  },
+  {
+    id: 'q6q7',
+    questionText: 'Which contractor has the most open EWs and what is the severity distribution?',
+    title: 'EW Contractor & Severity',
+    insight: 'Tata Projects has 7 open EWs — more than the next two contractors combined. High severity is the widest band at 14 EWs (35%), with Medium close behind at 13. Only 5 are Critical — but those 5 are unresolved.',
+    vizConfigs: [
+      { type: 'contractor-rank', contractors: ewOpenByContractor },
+      { type: 'severity-bands', severities: ewSeverityData },
+    ],
+    followupIds: ['q8'],
+    keyInsights: [
+      'Tata alone holds 39% of all open Early Warnings.',
+      'High + Critical severity makes up nearly half (19 of 40) of all EWs.',
+      'NCC and KEC are the least exposed with 2 open EWs each.',
+    ],
+  },
+  {
+    id: 'q8',
+    questionText: 'How many NCEs has each contractor raised?',
+    title: 'NCE Distribution',
+    insight: '25 NCEs total. Tata Projects raised 8 (32%) — the thickest branch in the tree. Branch thickness is proportional to NCE count; leaf node size reflects share of total.',
+    vizConfigs: [{ type: 'nce-tree', total: nceCompensationData.total, byContractor: nceByContractor }],
+    followupIds: ['q9'],
+    keyInsights: [
+      'Tata and Afcons together account for 56% of all NCEs.',
+      'KEC has the fewest NCEs (3) despite the highest variation ratio.',
+      'NCE concentration mirrors EW exposure — Tata leads both.',
+    ],
+  },
+  {
+    id: 'q9',
+    questionText: 'What % of NCEs are confirmed as compensation events?',
+    title: 'Compensation Confirmation',
+    insight: '60% of NCEs (15 of 25) are confirmed compensation events. The needle sweeps to the amber-to-green boundary. The 10 unconfirmed NCEs remain contested and represent potential future claim value.',
+    vizConfigs: [{ type: 'compensation-gauge', pct: nceCompensationData.pctConfirmed, confirmed: nceCompensationData.confirmed, total: nceCompensationData.total }],
+    followupIds: ['q10'],
+    keyInsights: [
+      '60% confirmation rate is moderate — 40% of claims are still disputed.',
+      '10 unconfirmed NCEs represent material financial exposure.',
+      'A rising confirmation rate would signal contractors are building stronger cases.',
+    ],
+  },
+  {
+    id: 'q10',
+    questionText: 'Show implemented vs unimplemented variations per contractor',
+    title: 'Variation Implementation',
+    insight: 'NCC Ltd has the best implementation rate — 11 of 13 variations actioned. Afcons Infra is the weakest: 9 unimplemented against only 5 completed, flagging contract delivery risk.',
+    vizConfigs: [{ type: 'variation-split', contractors: variationByContractor }],
+    followupIds: ['q11'],
+    keyInsights: [
+      'NCC leads with 85% implementation rate — most disciplined contractor.',
+      'Afcons has the worst ratio at 36% implemented — 9 variations pending.',
+      'KEC also lags with only 43% implementation despite heavy variation load.',
+    ],
+  },
+  {
+    id: 'q11',
+    questionText: 'What is the total value of accepted vs submitted quotations?',
+    title: 'Quotation Balance',
+    insight: 'The balance tips toward accepted: £28.4M accepted (31 quotations) vs £19.8M submitted and pending (22 quotations). The tilt of the beam encodes the value gap — a healthy acceptance rate.',
+    vizConfigs: [{ type: 'quotation-balance', accepted: quotationSummary.accepted, submitted: quotationSummary.submitted }],
+    followupIds: ['q12'],
+    keyInsights: [
+      'Accepted quotations exceed submitted by £8.6M — a positive signal.',
+      '59% of all quotation value has been accepted.',
+      'The 22 pending quotations represent £19.8M in unresolved claim value.',
+    ],
+  },
+  {
+    id: 'q12',
+    questionText: 'Show the trend of quotations submitted over time',
+    title: 'Quotation Trend',
+    insight: 'Submissions are accelerating. Week 12 hit 9 submissions — the highest in the 12-week window. The upward trend since W8 suggests contract activity is entering a peak claim period.',
+    vizConfigs: [{ type: 'quotation-trend', trend: quotationTrend }],
+    followupIds: ['q13'],
+    keyInsights: [
+      'W8–W12 shows a clear acceleration in submission volume.',
+      'Week 12 submissions (9) are 4.5× the Week 1 baseline.',
+      'Value per submission is also trending up — larger claims are emerging.',
+    ],
+  },
+  {
+    id: 'q13',
+    questionText: 'Show the full weekly report — base value, variations, and total commitment per contractor',
+    title: 'Weekly Report',
+    insight: 'The flow shows each contractor\'s base and variation contributions converging into £752.2M total commitment. L&T and NCC anchor the base column; KEC contributes a disproportionately large variation stream relative to base.',
+    vizConfigs: [{ type: 'weekly-flow', contractors: contractData.contractors }],
+    followupIds: [],
+    keyInsights: [
+      'L&T\'s base stream is the widest — anchoring the portfolio.',
+      'KEC\'s variation stream is visually disproportionate to its base — highest risk.',
+      'Total commitment converges at £752.2M — the full portfolio picture.',
+    ],
+  },
+];
+
+export const narrativeStepByQuestion = new Map<string, NarrativeStep>(
+  NARRATIVE_CHAIN.map(step => [step.questionText.toLowerCase(), step])
+);

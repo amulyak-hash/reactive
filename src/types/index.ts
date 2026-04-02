@@ -139,7 +139,20 @@ export type BaseVisualizationConfig =
   | {
       type: 'mini-bars';
       rows: MiniBarRow[];
-    };
+    }
+  | { type: 'contract-value-orb'; data: ContractData }
+  | { type: 'contract-bars'; contractors: ContractorRow[] }
+  | { type: 'commitment-race'; contractors: ContractorRow[] }
+  | { type: 'status-arc'; segments: EWStatusRow[]; title?: string }
+  | { type: 'ew-category'; categories: EWCategoryRow[] }
+  | { type: 'contractor-rank'; contractors: EWOpenContractorRow[] }
+  | { type: 'severity-bands'; severities: EWSeverityRow[] }
+  | { type: 'nce-tree'; total: number; byContractor: NCEContractorRow[] }
+  | { type: 'compensation-gauge'; pct: number; confirmed: number; total: number }
+  | { type: 'variation-split'; contractors: VariationRow[] }
+  | { type: 'quotation-balance'; accepted: QuotationSide; submitted: QuotationSide }
+  | { type: 'quotation-trend'; trend: QuotationTrendPoint[] }
+  | { type: 'weekly-flow'; contractors: ContractorRow[] };
 
 export type VisualizationRendererProps = {
   config: BaseVisualizationConfig;
@@ -182,3 +195,15 @@ export type VariationRow = {
 export type QuotationSide = { value: number; count: number; label: string };
 export type QuotationSummary = { accepted: QuotationSide; submitted: QuotationSide };
 export type QuotationTrendPoint = { week: string; count: number; value: number };
+
+// ─── Narrative Chain Types ──────────────────────────────────────────────────
+
+export type NarrativeStep = {
+  id: string;
+  questionText: string;
+  title: string;
+  insight: string;
+  vizConfigs: BaseVisualizationConfig[];
+  followupIds: string[];
+  keyInsights: string[];
+};

@@ -17,7 +17,9 @@ import {
   storyCategories,
   storyCategoryPositions,
   storyHeader,
-  vendorRows
+  vendorRows,
+  NARRATIVE_CHAIN,
+  narrativeStepByQuestion
 } from '../mocks/workspace.mock';
 import {
   escapeHtml,
@@ -386,6 +388,26 @@ export function useWorkspace() {
           rows: []
         };
       }
+
+      const narrativeStep = narrativeStepByQuestion.get(normalizedQuestion);
+      if (narrativeStep) {
+        return {
+          id: makeId(),
+          topic: narrativeStep.id,
+          title: narrativeStep.title,
+          question,
+          format: 'dashboard-viz',
+          formatLabel: 'Visualization',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          insight: narrativeStep.insight,
+          vizConfigs: narrativeStep.vizConfigs,
+          options: [{ key: 'dashboard-viz', label: 'visualization', enabled: true }],
+          rows: [],
+          lenses: [],
+          keyInsights: narrativeStep.keyInsights,
+        };
+      }
+
       return {
         id: makeId(),
         topic: 'vendor-leaderboard',
@@ -1081,6 +1103,9 @@ export function useWorkspace() {
     }
 
     function renderPrimaryVisual(response) {
+      if (response.format === 'dashboard-viz') {
+        return (response.vizConfigs || []).map(config => renderVizMount(config)).join('');
+      }
       const scopedRows = rowsForRange(response.rows || [], response.timeRange || '30D');
       if (response.format === 'story') return renderHiddenCostStory(response);
       if (response.format === 'briefing') return renderBriefingView(response);
@@ -1205,6 +1230,13 @@ export function useWorkspace() {
     }
 
     function followupsForSource(source) {
+      const narrativeStep = NARRATIVE_CHAIN.find(s => s.id === source);
+      if (narrativeStep?.followupIds.length) {
+        return narrativeStep.followupIds.map(fid => {
+          const next = NARRATIVE_CHAIN.find(s => s.id === fid);
+          return next?.questionText ?? '';
+        }).filter(Boolean);
+      }
       if (followupMap[source]?.length) return followupMap[source];
       const title = source.replaceAll('-', ' ').replace(/\b\w/g, char => char.toUpperCase());
       return [
@@ -1568,6 +1600,9 @@ export function useWorkspace() {
       appendResponseToCurrentThread(next);
       composerInput.value = '';
       composerInput.placeholder = CHAT_PLACEHOLDER;
+      if (next.format === 'dashboard-viz') {
+        showFollowups(next.id, next.topic);
+      }
       renderAll();
       scheduleAnimationFrame(() => scrollToResponse(next.id));
     }, { signal: controller.signal });
@@ -1674,6 +1709,9 @@ export function useWorkspace() {
         resetPanels();
         composerInput.value = '';
         composerInput.placeholder = CHAT_PLACEHOLDER;
+        if (next.format === 'dashboard-viz') {
+          showFollowups(next.id, next.topic);
+        }
         renderAll();
         canvas.scrollTo({ top: 0, behavior: 'smooth' });
         return;
@@ -1751,6 +1789,9 @@ export function useWorkspace() {
         appendResponseToCurrentThread(next);
         composerInput.value = '';
         composerInput.placeholder = CHAT_PLACEHOLDER;
+        if (next.format === 'dashboard-viz') {
+          showFollowups(next.id, next.topic);
+        }
         renderAll();
         scheduleAnimationFrame(() => scrollToResponse(next.id));
         return;
