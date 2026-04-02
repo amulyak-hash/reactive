@@ -7,8 +7,10 @@ import { CC, rgb, drawGlow, drawDust, drawScanline } from '../../canvas/canvasUt
 import { useCanvasLoop } from '../../canvas/useCanvasLoop';
 import type { ContractBarsProps } from './types';
 
-const W = 780;
-const H = 360;
+const W         = 780;
+const H         = 234;  // trimmed — content ends at ~220, 14px margin
+const FIXED_CY  = 130;  // explicit center Y, decoupled from H
+const FIXED_MAXR = 52;  // explicit max radius, decoupled from H
 const COLORS    = [CC.blue, CC.cyan, CC.amber, CC.purple, CC.green];
 const KPI_NAMES = ['Base Value', 'Variations', 'Commitment'];
 const KPI_SHORT = ['Base',       'Var',        'Commit'   ];
@@ -25,8 +27,8 @@ export function ContractBars({ contractors, 'data-testid': testId }: ContractBar
     return contractors.map((con, pi) => {
       // Symmetric horizontal layout — equal margins on both sides
       const cx    = W * (0.12 + pi * 0.19);
-      const cy    = H * 0.44;
-      const baseR = Math.min(W * 0.075, H * 0.14);
+      const cy    = FIXED_CY;
+      const baseR = Math.min(W * 0.075, FIXED_MAXR);
       const color = COLORS[pi % COLORS.length];
 
       const kpiVals   = [
@@ -182,10 +184,10 @@ export function ContractBars({ contractors, 'data-testid': testId }: ContractBar
       });
 
       // Footer caption
-      ctx.font         = `9px 'DM Sans', sans-serif`;
+      ctx.font         = `11px 'DM Sans', sans-serif`;
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle    = rgb(CC.t4, 0.45);
+      ctx.fillStyle    = rgb(CC.t4, 0.55);
       ctx.fillText(
         '▲ top = Base value  ·  ▼▸ lower-right = Variations  ·  ◂▼ lower-left = Commitment %  ·  hover stars for details',
         W / 2,

@@ -5,6 +5,7 @@ import {
   RANGE_OPTIONS,
   TABLE_PLUS_VIZ_OPTIONS,
   chipPresets,
+  chatInterfaceQuestions,
   drilldowns,
   followupMap,
   forwardRiskRows,
@@ -92,6 +93,7 @@ export function useWorkspace() {
     const composer = getRequiredElement<HTMLFormElement>('composer');
     const composerInput = getRequiredElement<HTMLInputElement>('composerInput');
     const composerStarters = getRequiredElement<HTMLElement>('composerStarters');
+    const questionsButtonEl = getRequiredElement<HTMLButtonElement>('questionsButton');
     const historyButtonEl = getRequiredElement<HTMLButtonElement>('historyButton');
     const bookmarksButtonEl = getRequiredElement<HTMLButtonElement>('bookmarksButton');
     const timelineRail = getRequiredElement<HTMLElement>('timelineRail');
@@ -104,8 +106,10 @@ export function useWorkspace() {
     const panelBody = getRequiredElement<HTMLElement>('panelBody');
     const bookmarksSheet = getRequiredElement<HTMLElement>('bookmarksSheet');
     const historySheet = getRequiredElement<HTMLElement>('historySheet');
+    const questionsSheet = getRequiredElement<HTMLElement>('questionsSheet');
     const artifactsSheet = getRequiredElement<HTMLElement>('artifactsSheet');
     const bookmarksList = getRequiredElement<HTMLElement>('bookmarksList');
+    const questionsList = getRequiredElement<HTMLElement>('questionsList');
     const artifactsList = getRequiredElement<HTMLElement>('artifactsList');
     const profileMenu = getRequiredElement<HTMLElement>('profileMenu');
     const starterButton = getRequiredElement<HTMLButtonElement>('starterButton');
@@ -129,6 +133,8 @@ export function useWorkspace() {
       },
       historyOpen: false,
       profileMenuOpen: false,
+      questionsQuery: '',
+      landingQuestionsQuery: '',
       storyActIndex: 0,
       storyCategoryKey: 'procurement',
       storyDirection: 'next',
@@ -147,6 +153,63 @@ export function useWorkspace() {
 
     function currentResponses() {
       return state.threads[state.currentThreadId] || [];
+    }
+
+    function allQuestions() {
+      return chatInterfaceQuestions;
+    }
+
+    function filteredQuestions(query = '') {
+      const normalizedQuery = query.trim().toLowerCase();
+      const questions = allQuestions();
+      if (!normalizedQuery) return questions;
+      return questions.filter(question => question.toLowerCase().includes(normalizedQuery));
+    }
+
+    function renderQuestionListing(questions, emptyText = 'No questions match this search yet.') {
+      if (!questions.length) {
+        return `<div class="question-list-empty">${escapeHtml(emptyText)}</div>`;
+      }
+
+      return `
+        <div class="question-listing">
+          ${questions.map(question => `
+            <button class="question-listing-item" type="button" data-question-option="${escapeHtml(question)}">
+              <div class="question-listing-title">${escapeHtml(question)}</div>
+              <div class="question-listing-meta">Open this question in the workspace</div>
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function openQuestion(question, replaceThread = false) {
+      const next = baseResponse(question);
+
+      if (replaceThread || state.mode !== 'thread') {
+        state.mode = 'thread';
+        state.centeredInput = false;
+        setThreadResponses(state.currentThreadId, [next]);
+      } else {
+        appendResponseToCurrentThread(next);
+      }
+
+      resetPanels();
+      state.questionsQuery = '';
+      state.landingQuestionsQuery = '';
+      composerInput.value = '';
+      composerInput.placeholder = CHAT_PLACEHOLDER;
+
+      if (next.format === 'dashboard-viz') {
+        showFollowups(next.id, next.topic);
+      }
+
+      renderAll();
+      canvas.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (!replaceThread) {
+        scheduleAnimationFrame(() => scrollToResponse(next.id));
+      }
     }
 
     function rowsForRange(rows = [], range = '30D') {
@@ -169,6 +232,181 @@ export function useWorkspace() {
       if (avg !== null) insights.push(`The current portfolio average is ${avg}, indicating ${avg >= 70 ? 'strong' : avg >= 50 ? 'mixed' : 'weak'} overall performance.`);
       while (insights.length < 3) insights.push('This view indicates a meaningful distribution spread that warrants follow-up on the outliers.');
       return insights.slice(0, 3);
+    }
+
+    function renderChipsRow(items) {
+      return items.map(item => `
+        <div class="kh-chip">
+          <span class="kh-chip-val" style="color:${item.color || '#F1F5F9'}">${escapeHtml(item.value)}</span>
+          <span class="kh-chip-lbl">${escapeHtml(item.label)}</span>
+        </div>`).join('');
+    }
+
+    function renderKeyHighlights(highlights) {
+      if (!highlights) return '';
+      const { type } = highlights;
+      let bodyHtml = '';
+
+      if (type === 'stats') {
+        bodyHtml = `<div class="kh-stats">${highlights.items.map(item => `
+          <div class="kh-stat-item">
+            <span class="kh-stat-value" style="color:${item.color || '#F1F5F9'}">${escapeHtml(item.value)}</span>
+            <span class="kh-stat-label">${escapeHtml(item.label)}</span>
+          </div>`).join('')}</div>`;
+
+      } else if (type === 'chips') {
+        bodyHtml = `<div class="kh-chips-row">${renderChipsRow(highlights.items)}</div>`;
+
+      } else if (type === 'ranked') {
+        bodyHtml = `<div class="kh-ranked">${highlights.items.map(item => `
+          <div class="kh-ranked-row">
+            <span class="kh-ranked-dot" style="background:${item.color}"></span>
+            <span class="kh-ranked-name">${escapeHtml(item.name)}</span>
+            <span class="kh-ranked-value" style="color:${item.color}">${escapeHtml(item.value)}</span>
+            <span class="kh-ranked-kpi">${escapeHtml(item.kpiLabel || '')}</span>
+          </div>`).join('')}</div>`;
+
+      } else if (type === 'proportion') {
+        const chipsHtml = highlights.chips && highlights.chips.length
+          ? `<div class="kh-chips-row">${renderChipsRow(highlights.chips)}</div>` : '';
+        bodyHtml = `
+          <div class="kh-proportion-wrap">
+            <div class="kh-prop-row">
+              <div class="kh-prop-side">
+                <span class="kh-prop-pct" style="color:${highlights.leftColor}">${highlights.leftPct}%</span>
+                <span class="kh-prop-name">${escapeHtml(highlights.leftLabel)}</span>
+                <span class="kh-prop-val" style="color:${highlights.leftColor}">${escapeHtml(highlights.leftValue)}</span>
+              </div>
+              <div class="kh-prop-side kh-prop-side-right">
+                <span class="kh-prop-pct" style="color:${highlights.rightColor}">${highlights.rightPct}%</span>
+                <span class="kh-prop-name">${escapeHtml(highlights.rightLabel)}</span>
+                <span class="kh-prop-val" style="color:${highlights.rightColor}">${escapeHtml(highlights.rightValue)}</span>
+              </div>
+            </div>
+            <div class="kh-prop-bar">
+              <div class="kh-prop-fill" style="width:${highlights.leftPct}%;background:${highlights.leftColor}33;border-right:2px solid ${highlights.leftColor}88"></div>
+              <div class="kh-prop-fill" style="width:${highlights.rightPct}%;background:${highlights.rightColor}22;border-left:1px solid ${highlights.rightColor}55"></div>
+            </div>
+            ${chipsHtml}
+          </div>`;
+
+      } else if (type === 'ring') {
+        const circ = 150.8;
+        const dash = ((highlights.pct / 100) * circ).toFixed(1);
+        const chipsHtml = highlights.chips && highlights.chips.length
+          ? `<div class="kh-ring-chips"><div class="kh-chips-row">${renderChipsRow(highlights.chips)}</div></div>` : '';
+        bodyHtml = `
+          <div class="kh-ring-layout">
+            <div class="kh-ring-container">
+              <div class="kh-ring-graphic">
+                <svg viewBox="0 0 60 60" width="72" height="72">
+                  <circle cx="30" cy="30" r="24" fill="none" stroke="${highlights.color}22" stroke-width="5"/>
+                  <circle cx="30" cy="30" r="24" fill="none" stroke="${highlights.color}" stroke-width="5"
+                          stroke-dasharray="${dash} ${circ}" stroke-linecap="round" transform="rotate(-90 30 30)"/>
+                </svg>
+                <div class="kh-ring-inner">
+                  <span class="kh-ring-pct" style="color:${highlights.color}">${highlights.pct}%</span>
+                </div>
+              </div>
+              <span class="kh-ring-label">${escapeHtml(highlights.label)}</span>
+            </div>
+            ${chipsHtml}
+          </div>`;
+
+      } else if (type === 'badges') {
+        bodyHtml = `<div class="kh-badges">${highlights.items.map(item => `
+          <div class="kh-badge kh-badge-${escapeHtml(item.severity)}">
+            <span class="kh-badge-dot"></span>
+            <span class="kh-badge-text">${escapeHtml(item.text)}</span>
+          </div>`).join('')}</div>`;
+
+      } else if (type === 'dot-strip') {
+        const range = highlights.max - highlights.min;
+        const dotsHtml = highlights.dots.map(dot => {
+          const pct = ((dot.val - highlights.min) / range) * 100;
+          return `<div class="kh-dot-point" style="left:${pct.toFixed(1)}%;background:${dot.color}"></div>`;
+        }).join('');
+        const namesHtml = highlights.dots.map(dot => {
+          const pct = ((dot.val - highlights.min) / range) * 100;
+          return `<span class="kh-dot-name" style="left:${pct.toFixed(1)}%">${escapeHtml(dot.name)}</span>`;
+        }).join('');
+        const chipsHtml = highlights.chips && highlights.chips.length
+          ? `<div class="kh-chips-row">${renderChipsRow(highlights.chips)}</div>` : '';
+        bodyHtml = `
+          <div class="kh-dot-strip-layout">
+            <div class="kh-dot-strip">
+              <div class="kh-dot-track">${dotsHtml}</div>
+              <div class="kh-dot-names">${namesHtml}</div>
+              <div class="kh-dot-axis">
+                <span>${highlights.min}${escapeHtml(highlights.unit)}</span>
+                <span>${highlights.max}${escapeHtml(highlights.unit)}</span>
+              </div>
+            </div>
+            ${chipsHtml}
+          </div>`;
+
+      } else if (type === 'scorecard-rows') {
+        bodyHtml = `<div class="kh-scorecard">${highlights.items.map(item => {
+          const borderColor = item.color || '#64748B';
+          const badgeHtml = item.badge && item.badgeSeverity
+            ? `<span class="kh-scorecard-badge kh-scorecard-badge-${escapeHtml(item.badgeSeverity)}">${escapeHtml(item.badge)}</span>` : '';
+          const sublabelHtml = item.sublabel
+            ? `<span class="kh-scorecard-sublabel">${escapeHtml(item.sublabel)}</span>` : '';
+          return `
+            <div class="kh-scorecard-row" style="border-left:3px solid ${borderColor}">
+              <span class="kh-scorecard-name" style="color:${borderColor};background:${borderColor}1A">${escapeHtml(item.name)}</span>
+              <div class="kh-scorecard-bar-wrap">
+                <div class="kh-scorecard-bar" style="width:${item.pct}%;background:${borderColor}"></div>
+              </div>
+              <span class="kh-scorecard-value" style="color:${borderColor}">${escapeHtml(item.value)}</span>
+              ${badgeHtml}
+              ${sublabelHtml}
+            </div>`;
+        }).join('')}</div>`;
+
+      } else if (type === 'comparison-rows') {
+        const headerCols = highlights.columns.map(col =>
+          `<span class="kh-comparison-header-col">${escapeHtml(col)}</span>`
+        ).join('');
+        const rowsHtml = highlights.rows.map(row => {
+          const color = row.color || '#64748B';
+          const cells = row.cells.map(cell =>
+            `<span class="kh-comparison-cell" style="color:${color}">${escapeHtml(cell)}</span>`
+          ).join('');
+          return `
+            <div class="kh-comparison-row" style="border-left:3px solid ${color}">
+              <span class="kh-comparison-label" style="color:${color};background:${color}1A">${escapeHtml(row.label)}</span>
+              ${cells}
+            </div>`;
+        }).join('');
+        bodyHtml = `
+          <div class="kh-comparison">
+            <div class="kh-comparison-header">
+              <span class="kh-comparison-header-spacer"></span>
+              ${headerCols}
+            </div>
+            ${rowsHtml}
+          </div>`;
+
+      } else if (type === 'flags-list') {
+        bodyHtml = `<div class="kh-flags">${highlights.items.map(item => `
+          <div class="kh-flag-row kh-flag-row-${escapeHtml(item.severity)}">
+            <span class="kh-flag-dot"></span>
+            <span class="kh-flag-text">${escapeHtml(item.text)}</span>
+            <span class="kh-flag-tag">${escapeHtml(item.tag)}</span>
+            <span class="kh-flag-date">${escapeHtml(item.date)}</span>
+          </div>`).join('')}</div>`;
+      }
+
+      const takeawayHtml = highlights.takeaway
+        ? `<div class="kh-takeaway"><span class="kh-takeaway-label">Takeaway</span><span class="kh-takeaway-text">${escapeHtml(highlights.takeaway)}</span></div>`
+        : '';
+
+      return `
+        <div class="key-highlights-section">
+          <div class="kh-title">Key Highlights</div>
+          <div class="kh-body">${bodyHtml}${takeawayHtml}</div>
+        </div>`;
     }
 
     function ensureThreadMeta(threadId) {
@@ -218,6 +456,8 @@ export function useWorkspace() {
       state.centeredInput = false;
       state.historyOpen = false;
       state.profileMenuOpen = false;
+      state.questionsQuery = '';
+      state.landingQuestionsQuery = '';
       resetPanels();
       composerInput.value = '';
       composerInput.placeholder = CHAT_PLACEHOLDER;
@@ -226,7 +466,8 @@ export function useWorkspace() {
     }
 
     function renderVizMount(config, className = 'd3-mount') {
-      return `<div class="${className}" data-d3-viz="${serializeVisualizationConfig(config)}"></div>`;
+      const titleHtml = config.title ? `<div class="viz-title">${escapeHtml(config.title)}</div>` : '';
+      return `<div class="viz-mount-wrap">${titleHtml}<div class="${className}" data-d3-viz="${serializeVisualizationConfig(config)}"></div></div>`;
     }
 
     function rowsForLens(question) {
@@ -405,6 +646,7 @@ export function useWorkspace() {
           rows: [],
           lenses: [],
           keyInsights: narrativeStep.keyInsights,
+          keyHighlights: narrativeStep.keyHighlights,
         };
       }
 
@@ -738,6 +980,8 @@ export function useWorkspace() {
                   <button class="landing-prompt-send" type="submit" aria-label="Start conversation">→</button>
                 </form>
 
+                <div class="landing-question-list" id="landingQuestionsList"></div>
+
                 <div class="landing-chip-row">
                   ${ensureLandingChipsForThread(state.currentThreadId).map((chip, index) => `
                     <button class="landing-chip ${index === 0 ? 'strong' : ''}" type="button" data-starter="${escapeHtml(chip)}">
@@ -753,7 +997,25 @@ export function useWorkspace() {
 
       const landingPromptForm = document.getElementById('landingPromptForm') as HTMLFormElement | null;
       const landingPromptInput = document.getElementById('landingPromptInput') as HTMLInputElement | null;
+      const landingQuestionsList = document.getElementById('landingQuestionsList') as HTMLElement | null;
       if (landingPromptForm && landingPromptInput) {
+        const updateLandingQuestions = () => {
+          if (!landingQuestionsList) return;
+          const query = landingPromptInput.value.trim();
+          state.landingQuestionsQuery = query;
+          landingQuestionsList.innerHTML = query
+            ? renderQuestionListing(filteredQuestions(query), 'No workspace questions match this search.')
+            : '';
+          landingQuestionsList.classList.toggle('visible', query.length > 0);
+        };
+
+        landingPromptInput.value = state.landingQuestionsQuery;
+        updateLandingQuestions();
+
+        landingPromptInput.addEventListener('input', () => {
+          updateLandingQuestions();
+        }, { signal: controller.signal });
+
         landingPromptForm.addEventListener('submit', event => {
           event.preventDefault();
           const value = landingPromptInput.value.trim();
@@ -768,15 +1030,7 @@ export function useWorkspace() {
             return;
           }
 
-          const next = baseResponse(value);
-          state.mode = 'thread';
-          state.centeredInput = false;
-          setThreadResponses(state.currentThreadId, [next]);
-          resetPanels();
-          composerInput.value = '';
-          composerInput.placeholder = CHAT_PLACEHOLDER;
-          renderAll();
-          canvas.scrollTo({ top: 0, behavior: 'smooth' });
+          openQuestion(value, true);
         }, { signal: controller.signal });
       }
     }
@@ -943,6 +1197,7 @@ export function useWorkspace() {
       if (!state.followupContext || state.followupContext.responseId !== response.id || !state.followupContext.prompts?.length) return '';
       return `
         <div class="followup-tray">
+          <div class="followup-label">Something interesting you might explore</div>
           <div class="followup-row">
             ${state.followupContext.prompts.map(prompt => `<button class="followup-chip" type="button" data-followup="${escapeHtml(prompt)}">${escapeHtml(prompt)}</button>`).join('')}
           </div>
@@ -1104,7 +1359,10 @@ export function useWorkspace() {
 
     function renderPrimaryVisual(response) {
       if (response.format === 'dashboard-viz') {
-        return (response.vizConfigs || []).map(config => renderVizMount(config)).join('');
+        const configs = response.vizConfigs || [];
+        const vizHtml = configs.map(config => renderVizMount(config)).join('');
+        const typeClass = configs.length > 0 ? ` viz-type-${configs[0].type}` : '';
+        return `<div class="viz-wrap${typeClass}">${vizHtml}</div>`;
       }
       const scopedRows = rowsForRange(response.rows || [], response.timeRange || '30D');
       if (response.format === 'story') return renderHiddenCostStory(response);
@@ -1153,16 +1411,30 @@ export function useWorkspace() {
           <div class="card-block card-body">
             <div class="agent-insight">${escapeHtml(response.insight)}</div>
             ${renderPrimaryVisual(response)}
-            ${showInsights ? `<ul class="key-insight-list">${insights.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
+            ${showInsights ? (response.keyHighlights ? renderKeyHighlights(response.keyHighlights) : `<ul class="key-insight-list">${insights.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`) : ''}
             <div class="response-footer">
-              <div class="response-actions">
-                <button class="icon-btn ${state.bookmarks.has(response.id) ? 'bookmarked' : ''}" type="button" data-bookmark="${response.id}" title="Bookmark">☆</button>
-                <button class="icon-btn ${state.liked.has(response.id) ? 'active' : ''}" type="button" data-like="${response.id}" title="Like">👍</button>
-                <button class="icon-btn" type="button" data-dislike="${response.id}" title="Dislike">👎</button>
-                <button class="icon-btn" type="button" data-regenerate="${response.id}" title="Regenerate">↻</button>
-              </div>
               <span class="response-time">${escapeHtml(formatResponseTime(response))}</span>
             </div>
+          </div>
+          <div class="response-fab-wrap">
+            <div class="actions-panel actions-panel--hidden" data-actions-panel="${response.id}">
+              <button class="action-btn ${state.bookmarks.has(response.id) ? 'bookmarked' : ''}" type="button" data-bookmark="${response.id}" title="Bookmark">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </button>
+              <button class="action-btn ${state.liked.has(response.id) ? 'active' : ''}" type="button" data-like="${response.id}" title="Helpful">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+              </button>
+              <button class="action-btn" type="button" data-dislike="${response.id}" title="Not helpful">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
+              </button>
+              <span class="actions-divider"></span>
+              <button class="panel-close-btn" type="button" data-actions-close="${response.id}" title="Close">
+                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/></svg>
+              </button>
+            </div>
+            <button class="response-fab actions-toggle-btn" type="button" data-actions-toggle="${response.id}" title="Actions">
+              <svg width="16" height="5" viewBox="0 0 16 5" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><circle cx="2.5" cy="2.5" r="1.8"/><circle cx="8" cy="2.5" r="1.8"/><circle cx="13.5" cy="2.5" r="1.8"/></svg>
+            </button>
           </div>
         </article>
       `;
@@ -1224,6 +1496,17 @@ export function useWorkspace() {
     }
 
     function renderComposerStarters() {
+      const hasQuery = state.questionsQuery.trim().length > 0;
+      composerStarters.classList.toggle('has-results', hasQuery);
+
+      if (hasQuery) {
+        composerStarters.innerHTML = renderQuestionListing(
+          filteredQuestions(state.questionsQuery),
+          'No workspace questions match this search.'
+        );
+        return;
+      }
+
       composerStarters.innerHTML = state.mode === 'empty'
         ? ensureLandingChipsForThread(state.currentThreadId).map(chip => `<button class="starter-chip" type="button" data-starter="${escapeHtml(chip)}">${escapeHtml(chip)}</button>`).join('')
         : '';
@@ -1303,6 +1586,13 @@ export function useWorkspace() {
           <div class="saved-meta">${escapeHtml(formatResponseTime(item))}</div>
         </button>
       `).join('') : `<div class="saved-item"><div class="saved-question">No bookmarked responses yet.</div><div class="saved-meta">Save a response from the thread to see it here.</div></div>`;
+    }
+
+    function renderQuestions() {
+      questionsList.innerHTML = renderQuestionListing(
+        allQuestions(),
+        'No questions are available right now.'
+      );
     }
 
     function renderArtifacts() {
@@ -1464,23 +1754,28 @@ export function useWorkspace() {
       emptyThread.classList.toggle('active', state.mode === 'empty');
       inputZone.classList.toggle('centered', state.centeredInput);
       profileMenu.hidden = !state.profileMenuOpen;
+      if (questionsButtonEl) questionsButtonEl.classList.toggle('active', state.activePanel === 'questions');
       if (historyButtonEl) historyButtonEl.classList.toggle('active', state.activePanel === 'history');
       if (bookmarksButtonEl) bookmarksButtonEl.classList.toggle('active', state.activePanel === 'bookmarks');
     }
 
     function renderPanels() {
       const drillOpen = state.mode !== 'landing' && state.activePanel === 'drill';
-      const bookmarksOpen = state.mode !== 'landing' && state.activePanel === 'bookmarks';
-      const historyOpen = state.mode !== 'landing' && state.activePanel === 'history';
+      const bookmarksOpen = state.activePanel === 'bookmarks';
+      const historyOpen = state.activePanel === 'history';
+      const questionsOpen = state.activePanel === 'questions';
       const artifactsOpen = state.mode !== 'landing' && state.activePanel === 'artifacts';
       panel.classList.toggle('open', drillOpen);
       if (bookmarksSheet) bookmarksSheet.classList.toggle('open', bookmarksOpen);
       if (historySheet) historySheet.classList.toggle('open', historyOpen);
+      if (questionsSheet) questionsSheet.classList.toggle('open', questionsOpen);
       if (artifactsSheet) artifactsSheet.classList.toggle('open', artifactsOpen);
+      timelineRail.classList.toggle('with-panel', drillOpen);
+      timelineRail.classList.toggle('with-sheet', bookmarksOpen || historyOpen || questionsOpen || artifactsOpen);
       workspaceMain.classList.toggle('with-panel', drillOpen);
-      workspaceMain.classList.toggle('with-sheet', bookmarksOpen || historyOpen || artifactsOpen);
+      workspaceMain.classList.toggle('with-sheet', bookmarksOpen || historyOpen || questionsOpen || artifactsOpen);
       inputZone.classList.toggle('with-panel', drillOpen);
-      inputZone.classList.toggle('with-sheet', bookmarksOpen || historyOpen || artifactsOpen);
+      inputZone.classList.toggle('with-sheet', bookmarksOpen || historyOpen || questionsOpen || artifactsOpen);
       canvas.classList.remove('dimmed');
     }
 
@@ -1491,6 +1786,7 @@ export function useWorkspace() {
       renderHistory();
       renderComposerStarters();
       renderBookmarks();
+      renderQuestions();
       renderArtifacts();
       renderVisibility();
       renderPanels();
@@ -1538,6 +1834,7 @@ export function useWorkspace() {
     starterButton.addEventListener('click', () => {
       state.mode = 'empty';
       state.centeredInput = true;
+      state.questionsQuery = '';
       resetPanels();
       composerInput.value = '';
       composerInput.placeholder = CHAT_PLACEHOLDER;
@@ -1546,7 +1843,6 @@ export function useWorkspace() {
     }, { signal: controller.signal });
 
     historyButton.addEventListener('click', () => {
-      if (state.mode === 'landing') return;
       state.activePanel = state.activePanel === 'history' ? null : 'history';
       renderAll();
     }, { signal: controller.signal });
@@ -1556,8 +1852,12 @@ export function useWorkspace() {
     }, { signal: controller.signal });
 
     bookmarksButton.addEventListener('click', () => {
-      if (state.mode === 'landing') return;
       state.activePanel = state.activePanel === 'bookmarks' ? null : 'bookmarks';
+      renderAll();
+    }, { signal: controller.signal });
+
+    questionsButtonEl.addEventListener('click', () => {
+      state.activePanel = state.activePanel === 'questions' ? null : 'questions';
       renderAll();
     }, { signal: controller.signal });
 
@@ -1596,15 +1896,12 @@ export function useWorkspace() {
         state.mode = 'thread';
         state.centeredInput = false;
       }
-      const next = baseResponse(value);
-      appendResponseToCurrentThread(next);
-      composerInput.value = '';
-      composerInput.placeholder = CHAT_PLACEHOLDER;
-      if (next.format === 'dashboard-viz') {
-        showFollowups(next.id, next.topic);
-      }
-      renderAll();
-      scheduleAnimationFrame(() => scrollToResponse(next.id));
+      openQuestion(value);
+    }, { signal: controller.signal });
+
+    composerInput.addEventListener('input', () => {
+      state.questionsQuery = composerInput.value.trim();
+      renderComposerStarters();
     }, { signal: controller.signal });
 
     canvas.addEventListener('scroll', () => {
@@ -1702,24 +1999,21 @@ export function useWorkspace() {
       if (starterBtn) {
         const starter = starterBtn.dataset.starter;
         if (!starter) return;
-        const next = baseResponse(starter);
-        state.mode = 'thread';
-        state.centeredInput = false;
-        setThreadResponses(state.currentThreadId, [next]);
-        resetPanels();
-        composerInput.value = '';
-        composerInput.placeholder = CHAT_PLACEHOLDER;
-        if (next.format === 'dashboard-viz') {
-          showFollowups(next.id, next.topic);
-        }
-        renderAll();
-        canvas.scrollTo({ top: 0, behavior: 'smooth' });
+        openQuestion(starter, true);
+        return;
+      }
+
+      const questionOptionBtn = clickTarget.closest('[data-question-option]') as HTMLElement | null;
+      if (questionOptionBtn) {
+        const question = questionOptionBtn.dataset.questionOption;
+        if (!question) return;
+        openQuestion(question, state.mode !== 'thread');
         return;
       }
 
       const closeBtn = clickTarget.closest('[data-close]') as HTMLElement | null;
       if (closeBtn) {
-        if (closeBtn.dataset.close === 'bookmarks' || closeBtn.dataset.close === 'artifacts' || closeBtn.dataset.close === 'history' || closeBtn.dataset.close === 'panel') {
+        if (closeBtn.dataset.close === 'bookmarks' || closeBtn.dataset.close === 'artifacts' || closeBtn.dataset.close === 'history' || closeBtn.dataset.close === 'questions' || closeBtn.dataset.close === 'panel') {
           state.activePanel = null;
           if (closeBtn.dataset.close === 'panel') {
             state.selectedEntity = null;
@@ -1822,17 +2116,26 @@ export function useWorkspace() {
         return;
       }
 
-      const regenerateBtn = clickTarget.closest('[data-regenerate]') as HTMLElement | null;
-      if (regenerateBtn) {
-        const target = currentResponses().find(item => item.id === regenerateBtn.dataset.regenerate);
-        if (!target) return;
-        const replacement = baseResponse(target.question);
-        replacement.id = target.id;
-        const list = currentResponses();
-        const index = list.findIndex(item => item.id === target.id);
-        if (index >= 0) list[index] = replacement;
-        touchThread();
-        renderAll();
+      const actionsToggleBtn = clickTarget.closest('[data-actions-toggle]') as HTMLElement | null;
+      if (actionsToggleBtn) {
+        const panelId = actionsToggleBtn.dataset.actionsToggle;
+        const panel = thread.querySelector(`[data-actions-panel="${panelId}"]`);
+        if (!panel) return;
+        const isOpen = panel.classList.contains('actions-panel--visible');
+        panel.classList.toggle('actions-panel--hidden', isOpen);
+        panel.classList.toggle('actions-panel--visible', !isOpen);
+        actionsToggleBtn.classList.toggle('is-open', !isOpen);
+        return;
+      }
+
+      const actionsCloseBtn = clickTarget.closest('[data-actions-close]') as HTMLElement | null;
+      if (actionsCloseBtn) {
+        const panelId = actionsCloseBtn.dataset.actionsClose;
+        const panel = thread.querySelector(`[data-actions-panel="${panelId}"]`);
+        if (!panel) return;
+        panel.classList.replace('actions-panel--visible', 'actions-panel--hidden');
+        const toggle = thread.querySelector(`[data-actions-toggle="${panelId}"]`);
+        toggle?.classList.remove('is-open');
         return;
       }
 

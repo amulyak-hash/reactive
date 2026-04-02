@@ -11,7 +11,7 @@ const W = 680;
 const H = 220;
 const COLORS = [CC.blue, CC.cyan, CC.amber, CC.purple, CC.green];
 const PAD    = { left: 8, right: 64, top: 16, bottom: 38 };
-const NAME_W = 120;
+const NAME_W = 88;
 const BAR_H  = 18;
 
 export function ContractValueOrb({ data, 'data-testid': testId }: ContractValueOrbProps) {

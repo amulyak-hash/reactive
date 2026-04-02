@@ -7,7 +7,6 @@ interface CanvasTooltipProps extends TooltipState {
   parentH?: number;
 }
 
-const TOOLTIP_W = 160;
 
 /**
  * DOM-based tooltip overlay for canvas visualizations.
@@ -22,10 +21,11 @@ export function CanvasTooltip({ visible, x, y, content, parentW }: CanvasTooltip
     const el = rootRef.current;
     if (!el) return;
 
-    let tx = x - TOOLTIP_W / 2;
+    const elW = el.offsetWidth;
+    let tx = x - elW / 2;
     let ty = y - 58;
     if (tx < 4) tx = 4;
-    if (tx + TOOLTIP_W > (parentW ?? 400) - 4) tx = (parentW ?? 400) - TOOLTIP_W - 4;
+    if (tx + elW > (parentW ?? 400) - 4) tx = (parentW ?? 400) - elW - 4;
     if (ty < 4) ty = y + 16;
 
     el.style.transform = `translate(${tx}px, ${ty}px)`;
@@ -53,7 +53,6 @@ export function CanvasTooltip({ visible, x, y, content, parentW }: CanvasTooltip
         top: 0,
         left: 0,
         minWidth: 80,
-        maxWidth: TOOLTIP_W,
         pointerEvents: 'none',
         background: CC.sf,
         border: `1px solid ${CC.bd}`,

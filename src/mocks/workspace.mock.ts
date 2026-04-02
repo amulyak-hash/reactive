@@ -31,6 +31,20 @@ export const quickStartChips = [
 
 export const chipPresets = [quickStartChips];
 
+export const chatInterfaceQuestions = [
+  'What is the total contract value across all vendors?',
+  'Show the contract value breakdown per vendor',
+  'Which vendors have the highest total commitment percentage?',
+  'What is the EW status split and which category has the most Early Warnings?',
+  'Which contractor has the most open EWs and what is the severity distribution?',
+  'How many NCEs has each contractor raised?',
+  'What % of NCEs are confirmed as compensation events?',
+  'Show implemented vs unimplemented variations per contractor',
+  'What is the total value of accepted vs submitted quotations?',
+  'Show the trend of quotations submitted over time',
+  'Show the full weekly report — base value, variations, and total commitment per contractor'
+];
+
 export const vendorRows = [
   {
     id: 'vendor-a',
@@ -615,6 +629,17 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'KEC International has the highest variation-to-base ratio at 42%.',
       'Total variations across all vendors account for 12.4% of the portfolio.',
     ],
+    keyHighlights: {
+      type: 'stats',
+      items: [
+        { value: '£752.2M', label: 'total portfolio commitment — base plus all approved variations', color: '#3B8BF6' },
+        { value: '£659M',   label: 'base contract value across all 5 active contractors',            color: '#22D3EE' },
+        { value: '£93.2M',  label: 'variations approved — 12.4% on top of base contract value',     color: '#FBBF24' },
+        { value: 'L&T',     label: 'largest share at £210.6M total — 28% of the full portfolio',    color: '#A78BFA' },
+        { value: 'KEC 42%', label: 'highest variation-to-base ratio — 3× the portfolio average',    color: '#34D399' },
+      ],
+      takeaway: 'L&T and NCC together anchor 50% of portfolio value. KEC\'s 42% variation ratio is 3× the average — the clearest single-contractor risk flag.',
+    },
   },
   {
     id: 'q2',
@@ -628,6 +653,18 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'KEC\'s variation load (£31.2M) is the largest despite having the smallest base.',
       'NCC shows the tightest base-to-commitment spread — disciplined delivery.',
     ],
+    keyHighlights: {
+      type: 'comparison-rows',
+      columns: ['Base', 'Variations', 'Var %'],
+      rows: [
+        { label: 'L&T',    cells: ['£198M', '£12.6M', '6%'],  color: '#22D3EE' },
+        { label: 'NCC',    cells: ['£156M', '£8.9M',  '6%'],  color: '#A78BFA' },
+        { label: 'Tata',   cells: ['£142M', '£18.4M', '13%'], color: '#3B8BF6' },
+        { label: 'Afcons', cells: ['£89M',  '£22.1M', '25%'], color: '#FBBF24' },
+        { label: 'KEC',    cells: ['£74M',  '£31.2M', '42%'], color: '#34D399' },
+      ],
+      takeaway: 'KEC\'s 42% variation-to-base ratio is 7× higher than L&T and NCC — the most exposed contractor despite holding the smallest base.',
+    },
   },
   {
     id: 'q3',
@@ -641,6 +678,15 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'KEC at 69% has the most headroom — and the most variation risk.',
       'The average commitment across all five contractors is 84%.',
     ],
+    keyHighlights: {
+      type: 'chips',
+      items: [
+        { value: '84%',    label: 'portfolio-weighted average commitment — 16 points below full close', color: '#3B8BF6' },
+        { value: '26 pts', label: 'spread from NCC (95%) to KEC (69%) — widest performance gap',       color: '#FBBF24' },
+        { value: '2 of 5', label: 'contractors below the 80% target — Afcons at 78% and KEC at 69%',  color: '#F06060' },
+      ],
+      takeaway: 'The 26-point spread signals a deeply uneven portfolio — KEC\'s 42% variation ratio is the primary factor keeping its commitment furthest from the finish line.',
+    },
   },
   {
     id: 'q4q5',
@@ -648,8 +694,8 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
     title: 'Early Warning Overview',
     insight: '40 Early Warnings total. 18 remain Open (45%) — the largest cohort — while 12 are Closed and 10 are Submitted awaiting decision. Ground Conditions dominate with 12 EWs (30% of all warnings), followed by Design Issues at 8.',
     vizConfigs: [
-      { type: 'status-arc', segments: ewStatusData, title: 'Early Warning Status Split' },
-      { type: 'ew-category', categories: ewCategoryData },
+      { type: 'status-arc', segments: ewStatusData, title: 'Early Warning by split' },
+      { type: 'ew-category', categories: ewCategoryData, title: 'Early Warning by category' },
     ],
     followupIds: ['q6q7'],
     keyInsights: [
@@ -657,6 +703,16 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'Ground Conditions account for 30% of all EWs — the single largest category.',
       'Design Issues (8) and Employer Risk (7) together rival Ground Conditions.',
     ],
+    keyHighlights: {
+      type: 'chips',
+      items: [
+        { value: '40 EWs',  label: 'total Early Warnings active across all 5 contractors right now',   color: '#94A3B8' },
+        { value: '18 Open', label: '45% still active and unresolved — risk actively in flight',        color: '#F06060' },
+        { value: '30%',     label: 'resolution rate — only 12 of 40 EWs fully closed to date',        color: '#34D399' },
+        { value: 'Ground',  label: 'dominant category — 12 EWs, 30% of all warnings in the portfolio', color: '#3B8BF6' },
+      ],
+      takeaway: '70% of EWs remain live — Ground Conditions alone (30%) is the single largest driver, and is strongly correlated with NCE escalation.',
+    },
   },
   {
     id: 'q6q7',
@@ -664,8 +720,8 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
     title: 'EW Contractor & Severity',
     insight: 'Tata Projects has 7 open EWs — more than the next two contractors combined. High severity is the widest band at 14 EWs (35%), with Medium close behind at 13. Only 5 are Critical — but those 5 are unresolved.',
     vizConfigs: [
-      { type: 'contractor-rank', contractors: ewOpenByContractor },
-      { type: 'severity-bands', severities: ewSeverityData },
+      { type: 'contractor-rank', contractors: ewOpenByContractor, title: 'Open EWs' },
+      { type: 'severity-bands', severities: ewSeverityData, title: 'Severity distribution for EWs' },
     ],
     followupIds: ['q8'],
     keyInsights: [
@@ -673,6 +729,16 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'High + Critical severity makes up nearly half (19 of 40) of all EWs.',
       'NCC and KEC are the least exposed with 2 open EWs each.',
     ],
+    keyHighlights: {
+      type: 'badges',
+      items: [
+        { text: '5 Critical — all currently unresolved, highest escalation and adjudication risk in the portfolio', severity: 'red'   },
+        { text: 'Tata holds 39% of open EWs — nearly double Afcons at 22%, top-2 combined = 61% concentration risk', severity: 'amber' },
+        { text: '14 High severity EWs — at risk of escalating to Critical without active commercial intervention', severity: 'amber' },
+        { text: '8 Low severity EWs — flagged for awareness only, no immediate financial or schedule exposure', severity: 'green' },
+      ],
+      takeaway: 'Critical + High EWs (19 total) account for 47.5% of the portfolio — all 5 Critical items remain unresolved, and Tata is the primary concentration risk.',
+    },
   },
   {
     id: 'q8',
@@ -686,6 +752,17 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'KEC has the fewest NCEs (3) despite the highest variation ratio.',
       'NCE concentration mirrors EW exposure — Tata leads both.',
     ],
+    keyHighlights: {
+      type: 'scorecard-rows',
+      items: [
+        { name: 'Tata',   value: '8 NCEs', pct: 100, color: '#3B8BF6', sublabel: '32% of total — highest raiser' },
+        { name: 'Afcons', value: '6 NCEs', pct: 75,  color: '#FBBF24', sublabel: '24% — Tata + Afcons = 56%' },
+        { name: 'L&T',    value: '4 NCEs', pct: 50,  color: '#22D3EE', sublabel: '16% share' },
+        { name: 'NCC',    value: '4 NCEs', pct: 50,  color: '#A78BFA', sublabel: '16% share' },
+        { name: 'KEC',    value: '3 NCEs', pct: 38,  color: '#34D399', sublabel: '12% — fewest despite highest var ratio' },
+      ],
+      takeaway: 'Tata\'s NCE concentration (32%) mirrors its EW exposure (39%) — both metrics converge on the same contractor as the portfolio\'s primary risk driver.',
+    },
   },
   {
     id: 'q9',
@@ -699,6 +776,16 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       '10 unconfirmed NCEs represent material financial exposure.',
       'A rising confirmation rate would signal contractors are building stronger cases.',
     ],
+    keyHighlights: {
+      type: 'badges',
+      items: [
+        { text: '10 NCEs unconfirmed — each a potential adjudication trigger and active financial liability', severity: 'red'   },
+        { text: '40% dispute rate — above typical 25% benchmark, signals contractor commercial aggression',  severity: 'red'   },
+        { text: '60% confirmation rate — at the amber-zone boundary, below the target performance threshold', severity: 'amber' },
+        { text: '15 NCEs confirmed — obligations legally established, budgeted and approved for payment',     severity: 'green' },
+      ],
+      takeaway: 'The 40% dispute rate exceeds typical benchmarks — 10 contested NCEs represent the portfolio\'s most volatile and unpredictable financial exposure.',
+    },
   },
   {
     id: 'q10',
@@ -712,6 +799,15 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'Afcons has the worst ratio at 36% implemented — 9 variations pending.',
       'KEC also lags with only 43% implementation despite heavy variation load.',
     ],
+    keyHighlights: {
+      type: 'chips',
+      items: [
+        { value: '59%',    label: 'overall portfolio implementation rate — 42 of 71 variations actioned', color: '#34D399' },
+        { value: '29',     label: 'variations still pending across all contractors — unresolved backlog',  color: '#F06060' },
+        { value: '49 pts', label: 'spread from NCC (85%) to Afcons (36%) — largest discipline gap',       color: '#FBBF24' },
+      ],
+      takeaway: 'Afcons\' 9 and KEC\'s 8 pending variations together account for 59% of the entire unimplemented backlog — two contractors are driving most of the portfolio\'s delivery risk.',
+    },
   },
   {
     id: 'q11',
@@ -725,6 +821,16 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       '59% of all quotation value has been accepted.',
       'The 22 pending quotations represent £19.8M in unresolved claim value.',
     ],
+    keyHighlights: {
+      type: 'comparison-rows',
+      columns: ['Value', 'Count', 'Avg deal'],
+      rows: [
+        { label: 'Accepted',  cells: ['£28.4M', '31 quotes', '~£916K'], color: '#34D399' },
+        { label: 'Submitted', cells: ['£19.8M', '22 quotes', '~£900K'], color: '#FBBF24' },
+        { label: 'Gap (+)',   cells: ['+£8.6M', '+9 quotes', '—'],       color: '#3B8BF6' },
+      ],
+      takeaway: 'The £19.8M pending pipeline represents 41% of already-accepted value — resolution of submitted quotations will define the quarter\'s commercial outcome.',
+    },
   },
   {
     id: 'q12',
@@ -738,6 +844,17 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'Week 12 submissions (9) are 4.5× the Week 1 baseline.',
       'Value per submission is also trending up — larger claims are emerging.',
     ],
+    keyHighlights: {
+      type: 'stats',
+      items: [
+        { value: '57',    label: 'total submissions over the 12-week window',                    color: '#22D3EE' },
+        { value: '9',     label: 'Week 12 peak — highest single-week volume on record',          color: '#3B8BF6' },
+        { value: '4.5×',  label: 'W12 vs W1 growth factor — acceleration across 12 weeks',      color: '#FBBF24' },
+        { value: '£8.3M', label: 'Week 12 value — highest-value week in the 12-week window',    color: '#34D399' },
+        { value: '+80%',  label: 'W11→W12 final-week acceleration — sharpest single-step jump', color: '#F06060' },
+      ],
+      takeaway: 'Week 12 alone accounts for 16% of all 12-week submissions at the highest value on record — the claim period is entering its most active phase.',
+    },
   },
   {
     id: 'q13',
@@ -751,6 +868,24 @@ export const NARRATIVE_CHAIN: NarrativeStep[] = [
       'KEC\'s variation stream is visually disproportionate to its base — highest risk.',
       'Total commitment converges at £752.2M — the full portfolio picture.',
     ],
+    keyHighlights: {
+      type: 'proportion',
+      leftPct: 88,
+      leftLabel: 'Base Value',
+      leftValue: '£659M',
+      leftColor: '#3B8BF6',
+      rightPct: 12,
+      rightLabel: 'Variations',
+      rightValue: '£93.2M',
+      rightColor: '#FBBF24',
+      chips: [
+        { value: 'KEC 42%',    label: 'highest variation-to-base ratio — 3× the portfolio average',             color: '#34D399' },
+        { value: 'Afcons 25%', label: 'second-highest — KEC + Afcons together drive 57% of variation value',   color: '#FBBF24' },
+        { value: '£93.2M',     label: 'total approved variations — equivalent to adding a 6th contractor',     color: '#22D3EE' },
+        { value: '2 of 5',     label: 'contractors above 20% variation rate — concentrated in the bottom tier', color: '#A78BFA' },
+      ],
+      takeaway: 'KEC and Afcons contribute 57% of all variation value despite holding only 23% of base contract value — the portfolio\'s primary financial concentration risk.',
+    },
   },
 ];
 

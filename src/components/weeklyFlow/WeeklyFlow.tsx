@@ -23,43 +23,51 @@ export function WeeklyFlow({ contractors, 'data-testid': testId }: WeeklyFlowPro
     frameRef.current = 0;
     const DURATION = 80;
 
-    // Layout: 3 columns
-    // Col 1 (x=80):  Contractor nodes
-    // Col 2 (x=400): Base node + Variations node
-    // Col 3 (x=720): Total Commitment node
+    // ── Layout constants ─────────────────────────────────────────────────────
+    const col1X  = 100;
+    const col2X  = 420;
+    const col3X  = 720;
+    const nodeW  = 110;
+    const padT   = 20;
+    const padB   = 26;
+    const nodeGap = 6; // gap between contractor nodes
 
-    const col1X = 80;
-    const col2X = 400;
-    const col3X = 720;
-    const nodeW = 110;
-    const nodeH = 32;
-
-    const totalBase = contractors.reduce((s, c) => s + c.base, 0);
-    const totalVar = contractors.reduce((s, c) => s + c.variations, 0);
+    const totalBase  = contractors.reduce((s, c) => s + c.base, 0);
+    const totalVar   = contractors.reduce((s, c) => s + c.variations, 0);
     const grandTotal = contractors.reduce((s, c) => s + c.totalCommitment, 0);
-    const maxNode = Math.max(grandTotal, 1);
 
-    // Contractor nodes — vertically spaced
-    const contSpacing = (H - 40) / contractors.length;
-    const contNodes = contractors.map((c, i) => ({
-      x: col1X - nodeW / 2,
-      y: 20 + i * contSpacing + (contSpacing - nodeH) / 2,
-      cy: 20 + i * contSpacing + contSpacing / 2,
-      c,
-      color: PALETTE[i % PALETTE.length],
-    }));
+    // ── Contractor nodes — proportional heights (Sankey) ─────────────────────
+    const availH      = H - padT - padB;
+    const totalGaps   = nodeGap * (contractors.length - 1);
+    const flowableH   = availH - totalGaps;
 
-    // Mid nodes
-    const baseH = Math.max(30, (totalBase / maxNode) * (H - 60));
-    const varH = Math.max(20, (totalVar / maxNode) * (H - 60));
-    const totalMidH = baseH + varH + 20;
-    const midStartY = (H - totalMidH) / 2;
-    const baseNode = { x: col2X - nodeW / 2, y: midStartY, h: baseH, cy: midStartY + baseH / 2 };
-    const varNode = { x: col2X - nodeW / 2, y: midStartY + baseH + 20, h: varH, cy: midStartY + baseH + 20 + varH / 2 };
+    let cumNodeY = padT;
+    const contNodes = contractors.map((c, i) => {
+      const nh   = Math.max(24, (c.totalCommitment / grandTotal) * flowableH);
+      const node = {
+        x    : col1X - nodeW / 2,
+        y    : cumNodeY,
+        h    : nh,
+        cy   : cumNodeY + nh / 2,
+        c,
+        color: PALETTE[i % PALETTE.length],
+      };
+      cumNodeY += nh + nodeGap;
+      return node;
+    });
 
-    // Total node
-    const totalNodeH = Math.max(40, (grandTotal / maxNode) * (H - 60));
-    const totalNode = { x: col3X - nodeW / 2, y: (H - totalNodeH) / 2, h: totalNodeH, cy: H / 2 };
+    // ── Mid nodes — proportional to base/var share of grand total ────────────
+    const gapMid      = 14;
+    const midFlowH    = flowableH - gapMid;
+    const baseH       = Math.max(28, (totalBase / grandTotal) * midFlowH);
+    const varH        = Math.max(18, (totalVar  / grandTotal) * midFlowH);
+    const totalMidH   = baseH + varH + gapMid;
+    const midStartY   = padT + (availH - totalMidH) / 2;
+    const baseNode    = { x: col2X - nodeW / 2, y: midStartY,                h: baseH, cy: midStartY + baseH / 2 };
+    const varNode     = { x: col2X - nodeW / 2, y: midStartY + baseH + gapMid, h: varH,  cy: midStartY + baseH + gapMid + varH / 2 };
+
+    // ── Total node — spans full available height ──────────────────────────────
+    const totalNode = { x: col3X - nodeW / 2, y: padT, h: availH, cy: padT + availH / 2 };
 
     let raf: number;
 
@@ -68,88 +76,96 @@ export function WeeklyFlow({ contractors, 'data-testid': testId }: WeeklyFlowPro
       const T = frameRef.current;
       ctx.clearRect(0, 0, W, H);
 
-      const rawP = Math.min(T / DURATION, 1);
+      const rawP     = Math.min(T / DURATION, 1);
       const progress = easeOutCubic(rawP);
 
       tickHoverProgress(hoverMap.current, hoveredRef.current);
       hitZonesRef.current = [];
 
-      // ── Draw flows (behind nodes) ─────────────────────────────────────────
+      // ── Contractor → mid node flows ──────────────────────────────────────
       contractors.forEach((c, i) => {
-        const cn = contNodes[i];
+        const cn     = contNodes[i];
         const localP = stagger(progress, i, contractors.length, easeOutCubic);
-        const hp = hoverMap.current.get(c.id) ?? 0;
-
+        const hp     = hoverMap.current.get(c.id) ?? 0;
         if (localP < 0.01) return;
 
-        const baseShare = c.base / totalBase;
-        const varShare = c.variations / totalVar;
+        // Proportional bands within the contractor node
+        const baseFrac    = c.base       / c.totalCommitment;
+        const varFrac     = c.variations / c.totalCommitment;
+        const baseBandH   = cn.h * baseFrac;
+        const varBandH    = cn.h * varFrac;
 
-        // Flow line width proportional to base and variation
-        const baseFlowH = Math.max(2, baseShare * baseH);
-        const varFlowH = Math.max(2, varShare * varH);
+        // Source Y: center of each band within the contractor node
+        const baseSourceY = cn.y + baseBandH / 2;
+        const varSourceY  = cn.y + baseBandH + varBandH / 2;
 
-        // Flow to base node
-        const bEndY = baseNode.y + baseShare * baseH * (contractors.slice(0, i).reduce((s, cc) => s + cc.base, 0) / totalBase * baseH / (baseShare * baseH || 1)) + baseFlowH / 2;
-        const bActualEndY = baseNode.y + contractors.slice(0, i).reduce((s, cc) => s + (cc.base / totalBase) * baseH, 0) + baseFlowH / 2;
+        // Destination Y: proportional slice within mid nodes
+        const baseFlowH    = Math.max(2, (c.base       / totalBase) * baseH);
+        const varFlowH     = Math.max(2, (c.variations / totalVar)  * varH);
+        const bActualEndY  = baseNode.y + contractors.slice(0, i).reduce((s, cc) => s + (cc.base       / totalBase) * baseH, 0) + baseFlowH / 2;
+        const vActualEndY  = varNode.y  + contractors.slice(0, i).reduce((s, cc) => s + (cc.variations / totalVar)  * varH,  0) + varFlowH  / 2;
 
-        drawBezierFlow(ctx, cn.x + nodeW, cn.cy, col2X - nodeW / 2, bActualEndY, baseFlowH * localP, cn.color, hp * 0.3 + 0.15);
-
-        // Flow to variations node
-        const vActualEndY = varNode.y + contractors.slice(0, i).reduce((s, cc) => s + (cc.variations / totalVar) * varH, 0) + varFlowH / 2;
-        drawBezierFlow(ctx, cn.x + nodeW, cn.cy, col2X - nodeW / 2, vActualEndY, varFlowH * localP, cn.color, hp * 0.2 + 0.1);
+        const alpha = hp * 0.2 + 0.18;
+        drawBezierFlow(ctx, cn.x + nodeW, baseSourceY, col2X - nodeW / 2, bActualEndY, baseFlowH * localP, cn.color, alpha);
+        drawBezierFlow(ctx, cn.x + nodeW, varSourceY,  col2X - nodeW / 2, vActualEndY, varFlowH  * localP, cn.color, alpha * 0.75);
       });
 
-      // Flows from mid nodes to total
+      // ── Mid → Total flows ────────────────────────────────────────────────
       if (progress > 0.3) {
-        const fp = Math.min(1, (progress - 0.3) / 0.7);
-        drawBezierFlow(ctx, col2X + nodeW / 2, baseNode.cy, col3X - nodeW / 2, totalNode.cy - totalNodeH * 0.2, baseH * fp, CC.blue, 0.2 * fp);
-        drawBezierFlow(ctx, col2X + nodeW / 2, varNode.cy, col3X - nodeW / 2, totalNode.cy + totalNodeH * 0.2, varH * fp, CC.amber, 0.15 * fp);
+        const fp       = Math.min(1, (progress - 0.3) / 0.7);
+        const baseDstY = totalNode.y + (totalBase / grandTotal) * availH / 2;
+        const varDstY  = totalNode.y + availH - (totalVar / grandTotal) * availH / 2;
+        drawBezierFlow(ctx, col2X + nodeW / 2, baseNode.cy, col3X - nodeW / 2, baseDstY, baseH * fp, CC.blue,  0.25 * fp);
+        drawBezierFlow(ctx, col2X + nodeW / 2, varNode.cy,  col3X - nodeW / 2, varDstY,  varH  * fp, CC.amber, 0.22 * fp);
       }
 
       // ── Column labels ────────────────────────────────────────────────────
       ['Contractors', 'Components', 'Total'].forEach((label, ci) => {
         const x = [col1X, col2X, col3X][ci];
-        ctx.font = "9px 'JetBrains Mono', monospace";
+        ctx.font      = "9px 'JetBrains Mono', monospace";
         ctx.fillStyle = rgb(CC.t3, 0.5);
         ctx.textAlign = 'center';
-        ctx.fillText(label, x, H - 6);
+        ctx.fillText(label, x, H - 8);
       });
 
       // ── Contractor nodes ─────────────────────────────────────────────────
       contractors.forEach((c, i) => {
-        const cn = contNodes[i];
+        const cn     = contNodes[i];
         const localP = stagger(progress, i, contractors.length, easeOutCubic);
-        const hp = hoverMap.current.get(c.id) ?? 0;
+        const hp     = hoverMap.current.get(c.id) ?? 0;
 
-        registerHitRect(hitZonesRef.current, c.id, cn.x, cn.y, nodeW, nodeH, {
-          label: c.name,
-          value: `£${c.totalCommitment}M total commitment`,
+        registerHitRect(hitZonesRef.current, c.id, cn.x, cn.y, nodeW, cn.h, {
+          label   : c.name,
+          value   : `£${c.totalCommitment}M total commitment`,
           sublabel: `Base £${c.base}M  +  Variations £${c.variations}M`,
-          color: cn.color,
+          color   : cn.color,
         });
 
         if (hp > 0) drawGlow(ctx, cn.x + nodeW / 2, cn.cy, nodeW * 0.6, cn.color, 0.12 * hp);
 
-        ctx.fillStyle = rgb(cn.color, (0.3 + hp * 0.15) * localP);
-        ctx.beginPath();
-        ctx.roundRect(cn.x, cn.y, nodeW * localP, nodeH, 4);
-        ctx.fill();
+        ctx.fillStyle   = rgb(cn.color, (0.3 + hp * 0.15) * localP);
         ctx.strokeStyle = rgb(cn.color, (0.55 + hp * 0.25) * localP);
-        ctx.lineWidth = 1;
+        ctx.lineWidth   = 1;
+        ctx.beginPath();
+        ctx.roundRect(cn.x, cn.y, nodeW * localP, cn.h, 4);
+        ctx.fill();
         ctx.stroke();
 
-        if (localP > 0.6) {
+        if (localP > 0.6 && cn.h >= 24) {
           const fade = Math.min(1, (localP - 0.6) / 0.4);
-          ctx.globalAlpha = fade;
-          ctx.font = `${hp > 0 ? 'bold ' : ''}9px 'JetBrains Mono', monospace`;
-          ctx.fillStyle = hp > 0 ? cn.color : rgb(CC.t2, 0.9);
-          ctx.textAlign = 'center';
-          ctx.fillText(c.shortName, cn.x + nodeW / 2, cn.cy - 2);
-          ctx.font = "8px 'JetBrains Mono', monospace";
-          ctx.fillStyle = rgb(CC.t3, 0.8);
-          ctx.fillText(`£${c.totalCommitment}M`, cn.x + nodeW / 2, cn.cy + 10);
-          ctx.globalAlpha = 1;
+          ctx.globalAlpha  = fade;
+          ctx.font         = `${hp > 0 ? 'bold ' : ''}9px 'JetBrains Mono', monospace`;
+          ctx.fillStyle    = hp > 0 ? cn.color : rgb(CC.t2, 0.9);
+          ctx.textAlign    = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(c.shortName, cn.x + nodeW / 2, cn.h >= 36 ? cn.cy - 5 : cn.cy);
+          if (cn.h >= 36) {
+            ctx.font      = "8px 'JetBrains Mono', monospace";
+            ctx.fillStyle = rgb(CC.t3, 0.8);
+            ctx.fillText(`£${c.totalCommitment}M`, cn.x + nodeW / 2, cn.cy + 7);
+          }
+          ctx.globalAlpha  = 1;
+          ctx.textBaseline = 'alphabetic';
         }
       });
 
@@ -157,67 +173,71 @@ export function WeeklyFlow({ contractors, 'data-testid': testId }: WeeklyFlowPro
       if (progress > 0.2) {
         const fp = Math.min(1, (progress - 0.2) / 0.4);
 
-        // Base node
         drawGlow(ctx, col2X, baseNode.cy, 30, CC.blue, 0.1 * fp);
-        ctx.fillStyle = rgb(CC.blue, 0.3 * fp);
+        ctx.fillStyle   = rgb(CC.blue, 0.3 * fp);
+        ctx.strokeStyle = rgb(CC.blue, 0.5 * fp);
+        ctx.lineWidth   = 1;
         ctx.beginPath();
         ctx.roundRect(baseNode.x, baseNode.y, nodeW, baseNode.h * fp, 4);
         ctx.fill();
-        ctx.strokeStyle = rgb(CC.blue, 0.5 * fp);
-        ctx.lineWidth = 1;
         ctx.stroke();
 
-        ctx.globalAlpha = fp;
-        ctx.font = "bold 9px 'JetBrains Mono', monospace";
-        ctx.fillStyle = CC.blue;
-        ctx.textAlign = 'center';
-        ctx.fillText('Base Value', col2X, baseNode.cy - 5);
-        ctx.font = "10px 'JetBrains Mono', monospace";
-        ctx.fillStyle = CC.t1;
+        ctx.globalAlpha  = fp;
+        ctx.textBaseline = 'middle';
+        ctx.font         = "bold 9px 'JetBrains Mono', monospace";
+        ctx.fillStyle    = CC.blue;
+        ctx.textAlign    = 'center';
+        ctx.fillText('Base Value', col2X, baseNode.cy - 6);
+        ctx.font         = "10px 'JetBrains Mono', monospace";
+        ctx.fillStyle    = CC.t1;
         ctx.fillText(`£${totalBase}M`, col2X, baseNode.cy + 8);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha  = 1;
+        ctx.textBaseline = 'alphabetic';
 
-        // Variations node
         drawGlow(ctx, col2X, varNode.cy, 24, CC.amber, 0.1 * fp);
-        ctx.fillStyle = rgb(CC.amber, 0.22 * fp);
-        ctx.strokeStyle = rgb(CC.amber, 0.4 * fp);
+        ctx.fillStyle   = rgb(CC.amber, 0.22 * fp);
+        ctx.strokeStyle = rgb(CC.amber, 0.4  * fp);
         ctx.beginPath();
         ctx.roundRect(varNode.x, varNode.y, nodeW, varNode.h * fp, 4);
         ctx.fill();
         ctx.stroke();
 
-        ctx.globalAlpha = fp;
-        ctx.font = "bold 9px 'JetBrains Mono', monospace";
-        ctx.fillStyle = CC.amber;
-        ctx.textAlign = 'center';
+        ctx.globalAlpha  = fp;
+        ctx.textBaseline = 'middle';
+        ctx.font         = "bold 9px 'JetBrains Mono', monospace";
+        ctx.fillStyle    = CC.amber;
+        ctx.textAlign    = 'center';
         ctx.fillText('Variations', col2X, varNode.cy - 4);
-        ctx.font = "10px 'JetBrains Mono', monospace";
-        ctx.fillStyle = CC.t1;
+        ctx.font         = "10px 'JetBrains Mono', monospace";
+        ctx.fillStyle    = CC.t1;
         ctx.fillText(`£${totalVar}M`, col2X, varNode.cy + 8);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha  = 1;
+        ctx.textBaseline = 'alphabetic';
       }
 
       // ── Total node ───────────────────────────────────────────────────────
       if (progress > 0.5) {
         const fp = Math.min(1, (progress - 0.5) / 0.5);
         drawGlow(ctx, col3X, totalNode.cy, 44, CC.cyan, 0.2 * fp);
-        ctx.fillStyle = rgb(CC.cyan, 0.25 * fp);
-        ctx.strokeStyle = rgb(CC.cyan, 0.6 * fp);
-        ctx.lineWidth = 1.5;
+        ctx.fillStyle   = rgb(CC.cyan, 0.25 * fp);
+        ctx.strokeStyle = rgb(CC.cyan, 0.6  * fp);
+        ctx.lineWidth   = 1.5;
         ctx.beginPath();
         ctx.roundRect(totalNode.x, totalNode.y, nodeW, totalNode.h * fp, 6);
         ctx.fill();
         ctx.stroke();
 
-        ctx.globalAlpha = fp;
-        ctx.font = "9px 'JetBrains Mono', monospace";
-        ctx.fillStyle = CC.t2;
-        ctx.textAlign = 'center';
+        ctx.globalAlpha  = fp;
+        ctx.textBaseline = 'middle';
+        ctx.font         = "9px 'JetBrains Mono', monospace";
+        ctx.fillStyle    = CC.t2;
+        ctx.textAlign    = 'center';
         ctx.fillText('Total Commitment', col3X, totalNode.cy - 12);
-        ctx.font = "bold 16px 'JetBrains Mono', monospace";
-        ctx.fillStyle = CC.cyan;
-        ctx.fillText(`£${grandTotal}M`, col3X, totalNode.cy + 5);
-        ctx.globalAlpha = 1;
+        ctx.font         = "bold 16px 'JetBrains Mono', monospace";
+        ctx.fillStyle    = CC.cyan;
+        ctx.fillText(`£${grandTotal}M`, col3X, totalNode.cy + 6);
+        ctx.globalAlpha  = 1;
+        ctx.textBaseline = 'alphabetic';
       }
 
       raf = requestAnimationFrame(draw);
@@ -241,12 +261,12 @@ export function WeeklyFlow({ contractors, 'data-testid': testId }: WeeklyFlowPro
 }
 
 function drawBezierFlow(
-  ctx: CanvasRenderingContext2D,
-  x1: number, y1: number,
-  x2: number, y2: number,
+  ctx      : CanvasRenderingContext2D,
+  x1       : number, y1: number,
+  x2       : number, y2: number,
   thickness: number,
-  color: string,
-  alpha: number,
+  color    : string,
+  alpha    : number,
 ): void {
   const cpX = (x1 + x2) / 2;
   ctx.beginPath();

@@ -27,7 +27,7 @@ export function CommitmentRace({ contractors, 'data-testid': testId }: Commitmen
     const ctx = setupCanvas(canvas, W, H);
     frameRef.current = 0;
 
-    const padL = W * 0.18;
+    const padL = W * 0.13;
     const padR = W * 0.08;
     const padT = H * 0.08;
     const trackH = H * 0.14;

@@ -94,4 +94,19 @@ export const pageStyles: Styles = {
     color: '#94A3B8',
     fontWeight: 700,
   },
+  highlightsWrap: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 10,
+    paddingLeft: 36,
+    borderLeft: '2px solid #1C2D42',
+  },
+  highlightsLabel: {
+    margin: '0 0 4px',
+    fontSize: 9,
+    fontWeight: 700,
+    letterSpacing: '0.14em',
+    textTransform: 'uppercase' as const,
+    color: '#334155',
+  },
 };

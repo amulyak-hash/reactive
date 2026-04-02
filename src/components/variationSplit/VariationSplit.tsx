@@ -23,15 +23,16 @@ export function VariationSplit({ contractors, 'data-testid': testId }: Variation
     frameRef.current = 0;
     const DURATION = 60;
 
-    const padL = 80;
+    const padL = 60;
     const padR = 28;
-    const padT = 32;
+    const padT = 16;
+    const padB = 32;
     const barH = 26;
     const gap = 14;
     const trackW = W - padL - padR;
     const maxTotal = Math.max(...contractors.map(c => c.implemented + c.unimplemented));
     const totalH = contractors.length * (barH + gap) - gap;
-    const startY = padT + (H - padT - 32 - totalH) / 2;
+    const startY = padT + (H - padT - padB - totalH) / 2;
 
     let raf: number;
 
@@ -45,14 +46,6 @@ export function VariationSplit({ contractors, 'data-testid': testId }: Variation
 
       tickHoverProgress(hoverMap.current, hoveredRef.current);
       hitZonesRef.current = [];
-
-      // Legend at top
-      ctx.font = "9px 'JetBrains Mono', monospace";
-      ctx.fillStyle = CC.green;
-      ctx.textAlign = 'left';
-      ctx.fillText('■ Implemented', padL, 18);
-      ctx.fillStyle = CC.t3;
-      ctx.fillText('■ Unimplemented', padL + 110, 18);
 
       contractors.forEach((c, i) => {
         const accentColor = PALETTE[i % PALETTE.length];
@@ -138,6 +131,17 @@ export function VariationSplit({ contractors, 'data-testid': testId }: Variation
           ctx.stroke();
         }
       });
+
+      // Legend below bars — centered over track
+      const legendY = startY + totalH + 24;
+      const trackCX = padL + trackW / 2;
+      ctx.font = "9px 'JetBrains Mono', monospace";
+      ctx.textAlign = 'right';
+      ctx.fillStyle = CC.green;
+      ctx.fillText('■ Implemented', trackCX - 10, legendY);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = rgb(CC.t3, 0.7);
+      ctx.fillText('■ Unimplemented', trackCX + 10, legendY);
 
       raf = requestAnimationFrame(draw);
     };

@@ -58,13 +58,6 @@ export function StatusArc({ segments, title, 'data-testid': testId }: StatusArcP
 
       drawDust(ctx, W, H, T, 40, rgb(CC.blue, 0.04));
 
-      // Title
-      ctx.font = "10px 'JetBrains Mono', monospace";
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillStyle = rgb(CC.t2, 0.7);
-      ctx.fillText(title, W * 0.5, H * 0.07);
-
       // Draw edges from center to each satellite
       segments.forEach((seg, i) => {
         const angle = (i / 3) * Math.PI * 2 - Math.PI / 2;

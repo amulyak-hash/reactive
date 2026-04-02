@@ -19,6 +19,9 @@ export function WorkspaceShell() {
                   <button className="tool-btn" id="bookmarksButton" type="button">
                     ⊞ <span>Bookmarks</span>
                   </button>
+                  <button className="tool-btn" id="questionsButton" type="button">
+                    ? <span>Questions</span>
+                  </button>
                   <div className="profile-wrap">
                     <button className="tool-btn profile-btn" id="profileButton" type="button" aria-label="Profile">
                       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -121,6 +124,21 @@ export function WorkspaceShell() {
                 </button>
               </div>
               <div className="panel-body history-list" id="historyList" />
+            </div>
+          </aside>
+
+          <aside className="side-sheet" id="questionsSheet">
+            <div className="panel-shell">
+              <div className="panel-header">
+                <div>
+                  <div className="panel-title">Questions</div>
+                  <div className="panel-meta">Browse all available prompts for this workspace</div>
+                </div>
+                <button className="close-btn" type="button" data-close="questions">
+                  ×
+                </button>
+              </div>
+              <div className="panel-body history-list" id="questionsList" />
             </div>
           </aside>
 

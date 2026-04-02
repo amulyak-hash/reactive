@@ -23,10 +23,10 @@ export function QuotationTrend({ trend, 'data-testid': testId }: QuotationTrendP
     frameRef.current = 0;
     const DURATION = 72;
 
-    const padL = 40;
+    const padL = 54;
     const padR = 28;
     const padT = 30;
-    const padB = 44;
+    const padB = 54;
     const chartW = W - padL - padR;
     const chartH = H - padT - padB;
     const maxCount = Math.max(...trend.map(p => p.count));
@@ -63,11 +63,27 @@ export function QuotationTrend({ trend, 'data-testid': testId }: QuotationTrendP
         ctx.lineTo(padL + chartW, y);
         ctx.stroke();
         ctx.setLineDash([]);
-        ctx.font = "8px 'JetBrains Mono', monospace";
+        ctx.font = "10px 'JetBrains Mono', monospace";
         ctx.fillStyle = rgb(CC.t4, 0.6);
         ctx.textAlign = 'right';
-        ctx.fillText(String(Math.round(maxCount * frac)), padL - 4, y + 3);
+        ctx.fillText(String(Math.round(maxCount * frac)), padL - 6, y + 3);
       });
+
+      // Y-axis label (rotated)
+      ctx.save();
+      ctx.translate(12, padT + chartH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.font = "11px 'JetBrains Mono', monospace";
+      ctx.fillStyle = rgb(CC.t3, 0.5);
+      ctx.textAlign = 'center';
+      ctx.fillText('Submissions', 0, 0);
+      ctx.restore();
+
+      // X-axis label
+      ctx.font = "11px 'JetBrains Mono', monospace";
+      ctx.fillStyle = rgb(CC.t3, 0.5);
+      ctx.textAlign = 'center';
+      ctx.fillText('Week', padL + chartW / 2, H - 6);
 
       // X-axis baseline
       ctx.strokeStyle = rgb(CC.bd, 0.3);
@@ -156,7 +172,7 @@ export function QuotationTrend({ trend, 'data-testid': testId }: QuotationTrendP
         }
 
         // Week label below axis
-        ctx.font = "8px 'JetBrains Mono', monospace";
+        ctx.font = "10px 'JetBrains Mono', monospace";
         ctx.fillStyle = hp > 0 ? CC.cyan : rgb(CC.t3, 0.6);
         ctx.textAlign = 'center';
         ctx.fillText(pt.point.week, pt.x, H - padB + 14);
