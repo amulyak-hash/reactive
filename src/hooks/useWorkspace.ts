@@ -1478,7 +1478,6 @@ export function useWorkspace() {
       thread.innerHTML = `<div class="thread-stack">${responses.map(response => `
         <div class="user-message">${escapeHtml(response.question)}</div>
         ${renderResponseCard(response)}
-        ${renderFollowups(response)}
         ${state.dislikeReasons.filter(e => e.responseId === response.id).map(entry => `
           <div class="dislike-submitted">
             <span class="dislike-submitted-reason">Reason for dislike — ${escapeHtml(entry.reason)}</span>
@@ -1502,6 +1501,7 @@ export function useWorkspace() {
             ` : ''}
           </div>
         ` : ''}
+        ${renderFollowups(response)}
       `).join('')}
       </div>`;
     }
