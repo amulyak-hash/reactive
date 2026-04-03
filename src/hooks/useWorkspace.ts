@@ -1479,30 +1479,30 @@ export function useWorkspace() {
         <div class="user-message">${escapeHtml(response.question)}</div>
         ${renderResponseCard(response)}
         ${renderFollowups(response)}
-      `).join('')}
-      ${state.dislikeReasons.length ? state.dislikeReasons.map(entry => `
-        <div class="dislike-submitted">
-          <span class="dislike-submitted-reason">Reason for dislike — ${escapeHtml(entry.reason)}</span>
-          <span class="dislike-submitted-thanks">Thanks for your feedback. This will help improve future responses.</span>
-        </div>
-      `).join('') : ''}
-      ${state.dislikePickerResponseId ? `
-        <div class="dislike-picker">
-          <div class="dislike-picker-label">Why wasn't this helpful?</div>
-          <div class="dislike-picker-options">
-            <button class="dislike-picker-opt" type="button" data-dislike-reason="Incorrect data">Incorrect data</button>
-            <button class="dislike-picker-opt" type="button" data-dislike-reason="Not relevant to my question">Not relevant to my question</button>
-            <button class="dislike-picker-opt" type="button" data-dislike-reason="Unclear explanation">Unclear explanation</button>
-            <button class="dislike-picker-opt dislike-picker-opt--other ${state.dislikePickerShowOther ? 'dislike-picker-opt--active' : ''}" type="button" data-dislike-other>Other</button>
+        ${state.dislikeReasons.filter(e => e.responseId === response.id).map(entry => `
+          <div class="dislike-submitted">
+            <span class="dislike-submitted-reason">Reason for dislike — ${escapeHtml(entry.reason)}</span>
+            <span class="dislike-submitted-thanks">Thanks for your feedback. This will help improve future responses.</span>
           </div>
-          ${state.dislikePickerShowOther ? `
-            <div class="dislike-picker-other-wrap">
-              <input class="dislike-picker-input" id="dislikeOtherInput" type="text" placeholder="Tell us what went wrong..." autocomplete="off" />
-              <button class="dislike-picker-submit" type="button" data-dislike-submit>Submit</button>
+        `).join('')}
+        ${state.dislikePickerResponseId === response.id ? `
+          <div class="dislike-picker">
+            <div class="dislike-picker-label">Why wasn't this helpful?</div>
+            <div class="dislike-picker-options">
+              <button class="dislike-picker-opt" type="button" data-dislike-reason="Incorrect data">Incorrect data</button>
+              <button class="dislike-picker-opt" type="button" data-dislike-reason="Not relevant to my question">Not relevant to my question</button>
+              <button class="dislike-picker-opt" type="button" data-dislike-reason="Unclear explanation">Unclear explanation</button>
+              <button class="dislike-picker-opt dislike-picker-opt--other ${state.dislikePickerShowOther ? 'dislike-picker-opt--active' : ''}" type="button" data-dislike-other>Other</button>
             </div>
-          ` : ''}
-        </div>
-      ` : ''}
+            ${state.dislikePickerShowOther ? `
+              <div class="dislike-picker-other-wrap">
+                <input class="dislike-picker-input" id="dislikeOtherInput" type="text" placeholder="Tell us what went wrong..." autocomplete="off" />
+                <button class="dislike-picker-submit" type="button" data-dislike-submit>Submit</button>
+              </div>
+            ` : ''}
+          </div>
+        ` : ''}
+      `).join('')}
       </div>`;
     }
 
