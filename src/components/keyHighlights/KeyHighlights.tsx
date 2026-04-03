@@ -128,10 +128,10 @@ function Chips({ items }: { items: KeyHighlightChip[] }) {
             borderRadius: 7,
           }}
         >
-          <div style={{ fontSize: 22, fontWeight: 700, color: item.color ?? C.t1, fontFamily: MONO, lineHeight: 1.1 }}>
+          <div style={{ fontSize: 26, fontWeight: 700, color: item.color ?? C.t1, fontFamily: MONO, lineHeight: 1.1 }}>
             {item.value}
           </div>
-          <div style={{ fontSize: 11, color: C.t4, fontFamily: SANS, marginTop: 6, lineHeight: 1.5 }}>
+          <div style={{ fontSize: 14, color: C.t4, fontFamily: SANS, marginTop: 6, lineHeight: 1.5 }}>
             {item.label}
           </div>
         </div>

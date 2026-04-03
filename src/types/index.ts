@@ -220,7 +220,7 @@ export type KeyHighlightBlock =
   | { type: 'ranked';          items: Array<{ name: string; value: string; color: string; kpiLabel?: string }>; takeaway?: string }
   | { type: 'proportion';      leftPct: number; leftLabel: string; leftValue: string; leftColor: string; rightPct: number; rightLabel: string; rightValue: string; rightColor: string; chips?: KeyHighlightChip[]; takeaway?: string }
   | { type: 'ring';            pct: number; label: string; color: string; chips?: KeyHighlightChip[]; takeaway?: string }
-  | { type: 'badges';          items: KeyHighlightBadge[]; takeaway?: string }
+  | { type: 'badges';          items: KeyHighlightBadge[]; textSize?: number; takeaway?: string }
   | { type: 'dot-strip';       min: number; max: number; unit: string; dots: KeyHighlightDot[]; chips?: KeyHighlightChip[]; takeaway?: string }
   | { type: 'scorecard-rows';  items: ScorecardRow[]; takeaway?: string }
   | { type: 'flags-list';      items: FlagsListRow[]; takeaway?: string }

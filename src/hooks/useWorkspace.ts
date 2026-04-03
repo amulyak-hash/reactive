@@ -146,8 +146,12 @@ export function useWorkspace() {
       followupContext: null,
       exportOpenFor: null,
       feedbackForResponseId: null,
+      dislikePickerResponseId: null as string | null,
+      dislikePickerShowOther: false,
+      dislikeReasons: [] as Array<{ responseId: string; reason: string }>,
       bookmarks: new Set(),
       liked: new Set(),
+      disliked: new Set(),
       reviewed: new Set()
     };
 
@@ -255,7 +259,11 @@ export function useWorkspace() {
           </div>`).join('')}</div>`;
 
       } else if (type === 'chips') {
-        bodyHtml = `<div class="kh-chips-row">${renderChipsRow(highlights.items)}</div>`;
+        bodyHtml = `<div class="kh-chips-block">${highlights.items.map(item => `
+          <div class="kh-chips-block-item" style="border-left:3px solid ${item.color || '#64748B'}">
+            <span class="kh-chip-val" style="color:${item.color || '#F1F5F9'}">${escapeHtml(item.value)}</span>
+            <span class="kh-chip-lbl">${escapeHtml(item.label)}</span>
+          </div>`).join('')}</div>`;
 
       } else if (type === 'ranked') {
         bodyHtml = `<div class="kh-ranked">${highlights.items.map(item => `
@@ -273,14 +281,20 @@ export function useWorkspace() {
           <div class="kh-proportion-wrap">
             <div class="kh-prop-row">
               <div class="kh-prop-side">
-                <span class="kh-prop-pct" style="color:${highlights.leftColor}">${highlights.leftPct}%</span>
+                <div class="kh-prop-top">
+                  <span class="kh-prop-pct" style="color:${highlights.leftColor}">${highlights.leftPct}%</span>
+                  <span class="kh-prop-sep"></span>
+                  <span class="kh-prop-val" style="color:${highlights.leftColor}">${escapeHtml(highlights.leftValue)}</span>
+                </div>
                 <span class="kh-prop-name">${escapeHtml(highlights.leftLabel)}</span>
-                <span class="kh-prop-val" style="color:${highlights.leftColor}">${escapeHtml(highlights.leftValue)}</span>
               </div>
               <div class="kh-prop-side kh-prop-side-right">
-                <span class="kh-prop-pct" style="color:${highlights.rightColor}">${highlights.rightPct}%</span>
+                <div class="kh-prop-top kh-prop-top-right">
+                  <span class="kh-prop-val" style="color:${highlights.rightColor}">${escapeHtml(highlights.rightValue)}</span>
+                  <span class="kh-prop-sep"></span>
+                  <span class="kh-prop-pct" style="color:${highlights.rightColor}">${highlights.rightPct}%</span>
+                </div>
                 <span class="kh-prop-name">${escapeHtml(highlights.rightLabel)}</span>
-                <span class="kh-prop-val" style="color:${highlights.rightColor}">${escapeHtml(highlights.rightValue)}</span>
               </div>
             </div>
             <div class="kh-prop-bar">
@@ -314,10 +328,11 @@ export function useWorkspace() {
           </div>`;
 
       } else if (type === 'badges') {
+        const badgeTextStyle = highlights.textSize ? ` style="font-size:${highlights.textSize}px"` : '';
         bodyHtml = `<div class="kh-badges">${highlights.items.map(item => `
           <div class="kh-badge kh-badge-${escapeHtml(item.severity)}">
             <span class="kh-badge-dot"></span>
-            <span class="kh-badge-text">${escapeHtml(item.text)}</span>
+            <span class="kh-badge-text"${badgeTextStyle}>${escapeHtml(item.text)}</span>
           </div>`).join('')}</div>`;
 
       } else if (type === 'dot-strip') {
@@ -1205,6 +1220,16 @@ export function useWorkspace() {
       `;
     }
 
+    function submitDislikeReason(reason: string) {
+      if (state.dislikePickerResponseId) {
+        state.disliked.add(state.dislikePickerResponseId);
+        state.dislikeReasons.push({ responseId: state.dislikePickerResponseId, reason });
+      }
+      state.dislikePickerResponseId = null;
+      state.dislikePickerShowOther = false;
+      renderAll();
+    }
+
     function followupResponse(prompt) {
       const map = {
         'Which furnace is most exposed?': {
@@ -1424,7 +1449,7 @@ export function useWorkspace() {
               <button class="action-btn ${state.liked.has(response.id) ? 'active' : ''}" type="button" data-like="${response.id}" title="Helpful">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
               </button>
-              <button class="action-btn" type="button" data-dislike="${response.id}" title="Not helpful">
+              <button class="action-btn ${state.disliked.has(response.id) ? 'active' : ''}" type="button" data-dislike="${response.id}" title="Not helpful">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>
               </button>
               <span class="actions-divider"></span>
@@ -1455,10 +1480,27 @@ export function useWorkspace() {
         ${renderResponseCard(response)}
         ${renderFollowups(response)}
       `).join('')}
-      ${state.feedbackForResponseId ? `
-        <div class="agent-question">
-          <div class="agent-question-label">Assistant</div>
-          <div class="agent-question-copy">What was wrong with this response? Share your reason below and I will regenerate with your feedback.</div>
+      ${state.dislikeReasons.length ? state.dislikeReasons.map(entry => `
+        <div class="dislike-submitted">
+          <span class="dislike-submitted-reason">Reason for dislike — ${escapeHtml(entry.reason)}</span>
+          <span class="dislike-submitted-thanks">Thanks for your feedback. This will help improve future responses.</span>
+        </div>
+      `).join('') : ''}
+      ${state.dislikePickerResponseId ? `
+        <div class="dislike-picker">
+          <div class="dislike-picker-label">Why wasn't this helpful?</div>
+          <div class="dislike-picker-options">
+            <button class="dislike-picker-opt" type="button" data-dislike-reason="Incorrect data">Incorrect data</button>
+            <button class="dislike-picker-opt" type="button" data-dislike-reason="Not relevant to my question">Not relevant to my question</button>
+            <button class="dislike-picker-opt" type="button" data-dislike-reason="Unclear explanation">Unclear explanation</button>
+            <button class="dislike-picker-opt dislike-picker-opt--other ${state.dislikePickerShowOther ? 'dislike-picker-opt--active' : ''}" type="button" data-dislike-other>Other</button>
+          </div>
+          ${state.dislikePickerShowOther ? `
+            <div class="dislike-picker-other-wrap">
+              <input class="dislike-picker-input" id="dislikeOtherInput" type="text" placeholder="Tell us what went wrong..." autocomplete="off" />
+              <button class="dislike-picker-submit" type="button" data-dislike-submit>Submit</button>
+            </div>
+          ` : ''}
         </div>
       ` : ''}
       </div>`;
@@ -1871,26 +1913,7 @@ export function useWorkspace() {
       const value = composerInput.value.trim();
       if (!value) return;
       if (state.feedbackForResponseId) {
-        const next = {
-          id: makeId(),
-          topic: 'feedback',
-          title: 'Feedback Captured',
-          question: value,
-          format: 'text',
-          formatLabel: 'Text',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          insight: 'Thanks, we captured your feedback and will use it to improve subsequent answers.',
-          lenses: [],
-          options: [{ key: 'text', label: 'text', enabled: true }],
-          rows: []
-        };
-        appendResponseToCurrentThread(next);
         state.feedbackForResponseId = null;
-        composerInput.value = '';
-        composerInput.placeholder = CHAT_PLACEHOLDER;
-        renderAll();
-        scheduleAnimationFrame(() => scrollToResponse(next.id));
-        return;
       }
       if (state.mode !== 'thread') {
         state.mode = 'thread';
@@ -2108,11 +2131,33 @@ export function useWorkspace() {
 
       const dislikeBtn = clickTarget.closest('[data-dislike]') as HTMLElement | null;
       if (dislikeBtn) {
-        state.feedbackForResponseId = dislikeBtn.dataset.dislike;
-        composerInput.value = '';
-        composerInput.placeholder = CHAT_PLACEHOLDER;
+        state.dislikePickerResponseId = dislikeBtn.dataset.dislike ?? null;
+        state.dislikePickerShowOther = false;
         renderAll();
-        scheduleTimeout(() => composerInput.focus(), 100);
+        return;
+      }
+
+      const dislikeReasonBtn = clickTarget.closest('[data-dislike-reason]') as HTMLElement | null;
+      if (dislikeReasonBtn) {
+        const reason = dislikeReasonBtn.dataset.dislikeReason ?? '';
+        submitDislikeReason(reason);
+        return;
+      }
+
+      const dislikeOtherBtn = clickTarget.closest('[data-dislike-other]') as HTMLElement | null;
+      if (dislikeOtherBtn) {
+        state.dislikePickerShowOther = true;
+        renderAll();
+        scheduleTimeout(() => (document.getElementById('dislikeOtherInput') as HTMLInputElement | null)?.focus(), 50);
+        return;
+      }
+
+      const dislikeSubmitBtn = clickTarget.closest('[data-dislike-submit]') as HTMLElement | null;
+      if (dislikeSubmitBtn) {
+        const input = document.getElementById('dislikeOtherInput') as HTMLInputElement | null;
+        const reason = input?.value.trim() ?? '';
+        if (!reason) return;
+        submitDislikeReason(reason);
         return;
       }
 
