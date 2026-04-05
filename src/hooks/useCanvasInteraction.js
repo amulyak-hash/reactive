@@ -17,20 +17,52 @@ export function useCanvasInteraction(canvasRef, { width, height, onClick, enable
   const hoveredRef = useRef(null);
   const hitZonesRef = useRef([]);
   const debounceRef = useRef(null);
+  const tooltipHoverRef = useRef(false);
+  const hideTimerRef = useRef(null);
 
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: null });
 
+  const clearHideTimer = useCallback(() => {
+    clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = null;
+  }, []);
+
   const showTooltip = useCallback((x, y, content) => {
+    clearHideTimer();
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setTooltip({ visible: true, x, y, content });
     }, 30);
-  }, []);
+  }, [clearHideTimer]);
 
-  const hideTooltip = useCallback(() => {
+  const hideTooltip = useCallback((immediate = false) => {
     clearTimeout(debounceRef.current);
-    setTooltip(prev => prev.visible ? { visible: false, x: prev.x, y: prev.y, content: prev.content } : prev);
-  }, []);
+    if (tooltipHoverRef.current) return;
+
+    clearHideTimer();
+    const applyHide = () => {
+      if (tooltipHoverRef.current) return;
+      setTooltip(prev => prev.visible ? { visible: false, x: prev.x, y: prev.y, content: prev.content } : prev);
+    };
+
+    if (immediate) {
+      applyHide();
+      return;
+    }
+
+    // Small grace period lets the cursor travel from the hitzone to the tooltip
+    // without collapsing the interaction in between.
+    hideTimerRef.current = setTimeout(applyHide, 140);
+  }, [clearHideTimer]);
+
+  const setTooltipHovered = useCallback((hovered) => {
+    tooltipHoverRef.current = hovered;
+    if (!hovered) {
+      hideTooltip();
+      return;
+    }
+    clearHideTimer();
+  }, [clearHideTimer, hideTooltip]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -60,24 +92,28 @@ export function useCanvasInteraction(canvasRef, { width, height, onClick, enable
       canvas.style.cursor = found ? 'pointer' : 'default';
 
       if (found) {
+        const tooltipContent = found.data && typeof found.data === 'object'
+          ? { ...found.data, id: found.id }
+          : found.data;
         showTooltip(
           (e.clientX - rect.left) * (width / rect.width),
           (e.clientY - rect.top) * (height / rect.height),
-          found.data
+          tooltipContent
         );
       } else if (prevId) {
         hideTooltip();
       }
     };
 
-    const handleLeave = () => {
+    const handleLeave = (e) => {
+      if (e.relatedTarget?.closest?.('[data-canvas-tooltip="true"]')) return;
       mouseRef.current.x = -1;
       mouseRef.current.y = -1;
       mouseRef.current.over = false;
       if (hoveredRef.current) {
         hoveredRef.current = null;
         canvas.style.cursor = 'default';
-        hideTooltip();
+        hideTooltip(true);
       }
     };
 
@@ -97,10 +133,11 @@ export function useCanvasInteraction(canvasRef, { width, height, onClick, enable
       canvas.removeEventListener('mouseleave', handleLeave);
       canvas.removeEventListener('click', handleClick);
       clearTimeout(debounceRef.current);
+      clearHideTimer();
     };
-  }, [canvasRef, width, height, enabled, onClick, showTooltip, hideTooltip]);
+  }, [canvasRef, width, height, enabled, onClick, showTooltip, hideTooltip, clearHideTimer]);
 
-  return { mouseRef, hoveredRef, tooltip, showTooltip, hideTooltip, hitZonesRef };
+  return { mouseRef, hoveredRef, tooltip, showTooltip, hideTooltip, hitZonesRef, setTooltipHovered };
 }
 
 // --- Hit zone registration helpers ---

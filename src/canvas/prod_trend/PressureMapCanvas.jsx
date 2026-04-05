@@ -5,12 +5,12 @@ import { drawDust, drawGlow, drawScanline } from '../utils';
 import { useCanvasInteraction, registerHitCircle } from '../../hooks/useCanvasInteraction';
 import CanvasTooltip from '../../components/CanvasTooltip';
 
-export default function PressureMapCanvas({ w, h, step }) {
+export default function PressureMapCanvas({ w, h, step, paused = false, selectedZoneId = null, onZoneSelect, onZoneAction }) {
   const ref = useRef(null);
   const t = useRef(0);
   const particles = useRef([]);
   const hoverMap = useRef(new Map());
-  const { hoveredRef, tooltip, hitZonesRef } = useCanvasInteraction(ref, { width: w, height: h });
+  const { hoveredRef, tooltip, hitZonesRef, setTooltipHovered } = useCanvasInteraction(ref, { width: w, height: h, onClick: onZoneSelect });
 
   const stages = useMemo(() => [
     { label: 'Ore Yard', flow: 1.0, x: 0.08 },
@@ -38,10 +38,13 @@ export default function PressureMapCanvas({ w, h, step }) {
       tickHoverProgress(hoverMap.current, hoveredRef.current);
       hitZonesRef.current = [];
 
-      t.current++;
+      if (!paused) t.current++;
       const T = t.current;
       ctx.clearRect(0, 0, w, h);
       drawDust(ctx, w, h, T, 30);
+      const activeStageIndex = step === 0 ? 1 : step === 1 ? 2 : step === 2 ? 0 : 4;
+      const selectedStageIndex = selectedZoneId?.startsWith('stage-') ? Number(selectedZoneId.replace('stage-', '')) : null;
+      const selectedStage = Number.isInteger(selectedStageIndex) ? stages[selectedStageIndex] : null;
 
       // Draw pipe sections
       for (let i = 0; i < stages.length - 1; i++) {
@@ -63,15 +66,16 @@ export default function PressureMapCanvas({ w, h, step }) {
         ctx.closePath();
 
         const pipeColor = flow > 0.9 ? C.blue : flow > 0.7 ? C.amber : C.red;
+        const isActivePipe = i === activeStageIndex || i + 1 === activeStageIndex;
         const pg = ctx.createLinearGradient(x0, pipeY - pipeH, x0, pipeY + pipeH);
-        pg.addColorStop(0, rgb(pipeColor, 0.1));
-        pg.addColorStop(0.5, rgb(pipeColor, 0.2));
-        pg.addColorStop(1, rgb(pipeColor, 0.1));
+        pg.addColorStop(0, rgb(pipeColor, isActivePipe ? 0.18 : 0.06));
+        pg.addColorStop(0.5, rgb(pipeColor, isActivePipe ? 0.3 : 0.14));
+        pg.addColorStop(1, rgb(pipeColor, isActivePipe ? 0.18 : 0.06));
         ctx.fillStyle = pg;
         ctx.fill();
 
-        ctx.strokeStyle = rgb(pipeColor, 0.3);
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = rgb(pipeColor, isActivePipe ? 0.56 : 0.24);
+        ctx.lineWidth = isActivePipe ? 1.6 : 1;
         ctx.stroke();
 
         // Constriction highlight (step 1+)
@@ -89,9 +93,11 @@ export default function PressureMapCanvas({ w, h, step }) {
         const sx = s.x * w;
         const flow = step >= 1 ? s.flow : 0.94;
         const nodeColor = flow > 0.9 ? C.blue : flow > 0.7 ? C.amber : C.red;
-        if (flow < 0.7) drawGlow(ctx, sx, pipeY, 35, C.red, 0.12);
+        const isActive = i === activeStageIndex;
+        const isSelected = selectedZoneId === `stage-${i}`;
+        if (flow < 0.7 || isActive || isSelected) drawGlow(ctx, sx, pipeY, isSelected ? 52 : isActive ? 44 : 35, isSelected ? nodeColor : isActive ? nodeColor : C.red, isSelected ? 0.24 : isActive ? 0.18 : 0.12);
         const pulse = dampedPulse(T, 0.03, 0.0005) * 0.08 + 1;
-        const r = 16 * pulse;
+        const r = (isSelected ? 20 : isActive ? 18 : 16) * pulse;
         const nodeId = `stage-${i}`;
         const hp = hoverMap.current.get(nodeId) || 0;
 
@@ -100,7 +106,7 @@ export default function PressureMapCanvas({ w, h, step }) {
 
         // Glow
         const g = ctx.createRadialGradient(sx, pipeY, 0, sx, pipeY, r * 2.5);
-        g.addColorStop(0, rgb(nodeColor, 0.12 + 0.08 * hp));
+        g.addColorStop(0, rgb(nodeColor, (isSelected ? 0.3 : isActive ? 0.22 : 0.12) + 0.08 * hp));
         g.addColorStop(1, rgb(nodeColor, 0));
         ctx.fillStyle = g;
         ctx.beginPath();
@@ -109,8 +115,8 @@ export default function PressureMapCanvas({ w, h, step }) {
 
         // Node
         const ng = ctx.createRadialGradient(sx, pipeY - r * 0.2, 0, sx, pipeY, r);
-        ng.addColorStop(0, rgb(nodeColor, 0.85 + 0.1 * hp));
-        ng.addColorStop(1, rgb(nodeColor, 0.5 + 0.1 * hp));
+        ng.addColorStop(0, rgb(nodeColor, (isSelected ? 1 : isActive ? 0.95 : 0.85) + 0.1 * hp));
+        ng.addColorStop(1, rgb(nodeColor, (isSelected ? 0.82 : isActive ? 0.7 : 0.5) + 0.1 * hp));
         ctx.fillStyle = ng;
         ctx.beginPath();
         ctx.arc(sx, pipeY, r, 0, Math.PI * 2);
@@ -133,7 +139,7 @@ export default function PressureMapCanvas({ w, h, step }) {
       });
 
       // Flow particles
-      if (Math.random() < 0.3) {
+      if (!paused && Math.random() < 0.3) {
         particles.current.push({
           x: stages[0].x * w,
           speed: 0.8 + Math.random() * 1.2,
@@ -143,8 +149,9 @@ export default function PressureMapCanvas({ w, h, step }) {
       }
 
       particles.current = particles.current.filter(p => {
-        p.x += p.speed;
+        if (!paused) p.x += (step >= 2 ? -p.speed * 0.45 : p.speed);
         if (p.x > w) return false;
+        if (p.x < 0) return false;
 
         // Slow down at constrictions
         if (step >= 1) {
@@ -215,17 +222,37 @@ export default function PressureMapCanvas({ w, h, step }) {
         });
       }
 
+      if (selectedStage) {
+        const flow = step >= 1 ? selectedStage.flow : 0.94;
+        const nodeColor = flow > 0.9 ? C.blue : flow > 0.7 ? C.amber : C.red;
+        ctx.font = "bold 14px 'DM Sans',sans-serif";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = C.t1;
+        ctx.fillText(selectedStage.label, w * 0.5, h * 0.24);
+        ctx.font = "10px 'DM Sans',sans-serif";
+        ctx.fillStyle = rgb(nodeColor, 0.82);
+        ctx.fillText(`Flow ${Math.round(flow * 100)}% · ${flow < 0.7 ? 'Critical constriction' : flow < 0.9 ? 'Under pressure' : 'Normal flow'}`, w * 0.5, h * 0.24 + 20);
+      }
+
       drawScanline(ctx, w, h, T, 0.012);
-      raf = requestAnimationFrame(draw);
+      if (!paused) raf = requestAnimationFrame(draw);
     };
     draw();
     return () => { cancelAnimationFrame(raf); particles.current = []; };
-  }, [w, h, step, stages]);
+  }, [w, h, step, stages, paused]);
 
   return (
     <div style={{ position: 'relative', width: w, height: h }}>
       <canvas ref={ref} style={{ width: w, height: h, display: 'block' }} />
-      <CanvasTooltip {...tooltip} parentW={w} parentH={h} />
+      <CanvasTooltip
+        {...tooltip}
+        parentW={w}
+        parentH={h}
+        actions={onZoneAction ? [{ id: 'explain', label: 'Explain' }, { id: 'explore', label: 'Explore' }] : null}
+        onAction={onZoneAction}
+        onTooltipHover={setTooltipHovered}
+      />
     </div>
   );
 }

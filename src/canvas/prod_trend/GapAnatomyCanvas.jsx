@@ -6,11 +6,11 @@ import { useCanvasInteraction, registerHitCircle } from '../../hooks/useCanvasIn
 import CanvasTooltip from '../../components/CanvasTooltip';
 import { PRODUCTION_HOURS, PRODUCTION_EXPECTED, PRODUCTION_ACTUAL } from '../../data/tataSteel';
 
-export default function GapAnatomyCanvas({ w, h, step }) {
+export default function GapAnatomyCanvas({ w, h, step, paused = false, selectedZoneId = null, onZoneSelect, onZoneAction }) {
   const ref = useRef(null);
   const t = useRef(0);
   const hoverMap = useRef(new Map());
-  const { hoveredRef, tooltip, hitZonesRef } = useCanvasInteraction(ref, { width: w, height: h });
+  const { hoveredRef, tooltip, hitZonesRef, setTooltipHovered } = useCanvasInteraction(ref, { width: w, height: h, onClick: onZoneSelect });
 
   const data = useMemo(() => {
     const padL = w * 0.08, padR = w * 0.08;
@@ -48,10 +48,13 @@ export default function GapAnatomyCanvas({ w, h, step }) {
       tickHoverProgress(hoverMap.current, hoveredRef.current);
       hitZonesRef.current = [];
 
-      t.current++;
+      if (!paused) t.current++;
       const T = t.current;
       ctx.clearRect(0, 0, w, h);
       drawDust(ctx, w, h, T, 30);
+      const activeFragmentIndex = step === 0 ? -1 : step === 1 ? 0 : step === 2 ? 1 : 2;
+      const selectedFragmentIndex = selectedZoneId?.startsWith('frag-') ? Number(selectedZoneId.replace('frag-', '')) : null;
+      const selectedFragment = Number.isInteger(selectedFragmentIndex) ? fragments[selectedFragmentIndex] : null;
 
       const { expected, actual } = data;
 
@@ -128,6 +131,8 @@ export default function GapAnatomyCanvas({ w, h, step }) {
         fragments.forEach((frag, fi) => {
           const fx = frag.x * w;
           const fy = frag.y * h + Math.sin(T * 0.02 + fi * 2) * 5;
+          const isActive = fi === activeFragmentIndex;
+          const isSelected = selectedZoneId === `frag-${fi}`;
           const fr = 14 + frag.pct * 0.15;
           const pulse = dampedPulse(T, 0.03, 0.0005) * 0.1 + 1;
           const fragId = `frag-${fi}`;
@@ -137,8 +142,8 @@ export default function GapAnatomyCanvas({ w, h, step }) {
           if (hp > 0) drawGlow(ctx, fx, fy, 16 * hp, frag.color, 0.2 * hp);
 
           // Fragment glow
-          const g = ctx.createRadialGradient(fx, fy, 0, fx, fy, fr * 2.5 * pulse);
-          g.addColorStop(0, rgb(frag.color, 0.1 + 0.08 * hp));
+          const g = ctx.createRadialGradient(fx, fy, 0, fx, fy, fr * (isSelected ? 3.8 : isActive ? 3.2 : 2.5) * pulse);
+          g.addColorStop(0, rgb(frag.color, (isSelected ? 0.28 : isActive ? 0.2 : 0.1) + 0.08 * hp));
           g.addColorStop(1, rgb(frag.color, 0));
           ctx.fillStyle = g;
           ctx.beginPath();
@@ -147,8 +152,8 @@ export default function GapAnatomyCanvas({ w, h, step }) {
 
           // Fragment node
           const ng = ctx.createRadialGradient(fx, fy - fr * 0.2, 0, fx, fy, fr * pulse);
-          ng.addColorStop(0, rgb(frag.color, 0.85 + 0.1 * hp));
-          ng.addColorStop(1, rgb(frag.color, 0.45 + 0.1 * hp));
+          ng.addColorStop(0, rgb(frag.color, (isSelected ? 1 : isActive ? 0.96 : 0.85) + 0.1 * hp));
+          ng.addColorStop(1, rgb(frag.color, (isSelected ? 0.8 : isActive ? 0.68 : 0.45) + 0.1 * hp));
           ctx.fillStyle = ng;
           ctx.beginPath();
           ctx.arc(fx, fy, fr * pulse, 0, Math.PI * 2);
@@ -170,7 +175,7 @@ export default function GapAnatomyCanvas({ w, h, step }) {
           ctx.fillStyle = rgb(C.t3, 0.5);
           ctx.fillText(frag.sub, fx, fy + fr * pulse + 19);
 
-          registerHitCircle(hitZonesRef.current, fragId, fx, fy, fr * pulse + 4, {
+          registerHitCircle(hitZonesRef.current, fragId, fx, fy, fr * pulse + 6, {
             label: frag.label, value: `${frag.pct}% of gap`, sublabel: frag.sub, color: frag.color,
           });
         });
@@ -210,17 +215,35 @@ export default function GapAnatomyCanvas({ w, h, step }) {
       ctx.fillStyle = rgb(C.blue, 0.5);
       ctx.fillText('Actual', actual[0].x - 5, actual[0].y + 12);
 
+      if (selectedFragment) {
+        ctx.font = "bold 14px 'DM Sans',sans-serif";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = C.t1;
+        ctx.fillText(selectedFragment.label, w * 0.5, h * 0.2);
+        ctx.font = "10px 'DM Sans',sans-serif";
+        ctx.fillStyle = rgb(selectedFragment.color, 0.82);
+        ctx.fillText(`${selectedFragment.pct}% of gap · ${selectedFragment.sub}`, w * 0.5, h * 0.2 + 20);
+      }
+
       drawScanline(ctx, w, h, T, 0.012);
-      raf = requestAnimationFrame(draw);
+      if (!paused) raf = requestAnimationFrame(draw);
     };
     draw();
     return () => cancelAnimationFrame(raf);
-  }, [w, h, step, data, fragments]);
+  }, [w, h, step, data, fragments, paused]);
 
   return (
     <div style={{ position: 'relative', width: w, height: h }}>
       <canvas ref={ref} style={{ width: w, height: h, display: 'block' }} />
-      <CanvasTooltip {...tooltip} parentW={w} parentH={h} />
+      <CanvasTooltip
+        {...tooltip}
+        parentW={w}
+        parentH={h}
+        actions={onZoneAction ? [{ id: 'explain', label: 'Explain' }, { id: 'explore', label: 'Explore' }] : null}
+        onAction={onZoneAction}
+        onTooltipHover={setTooltipHovered}
+      />
     </div>
   );
 }
