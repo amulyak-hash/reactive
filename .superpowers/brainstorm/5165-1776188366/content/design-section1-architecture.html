@@ -1,0 +1,155 @@
+<h2>Design Section 1 — Node Architecture</h2>
+<p class="subtitle">What lives in the constellation, how it's typed, sized, and colored</p>
+
+<div class="section">
+  <h3>Entity Types & Visual Treatment</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+
+    <!-- Contractor node -->
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <defs><filter id="g1"><feGaussianBlur stdDeviation="2"/></filter></defs>
+        <circle cx="32" cy="32" r="28" fill="#F0606015" filter="url(#g1)"/>
+        <circle cx="32" cy="32" r="22" fill="#0d1520" stroke="#F06060" stroke-width="1.5"/>
+        <circle cx="32" cy="32" r="18" fill="none" stroke="#F06060" stroke-width="3" stroke-dasharray="28 85" stroke-linecap="round" opacity="0.4"/>
+        <text x="32" y="30" text-anchor="middle" fill="#fff" font-size="7" font-weight="600">Afcons</text>
+        <text x="32" y="39" text-anchor="middle" fill="#F0606090" font-size="5.5">£35.5M</text>
+      </svg>
+      <div>
+        <p style="color:#fff;font-weight:600;margin:0 0 4px;font-size:14px;">Contractor</p>
+        <p style="color:#9ca3af;margin:0;font-size:12px;line-height:1.5;">
+          <strong>Shape:</strong> Large sphere (r=18-28)<br/>
+          <strong>Size:</strong> Scales with total NCE exposure<br/>
+          <strong>Color:</strong> Severity — red >20%, orange >10%, green <8%<br/>
+          <strong>Inner ring:</strong> Partial arc = % of variation vs portfolio avg<br/>
+          <strong>Label:</strong> Name + £ value
+        </p>
+      </div>
+    </div>
+
+    <!-- Early Warning node -->
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <defs><filter id="g2"><feGaussianBlur stdDeviation="2"/></filter></defs>
+        <circle cx="32" cy="32" r="18" fill="#A78BFA20" filter="url(#g2)"/>
+        <circle cx="32" cy="32" r="12" fill="#A78BFA" opacity="0.85"/>
+        <text x="32" y="29" text-anchor="middle" fill="#fff" font-size="6" font-weight="600">EW</text>
+        <text x="32" y="38" text-anchor="middle" fill="#ffffffcc" font-size="5">0042</text>
+        <!-- Pulse ring -->
+        <circle cx="32" cy="32" r="15" fill="none" stroke="#A78BFA" stroke-width="0.8" opacity="0.3"/>
+      </svg>
+      <div>
+        <p style="color:#fff;font-weight:600;margin:0 0 4px;font-size:14px;">Early Warning</p>
+        <p style="color:#9ca3af;margin:0;font-size:12px;line-height:1.5;">
+          <strong>Shape:</strong> Small filled sphere (r=8-14)<br/>
+          <strong>Size:</strong> Scales with projected CE cost<br/>
+          <strong>Color:</strong> Purple (open) / amber (stale >14d) / red (critical)<br/>
+          <strong>Animation:</strong> Pulsing ring if stale<br/>
+          <strong>Label:</strong> "EW" + ID number
+        </p>
+      </div>
+    </div>
+
+    <!-- NCE node -->
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <defs><filter id="g3"><feGaussianBlur stdDeviation="2"/></filter></defs>
+        <circle cx="32" cy="32" r="16" fill="#FBBF2420" filter="url(#g3)"/>
+        <rect x="22" y="22" width="20" height="20" rx="4" fill="#0d1520" stroke="#FBBF24" stroke-width="1.2"/>
+        <text x="32" y="31" text-anchor="middle" fill="#FBBF24" font-size="6" font-weight="600">NCE</text>
+        <text x="32" y="39" text-anchor="middle" fill="#FBBF2490" font-size="5">£47K</text>
+      </svg>
+      <div>
+        <p style="color:#fff;font-weight:600;margin:0 0 4px;font-size:14px;">NCE / Claim</p>
+        <p style="color:#9ca3af;margin:0;font-size:12px;line-height:1.5;">
+          <strong>Shape:</strong> Rounded square (distinguishes from circular EWs)<br/>
+          <strong>Size:</strong> Scales with claim value<br/>
+          <strong>Color:</strong> Amber (normal) / red (flagged — validity issue or salami pattern)<br/>
+          <strong>Label:</strong> "NCE" + £ value
+        </p>
+      </div>
+    </div>
+
+    <!-- Package node -->
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <defs><filter id="g4"><feGaussianBlur stdDeviation="2"/></filter></defs>
+        <circle cx="32" cy="32" r="14" fill="#29cfd610" filter="url(#g4)"/>
+        <polygon points="32,18 44,26 44,38 32,46 20,38 20,26" fill="#0d1520" stroke="#29cfd6" stroke-width="1" opacity="0.8"/>
+        <text x="32" y="34" text-anchor="middle" fill="#29cfd6" font-size="6" font-weight="500">EI-01</text>
+      </svg>
+      <div>
+        <p style="color:#fff;font-weight:600;margin:0 0 4px;font-size:14px;">Package</p>
+        <p style="color:#9ca3af;margin:0;font-size:12px;line-height:1.5;">
+          <strong>Shape:</strong> Hexagon (distinct from spheres and squares)<br/>
+          <strong>Size:</strong> Scales with contract value<br/>
+          <strong>Color:</strong> Teal (on-track) / amber (drifting) / red (bleeding)<br/>
+          <strong>Label:</strong> Package code
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Connection Types</h3>
+  <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;margin-top:12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <svg width="80" height="24" viewBox="0 0 80 24">
+          <line x1="4" y1="12" x2="76" y2="12" stroke="#29cfd6" stroke-width="1.5" opacity="0.4"/>
+          <circle cx="40" cy="12" r="2" fill="#29cfd6" opacity="0.7"/>
+        </svg>
+        <span style="color:#9ca3af;font-size:12px;"><strong style="color:#fff;">Contractual</strong> — contractor ↔ package (solid, teal, animated particle)</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <svg width="80" height="24" viewBox="0 0 80 24">
+          <line x1="4" y1="12" x2="76" y2="12" stroke="#F06060" stroke-width="1.2" opacity="0.5"/>
+        </svg>
+        <span style="color:#9ca3af;font-size:12px;"><strong style="color:#fff;">Risk link</strong> — EW/NCE ↔ source entity (colored by severity)</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <svg width="80" height="24" viewBox="0 0 80 24">
+          <line x1="4" y1="12" x2="76" y2="12" stroke="#A78BFA" stroke-width="0.8" opacity="0.3" stroke-dasharray="5,5"/>
+        </svg>
+        <span style="color:#9ca3af;font-size:12px;"><strong style="color:#fff;">Cascade</strong> — risk-to-risk dependency (dashed, purple, the "aha" lines)</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <svg width="80" height="24" viewBox="0 0 80 24">
+          <line x1="4" y1="12" x2="76" y2="12" stroke="#FBBF24" stroke-width="0.6" opacity="0.2" stroke-dasharray="2,4"/>
+        </svg>
+        <span style="color:#9ca3af;font-size:12px;"><strong style="color:#fff;">Pattern</strong> — AI-detected relationship (salami slicing, budget bleed cluster)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Hub (Centre)</h3>
+  <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;display:flex;align-items:center;gap:24px;margin-top:12px;">
+    <svg width="100" height="100" viewBox="0 0 100 100">
+      <defs>
+        <radialGradient id="hubG" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#29cfd6" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#070B12" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="g5"><feGaussianBlur stdDeviation="3"/></filter>
+      </defs>
+      <circle cx="50" cy="50" r="45" fill="url(#hubG)"/>
+      <circle cx="50" cy="50" r="32" fill="#0d1520" stroke="#29cfd6" stroke-width="1.5"/>
+      <text x="50" y="40" text-anchor="middle" fill="#fff" font-size="9" font-weight="700">PORT TALBOT</text>
+      <text x="50" y="52" text-anchor="middle" fill="#29cfd680" font-size="6.5">EAF Programme</text>
+      <text x="50" y="66" text-anchor="middle" fill="#F06060" font-size="8" font-weight="600">£93.2M</text>
+      <text x="50" y="75" text-anchor="middle" fill="#F0606060" font-size="5.5">total exposure</text>
+    </svg>
+    <div>
+      <p style="color:#9ca3af;margin:0;font-size:12px;line-height:1.6;">
+        The hub is the programme itself. Always visible. Shows the headline number (total exposure).
+        All contractor nodes connect to it. Acts as the gravitational anchor.
+        <br/><br/>
+        <strong style="color:#fff;">In 3D:</strong> The hub is a glowing sphere at the origin. Contractors orbit at ~radius 8-12. Events/EWs/NCEs orbit their parent contractor at radius 3-5. Creates a natural solar-system hierarchy.
+      </p>
+    </div>
+  </div>
+</div>

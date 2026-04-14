@@ -1,93 +1,64 @@
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap');
+
+:root {
+  --bg: #050914;
+  --bg-soft: #070c17;
+  --panel: rgba(7, 12, 23, 0.94);
+  --panel-strong: rgba(10, 16, 29, 0.98);
+  --line: rgba(109, 123, 156, 0.12);
+  --line-strong: rgba(109, 123, 156, 0.2);
+  --text: #f5f7fb;
+  --muted: rgba(245, 247, 251, 0.72);
+  --muted-soft: rgba(156, 163, 175, 0.9);
+  --teal: #29cfd6;
+  --teal-soft: rgba(41, 207, 214, 0.14);
+  --blue: #5c83ff;
+  --gold: #9eb2ff;
+  --gold-soft: rgba(158, 178, 255, 0.12);
+  --shadow-sm: 0 12px 30px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 22px 54px rgba(0, 0, 0, 0.30);
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+  --radius-md: 18px;
+  --radius-sm: 14px;
+  --sans: "Satoshi", "Manrope", "Segoe UI", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* ─── Intel Briefing animations ─── */
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.8); }
-}
+button, input { font: inherit; color: inherit; }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-@keyframes narratePulse {
-  0%, 100% { box-shadow: 0 0 0px rgba(34, 211, 238, 0), 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12); }
-  50% { box-shadow: 0 0 24px rgba(34, 211, 238, 0.08), 0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.14); }
-}
-
-/* ─── Liquid Glass ─── iOS 26-style glassmorphism ─── */
-.liquid-glass {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.02);
-}
-
-.liquid-glass-strong {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.03);
-}
-
-.liquid-glass-subtle {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.liquid-glass:hover,
-.liquid-glass-subtle:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
+button {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 html, body, #root {
   width: 100%;
   min-height: 100vh;
-  background: #070B12;
-  color: #F1F5F9;
-  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 50% 82%, rgba(24, 67, 139, 0.24), transparent 18%),
+    linear-gradient(180deg, #040914 0%, #050913 100%);
+  font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+  overflow: hidden;
 }
+
+/* ─── Animations ─── */
 
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
-}
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.3); }
-}
-
-@keyframes lensPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-r), var(--accent-g), var(--accent-b), .25); }
-  50% { box-shadow: 0 0 10px 3px rgba(var(--accent-r), var(--accent-g), var(--accent-b), .12); }
-}
-
-@keyframes dotFill {
-  from { width: 0%; }
-  to   { width: 100%; }
 }
 
 @keyframes fadeIn {
@@ -95,191 +66,38 @@ html, body, #root {
   to   { opacity: 1; }
 }
 
-@keyframes orbGlow {
-  0%, 100% { box-shadow: 0 0 8px 2px rgba(34, 211, 238, 0.15); }
-  50% { box-shadow: 0 0 16px 4px rgba(34, 211, 238, 0.3); }
-}
-
-/* Story redesign animations */
-@keyframes narrativeEnter {
+@keyframes card-enter {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes progressPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-r), var(--accent-g), var(--accent-b), .4); }
-  50% { box-shadow: 0 0 8px 3px rgba(var(--accent-r), var(--accent-g), var(--accent-b), .15); }
+@keyframes wave-drift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(18px); }
 }
 
-@keyframes trackFill {
-  from { width: 0%; }
-  to   { width: 100%; }
+/* ─── NCE Story Card animations ─── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(240,96,96,0.15); }
+  50% { box-shadow: 0 0 40px rgba(240,96,96,0.3); }
 }
 
-@keyframes lensInvite {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
+@keyframes glow-pulse-text {
+  0%, 100% { text-shadow: 0 0 30px rgba(240,96,96,0.2); }
+  50% { text-shadow: 0 0 50px rgba(240,96,96,0.4); }
 }
 
-@keyframes endFadeIn {
-  from { opacity: 0; backdrop-filter: blur(0px); }
-  to   { opacity: 1; backdrop-filter: blur(8px); }
+@keyframes advance-cue {
+  0%, 100% { opacity: 0.08; }
+  50% { opacity: 0.2; }
 }
 
-@keyframes surfaceRise {
-  from { opacity: 0; transform: translateY(12px) scale(0.985); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: translateX(0); }
+  50% { opacity: 0.7; transform: translateX(4px); }
 }
 
-@keyframes ambientFloat {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(0, -8px, 0) scale(1.02); }
-}
-
-@keyframes subtleSheen {
-  0% { transform: translateX(-120%); opacity: 0; }
-  30% { opacity: 0.35; }
-  100% { transform: translateX(120%); opacity: 0; }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   LENS MORPHING — data-attribute driven dashboard transforms
-   ═══════════════════════════════════════════════════════════ */
-
-/* Base transition for morphing */
-.panel-card {
-  transition: max-height 500ms cubic-bezier(.22,1,.36,1),
-              padding 500ms cubic-bezier(.22,1,.36,1),
-              border-color 200ms ease,
-              box-shadow 200ms ease,
-              transform 300ms cubic-bezier(.22,1,.36,1),
-              opacity 500ms cubic-bezier(.22,1,.36,1) !important;
-}
-
-/* ─── RTR: Real-Time Responder ─── */
-[data-archetype="rtr"] .ai-briefing { max-height: 0; overflow: hidden; opacity: 0; padding: 0 !important; margin: 0 !important; border: none !important; }
-[data-archetype="rtr"] .section-label { display: none; }
-[data-archetype="rtr"] .panel-card { max-height: 140px; overflow: hidden; }
-[data-archetype="rtr"] .panel-subtitle { display: none; }
-[data-archetype="rtr"] .section-divider { margin-bottom: 16px !important; }
-[data-archetype="rtr"] .card-metric { font-size: 28px !important; }
-[data-archetype="rtr"] .card-title { font-size: 11px !important; }
-
-/* ─── OO: Ops Optimizer ─── */
-[data-archetype="oo"] .narrative-text { max-height: 60px; overflow: hidden; }
-[data-archetype="oo"] .panel-card { max-height: 280px; overflow: hidden; }
-
-/* ─── AP: Analytical Planner ─── */
-[data-archetype="ap"] .narrative-text { font-family: 'Newsreader', serif !important; font-size: 16px !important; line-height: 1.8 !important; }
-[data-archetype="ap"] .panel-card { max-height: none; }
-[data-archetype="ap"] .section-label span { font-size: 12px !important; letter-spacing: 0.15em !important; }
-
-/* ─── SDM: Strategic Decision Maker ─── */
-[data-archetype="sdm"] .narrative-text { display: none; }
-[data-archetype="sdm"] .card-metric { font-size: 32px !important; font-weight: 900 !important; }
-[data-archetype="sdm"] .card-sub { display: none; }
-[data-archetype="sdm"] .panel-card { max-height: 220px; overflow: hidden; }
-[data-archetype="sdm"] .signal-card { border-left: 3px solid; }
-
-/* ─── SS: Safety Sentinel ─── */
-[data-archetype="ss"] .intelligence-card[data-status="alert"] { order: -1; border-width: 2px; }
-[data-archetype="ss"] .intelligence-card[data-status="alert"] .card-metric { color: #F06060 !important; }
-[data-archetype="ss"] .risk-section { order: -1; }
-[data-archetype="ss"] .section-divider { margin-bottom: 20px !important; }
-
-/* ─── Cognitive Cluster: Speed ─── */
-[data-cogcluster="speed"] .panel-card { border-radius: 6px !important; padding: 10px 12px !important; }
-[data-cogcluster="speed"] .ai-briefing { padding: 14px 16px !important; }
-[data-cogcluster="speed"] .narrative-text { font-size: 12px !important; line-height: 1.4 !important; }
-[data-cogcluster="speed"] .section-divider { margin-bottom: 20px !important; }
-
-/* ─── Cognitive Cluster: Depth ─── */
-[data-cogcluster="depth"] .panel-card { padding: 20px 22px !important; }
-[data-cogcluster="depth"] .narrative-text { font-size: 15px !important; line-height: 1.8 !important; }
-[data-cogcluster="depth"] .section-label span { letter-spacing: 0.15em !important; }
-[data-cogcluster="depth"] .signal-card { padding: 16px 18px !important; }
-
-/* ─── Cognitive Cluster: Systems ─── */
-[data-cogcluster="systems"] .factory-map-section { order: -1; }
-[data-cogcluster="systems"] .intelligence-grid { gap: 8px !important; }
-[data-cogcluster="systems"] .panel-card { border-left: 3px solid var(--panel-accent, #3B8BF6) !important; }
-
-/* ─── Cognitive Cluster: People ─── */
-[data-cogcluster="people"] .ai-briefing { padding: 24px 28px !important; }
-[data-cogcluster="people"] .narrative-text { font-family: 'Newsreader', serif !important; font-size: 15px !important; }
-[data-cogcluster="people"] .section-label span { font-family: 'DM Sans', sans-serif !important; font-weight: 600 !important; text-transform: none !important; letter-spacing: 0 !important; }
-
-/* ─── Individual Cognitive Style fine-tuning ─── */
-
-/* Speed cluster */
-[data-cogstyle="rapid-decider"] .panel-card { max-height: calc(var(--panel-max-height, 300px) - 40px); }
-[data-cogstyle="decisive-actor"] .signal-card { font-weight: 800 !important; }
-[data-cogstyle="decisive-actor"] .story-button { font-weight: 700 !important; }
-
-/* Depth cluster */
-[data-cogstyle="deliberate-analyst"] .panel-card { max-height: none !important; }
-[data-cogstyle="deep-investigator"] .intelligence-card { min-height: 120px; }
-[data-cogstyle="deep-investigator"] .card-preview { transform: scale(1.12); }
-
-/* Systems cluster */
-[data-cogstyle="systems-thinker"] .intelligence-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; }
-[data-cogstyle="pattern-recognizer"] .card-metric { font-family: 'JetBrains Mono', monospace !important; }
-[data-cogstyle="pattern-recognizer"] .intelligence-grid { gap: 6px !important; }
-
-/* People cluster */
-[data-cogstyle="collab-facilitator"] .signal-card { border-radius: 14px !important; }
-[data-cogstyle="consensus-builder"] .ai-briefing { border-radius: 20px !important; }
-[data-cogstyle="narrative-interpreter"] .narrative-text { font-style: italic !important; font-size: 16px !important; }
-[data-cogstyle="intuitive-scanner"] .intelligence-card { opacity: 0.85; }
-[data-cogstyle="intuitive-scanner"] .intelligence-card[data-status="alert"] { opacity: 1; transform: scale(1.01); }
-
-/* ─── 2-Axis Differentiation: New Rules ─── */
-
-/* SDM financial summary band */
-.financial-summary-band {
-  display: none;
-  align-items: center;
-  gap: 20px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, rgba(34,211,238,0.04), rgba(59,139,246,0.04));
-  border: 1px solid rgba(34,211,238,0.15);
-  border-radius: 12px;
-  margin-bottom: 24px;
-}
-[data-archetype="sdm"] .financial-summary-band { display: flex; }
-
-/* Surface metric badges (#8) */
-.surface-metric-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(241,245,249,0.6);
-}
-
-/* Story annotation panels (#9) */
-.story-annotation {
-  padding: 8px 12px;
-  margin-top: 8px;
-  background: rgba(255,255,255,0.03);
-  border-left: 2px solid rgba(34,211,238,0.3);
-  border-radius: 0 6px 6px 0;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: rgba(241,245,249,0.5);
-  animation: fadeIn 0.3s ease;
-}
-
-/* Lens menu entry animation */
-@keyframes lensMenuEnter {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+.pills-scroll::-webkit-scrollbar { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

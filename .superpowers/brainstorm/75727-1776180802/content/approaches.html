@@ -1,0 +1,103 @@
+<h2>Three approaches to build it</h2>
+<p class="subtitle">Same story, same animations, same visual language. The difference is how we architect it and how much we replace.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Story Takeover — Replace the entire card</h3>
+      <p style="margin-bottom:14px;">When <code style="font-size:11px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:4px;">uc-00</code> is active, ResponseCard renders a completely new <strong>NCEStoryCard</strong> component instead of the current layout. The story card owns its own scene management, scroll tracking, and animation orchestration.</p>
+
+      <div style="display:flex;gap:12px;margin-top:12px;">
+        <div style="flex:1;padding:12px;border-radius:8px;background:rgba(59,184,138,0.05);border:1px solid rgba(59,184,138,0.1);">
+          <div style="font-size:9px;color:rgba(59,184,138,0.6);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Pros</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
+            &bull; Total creative freedom<br/>
+            &bull; Clean separation — no fighting existing layout<br/>
+            &bull; Can be the template for other use cases later
+          </div>
+        </div>
+        <div style="flex:1;padding:12px;border-radius:8px;background:rgba(240,96,96,0.05);border:1px solid rgba(240,96,96,0.1);">
+          <div style="font-size:9px;color:rgba(240,96,96,0.6);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Cons</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
+            &bull; Biggest build — new component from scratch<br/>
+            &bull; Need to handle all the card infrastructure (resize, context, etc.)
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;padding:10px 14px;border-radius:8px;background:rgba(92,131,255,0.05);border:1px solid rgba(92,131,255,0.1);font-size:11px;color:rgba(92,131,255,0.6);">
+        <strong>Kills:</strong> NCEStackedBars, CompanionViz (treemap+trend), ContractorDrilldown table, KPI boxes, UseCaseAnswer text block — all replaced by story beats
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Story Layer — Overlay on existing card</h3>
+      <p style="margin-bottom:14px;">The story plays as an animated overlay on top of the card. When it finishes (or user dismisses), the traditional card is underneath as a reference. Think of it as a "guided tour" that plays first, then gets out of the way.</p>
+
+      <div style="display:flex;gap:12px;margin-top:12px;">
+        <div style="flex:1;padding:12px;border-radius:8px;background:rgba(59,184,138,0.05);border:1px solid rgba(59,184,138,0.1);">
+          <div style="font-size:9px;color:rgba(59,184,138,0.6);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Pros</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
+            &bull; Safer — existing card untouched<br/>
+            &bull; User can skip to raw data<br/>
+            &bull; Easier to A/B test
+          </div>
+        </div>
+        <div style="flex:1;padding:12px;border-radius:8px;background:rgba(240,96,96,0.05);border:1px solid rgba(240,96,96,0.1);">
+          <div style="font-size:9px;color:rgba(240,96,96,0.6);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Cons</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
+            &bull; Compromised vision — story + old card fighting for attention<br/>
+            &bull; "Skip" option undermines the narrative<br/>
+            &bull; Two experiences to maintain
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;padding:10px 14px;border-radius:8px;background:rgba(251,191,36,0.05);border:1px solid rgba(251,191,36,0.1);font-size:11px;color:rgba(251,191,36,0.6);">
+        <strong>Keeps:</strong> Everything. Story is additive, not a replacement.
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Story-First with Data Drawer</h3>
+      <p style="margin-bottom:14px;">The story IS the card — full replacement like option A. But at the end of the story (after beat 5), a subtle "View raw data" affordance slides open a compact data drawer with the essential numbers in a clean table. The story is primary; data is secondary reference.</p>
+
+      <div style="display:flex;gap:12px;margin-top:12px;">
+        <div style="flex:1;padding:12px;border-radius:8px;background:rgba(59,184,138,0.05);border:1px solid rgba(59,184,138,0.1);">
+          <div style="font-size:9px;color:rgba(59,184,138,0.6);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Pros</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
+            &bull; Full creative freedom for the story<br/>
+            &bull; Data-minded users still have an escape hatch<br/>
+            &bull; Story doesn't compete with charts<br/>
+            &bull; Clean architecture — story component + minimal data component
+          </div>
+        </div>
+        <div style="flex:1;padding:12px;border-radius:8px;background:rgba(240,96,96,0.05);border:1px solid rgba(240,96,96,0.1);">
+          <div style="font-size:9px;color:rgba(240,96,96,0.6);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Cons</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;">
+            &bull; Still a big build (story + drawer)<br/>
+            &bull; Drawer needs its own design to not feel like an afterthought
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;padding:10px 14px;border-radius:8px;background:rgba(92,131,255,0.05);border:1px solid rgba(92,131,255,0.1);font-size:11px;color:rgba(92,131,255,0.6);">
+        <strong>Kills:</strong> Same as A — all current viz components. <strong>Adds:</strong> Collapsible data drawer at the end.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;padding:16px 20px;border-radius:12px;background:rgba(166,123,219,0.04);border:1px solid rgba(166,123,219,0.1);">
+  <div style="font-size:11px;color:rgba(166,123,219,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">My recommendation</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.6;">
+    <strong style="color:rgba(255,255,255,0.8);">Option C</strong> — Story-First with Data Drawer. You get the full narrative experience without compromise, but the analytical users who want to copy a number into an email still have a way. The drawer is a footnote, not a co-star.
+  </div>
+</div>

@@ -1,0 +1,107 @@
+<h2>What's the cold open?</h2>
+<p class="subtitle">This is the first thing they see. The moment that stops them cold. Pick the gut-punch.</p>
+
+<div class="cards" style="grid-template-columns: 1fr 1fr;">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:32px 24px;text-align:center;background:linear-gradient(180deg,rgba(240,96,96,0.08),rgba(240,96,96,0.02));">
+      <div style="font-size:11px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;">Portfolio leakage</div>
+      <div style="font-family:monospace;font-size:56px;font-weight:800;color:#F06060;letter-spacing:-0.03em;line-height:1;">£93.2M</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:12px;">has bled through contract variations</div>
+      <div style="margin-top:20px;height:3px;background:linear-gradient(90deg,transparent,#F06060,transparent);border-radius:2px;opacity:0.6;"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:12px;">then: "Where is it going?" pulls you in</div>
+    </div>
+    <div class="card-body">
+      <h3>The Number</h3>
+      <p>One massive figure. No context. No charts. Just the hemorrhage, raw. Then a single question beneath it pulls you into the investigation.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:32px 24px;text-align:center;background:linear-gradient(180deg,rgba(240,96,96,0.06),rgba(17,27,40,0.96));">
+      <div style="font-size:11px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:16px;">7 months of bleeding</div>
+      <div style="display:flex;align-items:flex-end;justify-content:center;gap:4px;height:80px;margin-bottom:12px;">
+        <div style="width:24px;background:rgba(240,96,96,0.15);border-radius:3px 3px 0 0;height:8%;"></div>
+        <div style="width:24px;background:rgba(240,96,96,0.2);border-radius:3px 3px 0 0;height:16%;"></div>
+        <div style="width:24px;background:rgba(240,96,96,0.3);border-radius:3px 3px 0 0;height:30%;"></div>
+        <div style="width:24px;background:rgba(240,96,96,0.4);border-radius:3px 3px 0 0;height:48%;"></div>
+        <div style="width:24px;background:rgba(240,96,96,0.55);border-radius:3px 3px 0 0;height:64%;"></div>
+        <div style="width:24px;background:rgba(240,96,96,0.7);border-radius:3px 3px 0 0;height:82%;"></div>
+        <div style="width:24px;background:#F06060;border-radius:3px 3px 0 0;height:100%;box-shadow:0 0 12px rgba(240,96,96,0.4);"></div>
+      </div>
+      <div style="font-family:monospace;font-size:14px;color:rgba(255,255,255,0.5);">£0 &rarr; £93.2M</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:12px;">animated — you watch the money drain in real-time</div>
+    </div>
+    <div class="card-body">
+      <h3>The Bleed</h3>
+      <p>An animated counter ticking from £0 to £93.2M over 7 months. You watch the money drain. The acceleration is visible — it's not linear, it's getting worse.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:32px 24px;background:linear-gradient(180deg,rgba(240,96,96,0.06),rgba(17,27,40,0.96));">
+      <div style="font-size:11px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:20px;text-align:center;">Contractor risk profile</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.5);width:90px;text-align:right;">L&T</span>
+          <div style="flex:1;height:18px;border-radius:4px;background:rgba(59,184,138,0.15);overflow:hidden;position:relative;">
+            <div style="position:absolute;right:8px;top:2px;font-size:10px;color:rgba(255,255,255,0.4);">6%</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.5);width:90px;text-align:right;">Tata Projects</span>
+          <div style="flex:1;height:18px;border-radius:4px;background:rgba(251,191,36,0.15);overflow:hidden;position:relative;">
+            <div style="position:absolute;right:8px;top:2px;font-size:10px;color:rgba(255,255,255,0.4);">9.8%</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.5);width:90px;text-align:right;">KEC</span>
+          <div style="flex:1;height:18px;border-radius:4px;background:rgba(251,191,36,0.2);overflow:hidden;position:relative;">
+            <div style="position:absolute;right:8px;top:2px;font-size:10px;color:rgba(255,255,255,0.4);">13.3%</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.5);width:90px;text-align:right;">NCC Ltd</span>
+          <div style="flex:1;height:18px;border-radius:4px;background:rgba(240,96,96,0.25);overflow:hidden;position:relative;">
+            <div style="position:absolute;right:8px;top:2px;font-size:10px;color:rgba(255,255,255,0.4);">16%</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:rgba(255,255,255,0.6);width:90px;text-align:right;font-weight:600;">Afcons</span>
+          <div style="flex:1;height:22px;border-radius:4px;background:rgba(240,96,96,0.3);border:1px solid rgba(240,96,96,0.5);overflow:hidden;position:relative;box-shadow:0 0 16px rgba(240,96,96,0.15);">
+            <div style="position:absolute;right:8px;top:3px;font-size:11px;color:#F06060;font-weight:700;">25%</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:16px;text-align:center;">the outlier glows — impossible to ignore</div>
+    </div>
+    <div class="card-body">
+      <h3>The Outlier</h3>
+      <p>All 5 contractors ranked by variation %. Four are quiet. One is glowing red, pulsing. Afcons at 25% — impossible to miss. The story becomes: "What's happening with Afcons?"</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:32px 24px;text-align:center;background:linear-gradient(180deg,rgba(92,131,255,0.06),rgba(17,27,40,0.96));">
+      <div style="font-size:11px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:20px;">The ratio</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;">
+        <div>
+          <div style="font-family:monospace;font-size:42px;font-weight:800;color:rgba(255,255,255,0.8);line-height:1;">£1</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">contracted</div>
+        </div>
+        <div style="font-size:24px;color:rgba(255,255,255,0.2);">&rarr;</div>
+        <div>
+          <div style="font-family:monospace;font-size:42px;font-weight:800;color:#F06060;line-height:1;">13p</div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">already leaked</div>
+        </div>
+      </div>
+      <div style="margin-top:20px;font-size:12px;color:rgba(255,255,255,0.35);">For every pound you committed,<br/>thirteen pence have already escaped.</div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:16px;">makes the abstract brutally concrete</div>
+    </div>
+    <div class="card-body">
+      <h3>The Ratio</h3>
+      <p>"For every £1 contracted, 13p has already leaked." Makes the abstract concrete. Everyone understands pounds and pence. Then zooms into who's responsible.</p>
+    </div>
+  </div>
+
+</div>

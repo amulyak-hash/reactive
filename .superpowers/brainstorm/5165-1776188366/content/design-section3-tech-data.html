@@ -1,0 +1,233 @@
+<h2>Design Section 3 — Tech Stack & Data Model</h2>
+<p class="subtitle">How it's built, what powers it, and how the data is structured</p>
+
+<div class="section">
+  <h3>Tech Stack</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;">
+      <p style="color:#29cfd6;font-size:10px;margin:0 0 10px;letter-spacing:1px;font-weight:600;">3D SCENE</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:13px;font-weight:500;">React Three Fiber</span>
+          <span style="color:#9ca3af;font-size:11px;">3D scene graph</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:13px;font-weight:500;">Three.js</span>
+          <span style="color:#9ca3af;font-size:11px;">WebGL renderer</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:13px;font-weight:500;">@react-three/drei</span>
+          <span style="color:#9ca3af;font-size:11px;">Billboard, Html, Float helpers</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:13px;font-weight:500;">@react-three/postprocessing</span>
+          <span style="color:#9ca3af;font-size:11px;">Bloom, depth-of-field, vignette</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;">
+      <p style="color:#29cfd6;font-size:10px;margin:0 0 10px;letter-spacing:1px;font-weight:600;">ALREADY IN PROJECT</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:13px;font-weight:500;">React 19 + Vite</span>
+          <span style="color:#9ca3af;font-size:11px;">no change</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:13px;font-weight:500;">Zustand</span>
+          <span style="color:#9ca3af;font-size:11px;">store.js — extend, not replace</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:13px;font-weight:500;">Theme tokens</span>
+          <span style="color:#9ca3af;font-size:11px;">C.blue, C.red etc — reuse as-is</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:13px;font-weight:500;">Canvas utils / easing</span>
+          <span style="color:#9ca3af;font-size:11px;">retire — replaced by R3F</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Component Architecture</h3>
+  <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:24px;margin-top:12px;">
+    <pre style="color:#9ca3af;font-size:12px;line-height:1.8;margin:0;font-family:'JetBrains Mono',monospace;overflow-x:auto;">
+<span style="color:#29cfd6">App.jsx</span>
+├── <span style="color:#fff;font-weight:600">IntelligenceScene</span>              <span style="color:#ffffff40">← new: R3F Canvas wrapper</span>
+│   ├── <span style="color:#A78BFA">CameraRig</span>                    <span style="color:#ffffff40">← guided presets + transitions</span>
+│   ├── <span style="color:#34D399">ConstellationGraph</span>            <span style="color:#ffffff40">← positions nodes, manages layout</span>
+│   │   ├── <span style="color:#F06060">HubNode</span>                   <span style="color:#ffffff40">← centre sphere + severity ring</span>
+│   │   ├── <span style="color:#F06060">ContractorNode</span>  ×5        <span style="color:#ffffff40">← sphere + floating label + arc</span>
+│   │   ├── <span style="color:#FBBF24">EventNode</span>  ×N             <span style="color:#ffffff40">← EW/NCE/Package, typed shape</span>
+│   │   └── <span style="color:#29cfd6">ConnectionEdge</span>  ×N        <span style="color:#ffffff40">← bezier tube + flow particles</span>
+│   ├── <span style="color:#FBBF24">FlowParticles</span>                 <span style="color:#ffffff40">← instanced mesh, shader trails</span>
+│   ├── <span style="color:#A78BFA">PostProcessing</span>                <span style="color:#ffffff40">← bloom + DOF + vignette</span>
+│   └── <span style="color:#29cfd6">EnvironmentEffects</span>            <span style="color:#ffffff40">← subtle star field / dust motes</span>
+│
+├── <span style="color:#fff;font-weight:600">HtmlOverlays</span>                    <span style="color:#ffffff40">← HTML positioned via drei &lt;Html&gt;</span>
+│   ├── <span style="color:#F06060">NodeTooltip</span>                   <span style="color:#ffffff40">← hover detail (replaces canvas tooltip)</span>
+│   ├── <span style="color:#FBBF24">ExpandedPanel</span>                 <span style="color:#ffffff40">← in-place detail when node expanded</span>
+│   └── <span style="color:#A78BFA">ThreadPanel</span>                   <span style="color:#ffffff40">← AI thread (slides from right edge)</span>
+│
+└── <span style="color:#fff;font-weight:600">CommandBar</span>                      <span style="color:#ffffff40">← existing, no change</span></pre>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Data Model — Entity Graph</h3>
+  <p style="color:#9ca3af;font-size:13px;">The current <code style="color:#FBBF24;background:#FBBF2415;padding:2px 6px;border-radius:3px;">USE_CASES[]</code> array gets restructured into a graph of typed entities and edges.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;">
+      <p style="color:#F06060;font-size:10px;margin:0 0 10px;letter-spacing:1px;font-weight:600;">NODES</p>
+      <pre style="color:#9ca3af;font-size:11px;line-height:1.7;margin:0;font-family:'JetBrains Mono',monospace;"><span style="color:#fff">entities</span>: [
+  {
+    <span style="color:#29cfd6">id</span>: <span style="color:#FBBF24">'contractor-afcons'</span>,
+    <span style="color:#29cfd6">type</span>: <span style="color:#FBBF24">'contractor'</span>,
+    <span style="color:#29cfd6">label</span>: <span style="color:#FBBF24">'Afcons Infra'</span>,
+    <span style="color:#29cfd6">value</span>: 35500,  <span style="color:#ffffff40">// £K exposure</span>
+    <span style="color:#29cfd6">severity</span>: <span style="color:#FBBF24">'critical'</span>,
+    <span style="color:#29cfd6">metrics</span>: {
+      <span style="color:#29cfd6">variationPct</span>: 25,
+      <span style="color:#29cfd6">nceCount</span>: 14,
+      <span style="color:#29cfd6">ewCount</span>: 3,
+      <span style="color:#29cfd6">originalValue</span>: 142000,
+    },
+    <span style="color:#29cfd6">orbit</span>: { <span style="color:#29cfd6">parent</span>: <span style="color:#FBBF24">'hub'</span>, <span style="color:#29cfd6">angle</span>: -0.4 }
+  },
+  {
+    <span style="color:#29cfd6">id</span>: <span style="color:#FBBF24">'ew-0042'</span>,
+    <span style="color:#29cfd6">type</span>: <span style="color:#FBBF24">'early-warning'</span>,
+    <span style="color:#29cfd6">label</span>: <span style="color:#FBBF24">'EW-0042'</span>,
+    <span style="color:#29cfd6">value</span>: 310,  <span style="color:#ffffff40">// £K projected CE</span>
+    <span style="color:#29cfd6">severity</span>: <span style="color:#FBBF24">'critical'</span>,
+    <span style="color:#29cfd6">metrics</span>: {
+      <span style="color:#29cfd6">daysOpen</span>: 19,
+      <span style="color:#29cfd6">subject</span>: <span style="color:#FBBF24">'Transformer'</span>,
+    },
+    <span style="color:#29cfd6">orbit</span>: { <span style="color:#29cfd6">parent</span>: <span style="color:#FBBF24">'contractor-afcons'</span> }
+  },
+  <span style="color:#ffffff30">// ... more entities</span>
+]</pre>
+    </div>
+
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;">
+      <p style="color:#A78BFA;font-size:10px;margin:0 0 10px;letter-spacing:1px;font-weight:600;">EDGES</p>
+      <pre style="color:#9ca3af;font-size:11px;line-height:1.7;margin:0;font-family:'JetBrains Mono',monospace;"><span style="color:#fff">edges</span>: [
+  {
+    <span style="color:#29cfd6">from</span>: <span style="color:#FBBF24">'hub'</span>,
+    <span style="color:#29cfd6">to</span>: <span style="color:#FBBF24">'contractor-afcons'</span>,
+    <span style="color:#29cfd6">type</span>: <span style="color:#FBBF24">'contractual'</span>,
+    <span style="color:#29cfd6">flow</span>: {
+      <span style="color:#29cfd6">speed</span>: 0.4,
+      <span style="color:#29cfd6">density</span>: 3,
+      <span style="color:#29cfd6">direction</span>: <span style="color:#FBBF24">'inward'</span>,
+    }
+  },
+  {
+    <span style="color:#29cfd6">from</span>: <span style="color:#FBBF24">'contractor-afcons'</span>,
+    <span style="color:#29cfd6">to</span>: <span style="color:#FBBF24">'ew-0042'</span>,
+    <span style="color:#29cfd6">type</span>: <span style="color:#FBBF24">'risk'</span>,
+    <span style="color:#29cfd6">flow</span>: {
+      <span style="color:#29cfd6">speed</span>: 0.7,
+      <span style="color:#29cfd6">density</span>: 5,
+      <span style="color:#29cfd6">direction</span>: <span style="color:#FBBF24">'outward'</span>,
+    }
+  },
+  {
+    <span style="color:#29cfd6">from</span>: <span style="color:#FBBF24">'ew-0042'</span>,
+    <span style="color:#29cfd6">to</span>: <span style="color:#FBBF24">'ew-0058'</span>,
+    <span style="color:#29cfd6">type</span>: <span style="color:#FBBF24">'cascade'</span>,
+    <span style="color:#29cfd6">flow</span>: {
+      <span style="color:#29cfd6">speed</span>: 1.0,  <span style="color:#ffffff40">// fastest</span>
+      <span style="color:#29cfd6">density</span>: 8,
+      <span style="color:#29cfd6">direction</span>: <span style="color:#FBBF24">'outward'</span>,
+    }
+  },
+  {
+    <span style="color:#29cfd6">from</span>: <span style="color:#FBBF24">'contractor-rhi'</span>,
+    <span style="color:#29cfd6">to</span>: <span style="color:#FBBF24">'nce-salami-cluster'</span>,
+    <span style="color:#29cfd6">type</span>: <span style="color:#FBBF24">'pattern'</span>,
+    <span style="color:#29cfd6">flow</span>: {
+      <span style="color:#29cfd6">speed</span>: 0.3,
+      <span style="color:#29cfd6">density</span>: 2,
+      <span style="color:#29cfd6">direction</span>: <span style="color:#FBBF24">'outward'</span>,
+    }
+  },
+  <span style="color:#ffffff30">// ... more edges</span>
+]</pre>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Flow Particles — How They Work in 3D</h3>
+  <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;margin-top:12px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+
+      <div>
+        <p style="color:#29cfd6;font-size:10px;margin:0 0 8px;letter-spacing:1px;font-weight:600;">RENDERING</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.5;">
+          <strong style="color:#fff;">InstancedMesh</strong> — single draw call for all particles across all edges. Each instance: a small billboard quad with additive blending.
+          <br/><br/>
+          <strong style="color:#fff;">Shader trail</strong> — vertex shader stretches quad along velocity. Fragment shader applies gradient fade for comet tail. Trail length scales with speed.
+        </p>
+      </div>
+
+      <div>
+        <p style="color:#FBBF24;font-size:10px;margin:0 0 8px;letter-spacing:1px;font-weight:600;">BEHAVIOR PER EDGE TYPE</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.5;">
+          <strong style="color:#29cfd6;">Contractual</strong> — slow, 2-3 particles, teal, steady flow<br/>
+          <strong style="color:#F06060;">Risk</strong> — medium, 4-5, colored by severity<br/>
+          <strong style="color:#A78BFA;">Cascade</strong> — fast, 6-8, purple, urgent pulse<br/>
+          <strong style="color:#FBBF24;">Pattern</strong> — slow, 1-2, amber, dotted path<br/>
+        </p>
+      </div>
+
+      <div>
+        <p style="color:#34D399;font-size:10px;margin:0 0 8px;letter-spacing:1px;font-weight:600;">POST-PROCESSING</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.5;">
+          <strong style="color:#fff;">Bloom</strong> — makes particles glow beyond their geometry. Low threshold, high intensity on particle layer.<br/>
+          <strong style="color:#fff;">DOF</strong> — background nodes blur on Focus camera. Particles stay sharp.<br/>
+          <strong style="color:#fff;">Vignette</strong> — subtle darkening at edges for cinematic feel.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Store Changes (Zustand)</h3>
+  <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;margin-top:12px;">
+    <pre style="color:#9ca3af;font-size:11px;line-height:1.7;margin:0;font-family:'JetBrains Mono',monospace;"><span style="color:#ffffff40">// New state slices added to existing store.js</span>
+
+<span style="color:#29cfd6">cameraPreset</span>: <span style="color:#FBBF24">'overview'</span>,       <span style="color:#ffffff40">// 'overview' | 'command-table' | 'focus'</span>
+<span style="color:#29cfd6">focusedEntity</span>: <span style="color:#FBBF24">null</span>,           <span style="color:#ffffff40">// entity id or null</span>
+<span style="color:#29cfd6">expandedEntity</span>: <span style="color:#FBBF24">null</span>,          <span style="color:#ffffff40">// entity id or null (expanded in-place)</span>
+<span style="color:#29cfd6">hoveredEntity</span>: <span style="color:#FBBF24">null</span>,           <span style="color:#ffffff40">// entity id or null</span>
+<span style="color:#29cfd6">threadEntity</span>: <span style="color:#FBBF24">null</span>,            <span style="color:#ffffff40">// entity id that opened the AI thread</span>
+
+<span style="color:#ffffff40">// Actions</span>
+<span style="color:#29cfd6">focusEntity</span>(<span style="color:#F0813A">id</span>)                 <span style="color:#ffffff40">// → fly camera, expand node</span>
+<span style="color:#29cfd6">unfocus</span>()                       <span style="color:#ffffff40">// → return to previous preset</span>
+<span style="color:#29cfd6">openThread</span>(<span style="color:#F0813A">entityId</span>)             <span style="color:#ffffff40">// → slide in AI panel</span>
+<span style="color:#29cfd6">setCameraPreset</span>(<span style="color:#F0813A">preset</span>)         <span style="color:#ffffff40">// → transition camera</span></pre>
+  </div>
+</div>
+
+<div style="margin-top:24px;padding:16px;border:1px solid #ffffff10;border-radius:8px;background:#ffffff05;">
+  <p style="color:#29cfd6;font-size:13px;margin:0 0 6px;font-weight:600;">What gets retired</p>
+  <p style="color:#9ca3af;font-size:13px;margin:0;line-height:1.6;">
+    <span style="color:#F06060;">Remove:</span> <code style="color:#F06060;background:#F0606015;padding:1px 5px;border-radius:3px;">src/canvas/uc/RiskConstellation.jsx</code> (replaced by IntelligenceScene)<br/>
+    <span style="color:#F06060;">Remove:</span> <code style="color:#F06060;background:#F0606015;padding:1px 5px;border-radius:3px;">src/components/Dashboard.jsx</code> (ResizeObserver wrapper, not needed with R3F)<br/>
+    <span style="color:#FBBF24;">Restructure:</span> <code style="color:#FBBF24;background:#FBBF2415;padding:1px 5px;border-radius:3px;">src/data/useCases.js</code> → new <code style="color:#34D399;background:#34D39915;padding:1px 5px;border-radius:3px;">src/data/entityGraph.js</code><br/>
+    <span style="color:#34D399;">Keep:</span> <code style="color:#34D399;background:#34D39915;padding:1px 5px;border-radius:3px;">src/store.js</code>, <code style="color:#34D399;background:#34D39915;padding:1px 5px;border-radius:3px;">src/theme/tokens.js</code>, <code style="color:#34D399;background:#34D39915;padding:1px 5px;border-radius:3px;">src/components/CommandBar.jsx</code>, thread components
+  </p>
+</div>

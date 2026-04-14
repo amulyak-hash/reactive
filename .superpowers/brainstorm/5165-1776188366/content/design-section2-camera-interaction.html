@@ -1,0 +1,249 @@
+<h2>Design Section 2 — Camera System & Interaction</h2>
+<p class="subtitle">3D camera presets, expand-in-place behavior, and the demo flow</p>
+
+<div class="section">
+  <h3>Camera Presets</h3>
+  <p style="color:#9ca3af;font-size:13px;">Three guided views the camera smoothly transitions between. No free orbit — the camera always moves to a preset.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:14px;">
+
+    <!-- Overview -->
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:16px;text-align:center;">
+      <svg width="100%" height="140" viewBox="0 0 200 140">
+        <defs>
+          <radialGradient id="ovG" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#29cfd6" stop-opacity="0.1"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+        </defs>
+        <!-- Top-down-ish view — circles as ellipses to show angle -->
+        <ellipse cx="100" cy="75" rx="85" ry="50" fill="none" stroke="#29cfd6" stroke-width="0.5" opacity="0.08"/>
+        <circle cx="100" cy="75" r="14" fill="#0d1520" stroke="#29cfd6" stroke-width="1"/>
+        <text x="100" y="78" text-anchor="middle" fill="#fff" font-size="7">£93M</text>
+
+        <circle cx="45" cy="45" r="9" fill="#0d1520" stroke="#F06060" stroke-width="1"/>
+        <circle cx="155" cy="45" r="8" fill="#0d1520" stroke="#5c83ff" stroke-width="1"/>
+        <circle cx="40" cy="105" r="7" fill="#0d1520" stroke="#34D399" stroke-width="1"/>
+        <circle cx="160" cy="105" r="8" fill="#0d1520" stroke="#F0813A" stroke-width="1"/>
+        <circle cx="100" cy="28" r="7" fill="#0d1520" stroke="#FBBF24" stroke-width="1"/>
+
+        <!-- Small event dots -->
+        <circle cx="28" cy="60" r="3" fill="#A78BFA" opacity="0.6"/>
+        <circle cx="58" cy="32" r="2.5" fill="#FBBF24" opacity="0.6"/>
+        <circle cx="170" cy="60" r="2.5" fill="#F0813A" opacity="0.6"/>
+
+        <!-- Connections -->
+        <line x1="100" y1="75" x2="45" y2="45" stroke="#29cfd6" stroke-width="0.4" opacity="0.15"/>
+        <line x1="100" y1="75" x2="155" y2="45" stroke="#29cfd6" stroke-width="0.4" opacity="0.15"/>
+        <line x1="100" y1="75" x2="40" y2="105" stroke="#29cfd6" stroke-width="0.4" opacity="0.15"/>
+        <line x1="100" y1="75" x2="160" y2="105" stroke="#29cfd6" stroke-width="0.4" opacity="0.15"/>
+        <line x1="100" y1="75" x2="100" y2="28" stroke="#29cfd6" stroke-width="0.4" opacity="0.15"/>
+
+        <!-- Camera icon -->
+        <text x="100" y="136" text-anchor="middle" fill="#29cfd6" font-size="8" opacity="0.6">▲ camera</text>
+      </svg>
+      <p style="color:#fff;font-weight:600;font-size:13px;margin:8px 0 4px;">Overview</p>
+      <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.4;">Elevated ~45° angle. Sees the full network. Slow auto-rotation (~0.1°/s). <strong>Default landing view.</strong></p>
+    </div>
+
+    <!-- Command Table -->
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:16px;text-align:center;">
+      <svg width="100%" height="140" viewBox="0 0 200 140">
+        <!-- Steeper angle — more elliptical -->
+        <ellipse cx="100" cy="80" rx="90" ry="30" fill="none" stroke="#29cfd6" stroke-width="0.5" opacity="0.08"/>
+        <ellipse cx="100" cy="80" rx="12" ry="5" fill="#0d1520" stroke="#29cfd6" stroke-width="1"/>
+        <text x="100" y="83" text-anchor="middle" fill="#fff" font-size="5">£93M</text>
+
+        <ellipse cx="30" cy="68" rx="7" ry="3" fill="#0d1520" stroke="#F06060" stroke-width="1"/>
+        <ellipse cx="170" cy="68" rx="6" ry="2.5" fill="#0d1520" stroke="#5c83ff" stroke-width="1"/>
+        <ellipse cx="25" cy="92" rx="5" ry="2" fill="#0d1520" stroke="#34D399" stroke-width="1"/>
+        <ellipse cx="175" cy="92" rx="6" ry="2.5" fill="#0d1520" stroke="#F0813A" stroke-width="1"/>
+        <ellipse cx="100" cy="55" rx="5" ry="2" fill="#0d1520" stroke="#FBBF24" stroke-width="1"/>
+
+        <!-- Floating labels above (perspective) -->
+        <text x="30" y="56" text-anchor="middle" fill="#F06060" font-size="6" opacity="0.7">Afcons</text>
+        <text x="170" y="56" text-anchor="middle" fill="#5c83ff" font-size="6" opacity="0.7">Tata</text>
+
+        <line x1="100" y1="80" x2="30" y2="68" stroke="#29cfd6" stroke-width="0.3" opacity="0.12"/>
+        <line x1="100" y1="80" x2="170" y2="68" stroke="#29cfd6" stroke-width="0.3" opacity="0.12"/>
+
+        <text x="100" y="136" text-anchor="middle" fill="#29cfd6" font-size="8" opacity="0.6">▲ camera</text>
+      </svg>
+      <p style="color:#fff;font-weight:600;font-size:13px;margin:8px 0 4px;">Command Table</p>
+      <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.4;">Low angle, almost flat — like looking across a strategy table. Labels float above nodes. Best for comparing contractors side-by-side.</p>
+    </div>
+
+    <!-- Focus -->
+    <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:16px;text-align:center;">
+      <svg width="100%" height="140" viewBox="0 0 200 140">
+        <defs>
+          <radialGradient id="focG" cx="40%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#F06060" stop-opacity="0.1"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+        </defs>
+        <rect x="0" y="0" width="200" height="140" fill="url(#focG)"/>
+
+        <!-- Focused node (large) -->
+        <circle cx="75" cy="70" r="28" fill="#0d1520" stroke="#F06060" stroke-width="1.5"/>
+        <text x="75" y="66" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">£35.5M</text>
+        <text x="75" y="78" text-anchor="middle" fill="#ffffff40" font-size="6">25% var</text>
+        <text x="75" y="34" text-anchor="middle" fill="#F06060" font-size="8" font-weight="600">Afcons</text>
+        <line x1="75" y1="38" x2="75" y2="42" stroke="#F06060" stroke-width="0.5" opacity="0.3"/>
+
+        <!-- Satellite events nearby -->
+        <circle cx="125" cy="40" r="8" fill="#A78BFA" opacity="0.8"/>
+        <text x="125" y="43" text-anchor="middle" fill="#fff" font-size="5">EW-42</text>
+
+        <rect x="118" y="80" width="16" height="16" rx="3" fill="#0d1520" stroke="#FBBF24" stroke-width="1"/>
+        <text x="126" y="91" text-anchor="middle" fill="#FBBF24" font-size="5">NCE</text>
+
+        <circle cx="130" cy="115" r="6" fill="#F06060" opacity="0.6"/>
+
+        <!-- Blurred background nodes -->
+        <circle cx="180" cy="70" r="6" fill="#0d1520" stroke="#ffffff15" stroke-width="0.5" opacity="0.3"/>
+        <circle cx="190" cy="40" r="4" fill="#0d1520" stroke="#ffffff10" stroke-width="0.5" opacity="0.2"/>
+        <circle cx="185" cy="110" r="5" fill="#0d1520" stroke="#ffffff10" stroke-width="0.5" opacity="0.2"/>
+
+        <line x1="75" y1="70" x2="125" y2="40" stroke="#F06060" stroke-width="0.7" opacity="0.35"/>
+        <line x1="75" y1="70" x2="126" y2="88" stroke="#FBBF24" stroke-width="0.5" opacity="0.25"/>
+        <line x1="75" y1="70" x2="130" y2="115" stroke="#F06060" stroke-width="0.4" opacity="0.2"/>
+
+        <text x="100" y="136" text-anchor="middle" fill="#29cfd6" font-size="8" opacity="0.6">▲ camera</text>
+      </svg>
+      <p style="color:#fff;font-weight:600;font-size:13px;margin:8px 0 4px;">Focus</p>
+      <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.4;">Camera flies to clicked node. Node expands, its satellites spread out. Background nodes blur + dim. <strong>Triggered by click.</strong></p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:28px;">
+  <h3>Expand-in-Place Interaction</h3>
+  <p style="color:#9ca3af;font-size:13px;">When a contractor node is clicked, the camera flies to it and the node "opens up" to reveal detail.</p>
+
+  <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:24px;margin-top:14px;">
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center;">
+
+      <!-- Before click -->
+      <div style="text-align:center;">
+        <p style="color:#ffffff60;font-size:10px;margin:0 0 12px;letter-spacing:1px;text-transform:uppercase;">Resting state</p>
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="50" fill="#F0606008"/>
+          <circle cx="60" cy="60" r="24" fill="#0d1520" stroke="#F06060" stroke-width="1.5"/>
+          <text x="60" y="56" text-anchor="middle" fill="#fff" font-size="10" font-weight="600">£35.5M</text>
+          <text x="60" y="68" text-anchor="middle" fill="#ffffff40" font-size="6">25% var</text>
+          <!-- Tight satellites -->
+          <circle cx="28" cy="30" r="5" fill="#A78BFA" opacity="0.7"/>
+          <circle cx="92" cy="35" r="4" fill="#FBBF24" opacity="0.7"/>
+          <circle cx="90" cy="90" r="4" fill="#F06060" opacity="0.6"/>
+          <line x1="60" y1="60" x2="28" y2="30" stroke="#A78BFA" stroke-width="0.5" opacity="0.2"/>
+          <line x1="60" y1="60" x2="92" y2="35" stroke="#FBBF24" stroke-width="0.5" opacity="0.2"/>
+          <line x1="60" y1="60" x2="90" y2="90" stroke="#F06060" stroke-width="0.5" opacity="0.2"/>
+        </svg>
+      </div>
+
+      <!-- Arrow -->
+      <div>
+        <svg width="40" height="24" viewBox="0 0 40 24">
+          <text x="4" y="16" fill="#29cfd680" font-size="12">click →</text>
+        </svg>
+      </div>
+
+      <!-- After click (expanded) -->
+      <div style="text-align:center;">
+        <p style="color:#ffffff60;font-size:10px;margin:0 0 12px;letter-spacing:1px;text-transform:uppercase;">Expanded state</p>
+        <svg width="220" height="200" viewBox="0 0 220 200">
+          <defs>
+            <radialGradient id="expG" cx="37%" cy="45%" r="50%">
+              <stop offset="0%" stop-color="#F06060" stop-opacity="0.08"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </radialGradient>
+          </defs>
+          <rect x="0" y="0" width="220" height="200" fill="url(#expG)"/>
+
+          <!-- Expanded main node -->
+          <circle cx="75" cy="90" r="32" fill="#0d1520" stroke="#F06060" stroke-width="1.5"/>
+          <text x="75" y="82" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">£35.5M</text>
+          <text x="75" y="96" text-anchor="middle" fill="#ffffff40" font-size="6.5">25% variation</text>
+          <text x="75" y="108" text-anchor="middle" fill="#F06060" font-size="6">14 NCEs · 3 EWs</text>
+          <text x="75" y="50" text-anchor="middle" fill="#F06060" font-size="9" font-weight="600">Afcons Infra</text>
+          <line x1="75" y1="54" x2="75" y2="58" stroke="#F06060" stroke-width="0.4" opacity="0.3"/>
+
+          <!-- Severity arc -->
+          <circle cx="75" cy="90" r="32" fill="none" stroke="#F06060" stroke-width="2.5" stroke-dasharray="50 151" stroke-linecap="round" opacity="0.4" transform="rotate(-90, 75, 90)"/>
+
+          <!-- Spread satellites -->
+          <circle cx="155" cy="40" r="12" fill="#A78BFA" opacity="0.85"/>
+          <text x="155" y="37" text-anchor="middle" fill="#fff" font-size="6" font-weight="600">EW-42</text>
+          <text x="155" y="47" text-anchor="middle" fill="#ffffffaa" font-size="5">19d stale</text>
+          <text x="155" y="23" text-anchor="middle" fill="#A78BFA" font-size="6">Transformer</text>
+
+          <rect x="148" y="100" width="22" height="22" rx="5" fill="#0d1520" stroke="#FBBF24" stroke-width="1.2"/>
+          <text x="159" y="113" text-anchor="middle" fill="#FBBF24" font-size="6">£47K</text>
+          <text x="159" y="90" text-anchor="middle" fill="#FBBF24" font-size="6">NCE-0127</text>
+
+          <circle cx="160" cy="160" r="10" fill="#F06060" opacity="0.7"/>
+          <text x="160" y="157" text-anchor="middle" fill="#fff" font-size="5.5" font-weight="600">EW-58</text>
+          <text x="160" y="166" text-anchor="middle" fill="#ffffffaa" font-size="4.5">22d stale</text>
+          <text x="160" y="145" text-anchor="middle" fill="#F06060" font-size="6">Piling</text>
+
+          <!-- Connections (now visible with labels) -->
+          <line x1="75" y1="90" x2="155" y2="40" stroke="#A78BFA" stroke-width="0.8" opacity="0.35"/>
+          <line x1="75" y1="90" x2="159" y2="111" stroke="#FBBF24" stroke-width="0.6" opacity="0.3"/>
+          <line x1="75" y1="90" x2="160" y2="160" stroke="#F06060" stroke-width="0.6" opacity="0.3"/>
+
+          <!-- Cascade line between EWs -->
+          <line x1="155" y1="40" x2="160" y2="160" stroke="#A78BFA" stroke-width="0.5" opacity="0.15" stroke-dasharray="4,4"/>
+
+          <!-- Blurred background -->
+          <circle cx="210" cy="90" r="4" fill="#ffffff08" stroke="#ffffff08"/>
+          <circle cx="205" cy="50" r="3" fill="#ffffff06"/>
+          <circle cx="208" cy="140" r="3" fill="#ffffff06"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#ffffff05;border:1px solid #ffffff10;border-radius:8px;padding:16px;margin-top:14px;">
+    <p style="color:#9ca3af;margin:0;font-size:13px;line-height:1.7;">
+      <strong style="color:#fff;">Animation sequence (~800ms):</strong><br/>
+      1. Camera starts easing toward the node (300ms)<br/>
+      2. Background nodes fade + blur (200ms, concurrent)<br/>
+      3. Clicked node scales up, satellites spread outward revealing labels (400ms, spring easing)<br/>
+      4. Expanded node shows richer detail — summary stats, severity arc, count badges<br/>
+      <br/>
+      <strong style="color:#fff;">Dismissal:</strong> Click empty space or press Escape → reverse animation, camera returns to previous preset.<br/>
+      <br/>
+      <strong style="color:#fff;">Nesting:</strong> From an expanded contractor, clicking a satellite (e.g., EW-0042) does a second-level focus — camera zooms further, satellite expands, and the AI thread panel slides in from the right edge as an HTML overlay.
+    </p>
+  </div>
+</div>
+
+<div class="section" style="margin-top:28px;">
+  <h3>Demo Flow (Guided Narrative)</h3>
+  <div style="background:#0d1520;border:1px solid #ffffff10;border-radius:12px;padding:20px;margin-top:12px;">
+    <div style="display:flex;gap:8px;align-items:stretch;">
+
+      <div style="flex:1;background:#ffffff05;border-radius:8px;padding:12px;border-left:2px solid #29cfd6;">
+        <p style="color:#29cfd6;font-size:10px;margin:0 0 6px;letter-spacing:1px;font-weight:600;">1 — LAND</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.4;">Overview camera. Full constellation. Auto-rotate. Headline number pulses in hub. <em>"£93.2M exposure across 5 contractors"</em></p>
+      </div>
+
+      <div style="flex:1;background:#ffffff05;border-radius:8px;padding:12px;border-left:2px solid #F06060;">
+        <p style="color:#F06060;font-size:10px;margin:0 0 6px;letter-spacing:1px;font-weight:600;">2 — SPOT</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.4;">Audience sees Afcons is largest + reddest node with most connections. Click it → Focus camera. Satellites reveal 3 EWs, 14 NCEs. <em>"25% variation — 2x the average"</em></p>
+      </div>
+
+      <div style="flex:1;background:#ffffff05;border-radius:8px;padding:12px;border-left:2px solid #A78BFA;">
+        <p style="color:#A78BFA;font-size:10px;margin:0 0 6px;letter-spacing:1px;font-weight:600;">3 — CONNECT</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.4;">Dashed cascade line from EW-0042 → EW-0058. Click it → see the £24M cascade path. <em>"A 6-week delay becomes 14 weeks and £24M"</em></p>
+      </div>
+
+      <div style="flex:1;background:#ffffff05;border-radius:8px;padding:12px;border-left:2px solid #34D399;">
+        <p style="color:#34D399;font-size:10px;margin:0 0 6px;letter-spacing:1px;font-weight:600;">4 — CONTRAST</p>
+        <p style="color:#9ca3af;font-size:11px;margin:0;line-height:1.4;">Escape back to overview. Click L&T — clean, green, sparse satellites. <em>"This is what a well-managed contract looks like"</em></p>
+      </div>
+
+    </div>
+  </div>
+</div>

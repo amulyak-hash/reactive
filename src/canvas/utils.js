@@ -27,6 +27,7 @@ export function setupCanvas(canvas, w, h, dpr = 2) {
 
 /** Draw a radial gradient glow (cheaper than ctx.shadowBlur) */
 export function drawGlow(ctx, x, y, radius, color, alpha = 0.3) {
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(radius) || radius <= 0) return;
   const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
   grad.addColorStop(0, typeof color === 'string' && color.startsWith('rgba')
     ? color : `rgba(${hexToRgbTuple(color)},${alpha})`);

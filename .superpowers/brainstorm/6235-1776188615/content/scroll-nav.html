@@ -1,0 +1,110 @@
+<h2>Scroll navigation for the story</h2>
+<p class="subtitle">A fixed element that shows where you are in the 5-beat narrative. Pick the vibe.</p>
+
+<div class="cards" style="grid-template-columns: 1fr 1fr;">
+
+  <!-- Option A: Vertical Pulse Line -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:32px 24px;display:flex;justify-content:center;background:linear-gradient(180deg,rgba(240,96,96,0.04),rgba(92,131,255,0.04));">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;position:relative;">
+        <!-- Progress line -->
+        <div style="width:2px;height:180px;background:rgba(255,255,255,0.06);border-radius:1px;position:relative;overflow:hidden;">
+          <!-- Filled portion -->
+          <div style="position:absolute;top:0;width:2px;height:60%;background:linear-gradient(180deg,#F06060,#a67bdb);border-radius:1px;"></div>
+          <!-- Glow dot at current position -->
+          <div style="position:absolute;top:58%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:#a67bdb;box-shadow:0 0 12px rgba(166,123,219,0.6);"></div>
+        </div>
+        <!-- Beat markers -->
+        <div style="position:absolute;top:0;left:16px;display:flex;flex-direction:column;justify-content:space-between;height:180px;">
+          <span style="font-size:8px;color:rgba(240,96,96,0.7);font-family:monospace;">HOOK</span>
+          <span style="font-size:8px;color:rgba(251,191,36,0.5);font-family:monospace;">FRACTURE</span>
+          <span style="font-size:8px;color:rgba(240,96,96,0.7);font-family:monospace;">VILLAIN</span>
+          <span style="font-size:8px;color:rgba(166,123,219,0.8);font-family:monospace;">TWIST ●</span>
+          <span style="font-size:8px;color:rgba(92,131,255,0.4);font-family:monospace;">CLARITY</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Pulse Line</h3>
+      <p>Vertical line fixed to the right edge. A glowing dot crawls down as you scroll. Beat labels appear beside it. The line gradient shifts color per act (red → purple → blue). Minimal, elegant.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Breathing Dots -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:32px 24px;display:flex;justify-content:center;align-items:center;background:linear-gradient(180deg,rgba(240,96,96,0.04),rgba(92,131,255,0.04));">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;">
+        <!-- Dots -->
+        <div style="width:10px;height:10px;border-radius:50%;background:#F06060;box-shadow:0 0 8px rgba(240,96,96,0.4);opacity:0.4;"></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:#FBBF24;box-shadow:0 0 8px rgba(251,191,36,0.4);opacity:0.4;"></div>
+        <div style="width:14px;height:14px;border-radius:50%;background:#F06060;box-shadow:0 0 14px rgba(240,96,96,0.5);"></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:rgba(166,123,219,0.2);border:1px solid rgba(166,123,219,0.3);"></div>
+        <div style="width:10px;height:10px;border-radius:50%;background:rgba(92,131,255,0.15);border:1px solid rgba(92,131,255,0.2);"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Breathing Dots</h3>
+      <p>5 dots stacked vertically on the right edge. The active beat's dot is larger and glowing. Past beats are filled but dim. Future beats are hollow outlines. The active dot breathes (scale pulse). No labels — pure visual.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Story Thread -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:32px 24px;display:flex;justify-content:center;background:linear-gradient(180deg,rgba(240,96,96,0.04),rgba(92,131,255,0.04));">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;position:relative;">
+        <!-- Thread line with nodes -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+          <!-- Node 1 - passed -->
+          <div style="width:6px;height:6px;border-radius:50%;background:rgba(240,96,96,0.5);"></div>
+          <div style="width:1px;height:24px;background:rgba(240,96,96,0.3);"></div>
+          <!-- Node 2 - passed -->
+          <div style="width:6px;height:6px;border-radius:50%;background:rgba(251,191,36,0.5);"></div>
+          <div style="width:1px;height:24px;background:rgba(251,191,36,0.3);"></div>
+          <!-- Node 3 - active -->
+          <div style="position:relative;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#F06060;box-shadow:0 0 12px rgba(240,96,96,0.5);"></div>
+            <!-- Active label -->
+            <div style="position:absolute;left:18px;top:-2px;white-space:nowrap;">
+              <span style="font-size:9px;color:rgba(255,255,255,0.6);font-family:monospace;background:rgba(240,96,96,0.1);padding:2px 8px;border-radius:4px;border:1px solid rgba(240,96,96,0.15);">Where the money went</span>
+            </div>
+          </div>
+          <div style="width:1px;height:24px;background:rgba(255,255,255,0.06);"></div>
+          <!-- Node 4 - future -->
+          <div style="width:6px;height:6px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:transparent;"></div>
+          <div style="width:1px;height:24px;background:rgba(255,255,255,0.04);"></div>
+          <!-- Node 5 - future -->
+          <div style="width:6px;height:6px;border-radius:50%;border:1px solid rgba(255,255,255,0.1);background:transparent;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Story Thread</h3>
+      <p>Connected nodes forming a thread. The active node is larger + glowing, with a contextual label that pops out ("Where the money went", "It's accelerating"). Past nodes are filled, future are hollow. The label changes per beat — it's a narrative breadcrumb.</p>
+    </div>
+  </div>
+
+  <!-- Option D: Cinematic Progress Bar -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:32px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:linear-gradient(180deg,rgba(240,96,96,0.04),rgba(92,131,255,0.04));">
+      <!-- Horizontal bar at top -->
+      <div style="width:200px;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;position:relative;overflow:visible;">
+        <div style="position:absolute;top:0;left:0;width:55%;height:3px;background:linear-gradient(90deg,#F06060,#a67bdb);border-radius:2px;"></div>
+        <!-- Tick marks -->
+        <div style="position:absolute;top:-3px;left:0%;width:1px;height:9px;background:rgba(240,96,96,0.5);"></div>
+        <div style="position:absolute;top:-3px;left:25%;width:1px;height:9px;background:rgba(251,191,36,0.4);"></div>
+        <div style="position:absolute;top:-3px;left:50%;width:1px;height:9px;background:rgba(240,96,96,0.6);"></div>
+        <div style="position:absolute;top:-3px;left:75%;width:1px;height:9px;background:rgba(255,255,255,0.1);"></div>
+        <div style="position:absolute;top:-3px;left:100%;width:1px;height:9px;background:rgba(255,255,255,0.08);"></div>
+        <!-- Current position dot -->
+        <div style="position:absolute;top:-4px;left:53%;width:10px;height:10px;border-radius:50%;background:#a67bdb;box-shadow:0 0 10px rgba(166,123,219,0.5);transform:translateX(-50%);"></div>
+      </div>
+      <!-- Current beat label -->
+      <div style="font-size:10px;color:rgba(255,255,255,0.5);font-family:monospace;letter-spacing:0.06em;">3 / 5 — THE VILLAIN</div>
+    </div>
+    <div class="card-body">
+      <h3>Horizon Bar</h3>
+      <p>Thin horizontal bar fixed to the top of the story area. Gradient fills left-to-right as you scroll (red → purple → blue). Tick marks for each beat. A glowing dot shows exact position. Current beat name below. Think Netflix episode progress.</p>
+    </div>
+  </div>
+
+</div>

@@ -1,139 +1,141 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useStore } from './store';
-import Onboarding from './components/Onboarding';
-import CommandCenter from './components/CommandCenter';
-import PlantDrilldown from './components/PlantDrilldown';
-import ZoneView from './components/ZoneView';
-import StoryView from './components/StoryView';
-import ProductionTrendDetailView from './components/ProductionTrendDetailView';
-import AIAgent from './components/AIAgent';
-import FactoryScene from './scene/FactoryScene';
-import IntelligencePanel from './scene/overlays/IntelligencePanel';
+import IntelligenceScene from './components/IntelligenceScene';
+import Thread from './components/Thread';
+// ThreadPanel removed — no side panel trigger
 import CommandBar from './components/CommandBar';
-import LayerOrb from './components/LayerOrb';
-import CausalBar from './components/CausalBar';
-import CausalBriefingPanel from './components/CausalBriefingPanel';
-import './audio/tourAudio'; // Activate tour audio subscription
+import { C, FONT_SANS, FONT_MONO } from './theme/tokens';
 
 export default function App() {
-  const layer = useStore(s => s.layer);
-  const mode = useStore(s => s.mode);
-  const triggerDashboardAssembly = useStore(s => s.triggerDashboardAssembly);
-  const triggerPlantBAssembly = useStore(s => s.triggerPlantBAssembly);
-  const triggerZonesAssembly = useStore(s => s.triggerZonesAssembly);
+  const view = useStore(s => s.view);
+  const goToDashboard = useStore(s => s.goToDashboard);
+  const newThread = useStore(s => s.newThread);
+  const focusedEntity = useStore(s => s.focusedEntity);
+  // threadEntity removed — no side panel
+  const unfocus = useStore(s => s.unfocus);
+  const setCameraPreset = useStore(s => s.setCameraPreset);
 
-  const toggleLayer = useStore(s => s.toggleLayer);
-  const flyTo = useStore(s => s.flyTo);
-  const exitStory = useStore(s => s.exitStory);
-  const story = useStore(s => s.story);
-  const tourState = useStore(s => s.tourState);
-  const offerTour = useStore(s => s.offerTour);
-  const endTour = useStore(s => s.endTour);
-  const causalTourState = useStore(s => s.causalTourState);
-  const endCausalTour = useStore(s => s.endCausalTour);
-
-  const [activeLayer, setActiveLayer] = useState(layer);
-  const [opacity, setOpacity] = useState(1);
-  const prevLayer = useRef(layer);
-  const cleanupRef = useRef(null);
-
-  // Keyboard shortcuts in 3D mode
   useEffect(() => {
-    if (mode !== '3d') return;
-    const LAYER_KEYS = { '1': 'thermal', '2': 'flow', '3': 'financial', '4': 'safety', '5': 'timeline' };
     const handler = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-      if (LAYER_KEYS[e.key]) { toggleLayer(LAYER_KEYS[e.key]); return; }
-
       if (e.key === 'Escape') {
-        if (causalTourState !== 'idle') { endCausalTour(); }
-        if (story) { exitStory(); }
-        flyTo({ position: [30, 20, 30], lookAt: [0, 0, 0] });
-        return;
+        if (view === 'thread') goToDashboard();
+        // threadEntity escape removed
+        else if (focusedEntity) unfocus();
       }
-
-      if (e.key === 't' || e.key === 'T') {
-        if (tourState === 'idle') offerTour();
-        else if (tourState !== 'idle') endTour();
-        return;
+      if ((e.key === 't' || e.key === 'T') && view === 'dashboard' && !focusedEntity) {
+        setCameraPreset('command-table');
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [mode, toggleLayer, flyTo, exitStory, story, tourState, offerTour, endTour, causalTourState, endCausalTour]);
-
-  useEffect(() => {
-    if (layer === prevLayer.current) return;
-    const fromOnboarding = prevLayer.current === 'onboarding';
-    prevLayer.current = layer;
-
-    if (fromOnboarding) {
-      setActiveLayer(layer);
-      setOpacity(0);
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setOpacity(1);
-          const t = setTimeout(() => {
-            if (layer === 'dashboard') triggerDashboardAssembly();
-          }, 200);
-          cleanupRef.current = () => clearTimeout(t);
-        });
-      });
-      return;
-    }
-
-    setOpacity(0);
-
-    const t1 = setTimeout(() => {
-      setActiveLayer(layer);
-      window.scrollTo(0, 0);
-      setOpacity(1);
-
-      const t2 = setTimeout(() => {
-        if (layer === 'dashboard') triggerDashboardAssembly();
-        if (layer === 'plantB') triggerPlantBAssembly();
-        if (layer === 'zones') triggerZonesAssembly();
-      }, 200);
-
-      cleanupRef.current = () => clearTimeout(t2);
-    }, 300);
-
-    return () => {
-      clearTimeout(t1);
-      if (cleanupRef.current) cleanupRef.current();
-    };
-  }, [layer]);
-
-  const scanPhase = useStore(s => s.scanPhase);
-  const scanDone = scanPhase === 'complete';
+  }, [view, goToDashboard, focusedEntity, unfocus, setCameraPreset]);
 
   return (
-    <>
-      {mode === '3d' ? (
-        <>
-          <FactoryScene />
-          {scanDone && <IntelligencePanel />}
-          {/* CausalBar removed — 3D IntelCards3D now persists through all phases */}
-          {scanDone && <CausalBriefingPanel />}
-          {scanDone && <CommandBar />}
-          {scanDone && <LayerOrb />}
-        </>
-      ) : (
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+    }}>
+      {/* ─── Header ─── */}
+      <header style={{
+        position: 'relative',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 16,
+        padding: '16px clamp(18px, 2vw, 24px)',
+        borderBottom: '1px solid rgba(109, 123, 156, 0.14)',
+        background: 'rgba(7, 11, 18, 0.88)',
+        backdropFilter: 'blur(18px)',
+        flexShrink: 0,
+        zIndex: 20,
+      }}>
         <div style={{
-          opacity,
-          transition: 'opacity 300ms ease',
-          minHeight: '100vh',
+          position: 'absolute', inset: 0, zIndex: -1, pointerEvents: 'none',
+          background: [
+            'radial-gradient(circle at 8% 18%, rgba(59, 139, 246, 0.12), transparent 24%)',
+            'radial-gradient(circle at 92% 12%, rgba(41, 207, 214, 0.10), transparent 26%)',
+            'linear-gradient(180deg, rgba(7, 11, 18, 0.98), rgba(12, 20, 32, 0.92))',
+          ].join(', '),
+        }} />
+
+        <div style={{
+          fontFamily: FONT_SANS, fontSize: 18, fontWeight: 600,
+          letterSpacing: '-0.04em', color: C.t1,
         }}>
-          {activeLayer === 'onboarding' && <Onboarding />}
-          {activeLayer === 'dashboard' && <CommandCenter />}
-          {activeLayer === 'plantB' && <PlantDrilldown />}
-          {activeLayer === 'zones' && <ZoneView />}
-          {activeLayer === 'story' && <StoryView />}
-          {activeLayer === 'storyDetail' && <ProductionTrendDetailView />}
+          Enterprise Brain
         </div>
-      )}
-      {mode === '2d' && <AIAgent visibleLayer={activeLayer} />}
-    </>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          {view === 'thread' && (
+            <ToolButton onClick={goToDashboard}>
+              ← <span>Dashboard</span>
+            </ToolButton>
+          )}
+          <ToolButton onClick={newThread}>+ <span>New Chat</span></ToolButton>
+          <ToolButton>&#x29D7; <span>History</span></ToolButton>
+          <ToolButton>&#x229E; <span>Bookmarks</span></ToolButton>
+          <ProfileButton />
+        </div>
+      </header>
+
+      {/* ─── Content ─── */}
+      <div style={{
+        flex: 1,
+        overflowY: view === 'thread' ? 'auto' : 'hidden',
+        overflowX: 'hidden',
+        position: 'relative',
+      }}>
+        {view === 'dashboard' && <IntelligenceScene />}
+        {/* ThreadPanel removed */}
+        {view === 'thread' && <Thread />}
+      </div>
+
+      {/* ─── Bottom bar ─── */}
+      <CommandBar />
+    </div>
+  );
+}
+
+function ToolButton({ children, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        padding: '6px 2px', border: 0, background: 'transparent',
+        fontFamily: FONT_SANS, fontSize: 14, fontWeight: 600,
+        color: '#a8b8d0', opacity: 0.88, cursor: 'pointer',
+        transition: 'color 160ms ease, opacity 160ms ease',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.color = C.t1; e.currentTarget.style.opacity = '1'; }}
+      onMouseLeave={e => { e.currentTarget.style.color = '#a8b8d0'; e.currentTarget.style.opacity = '0.88'; }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function ProfileButton() {
+  return (
+    <button
+      style={{
+        width: 40, height: 40, padding: 0, borderRadius: 999,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'transparent', border: 0, color: '#a8b8d0',
+        cursor: 'pointer', transition: 'color 160ms ease',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.color = C.t1; }}
+      onMouseLeave={e => { e.currentTarget.style.color = '#a8b8d0'; }}
+      aria-label="Profile"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c0-4.2 3.6-7 8-7s8 2.8 8 7" />
+      </svg>
+    </button>
   );
 }

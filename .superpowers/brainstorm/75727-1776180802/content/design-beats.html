@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NCE Story Card — Beat-by-Beat Design</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#070B12; color:#fff; font-family:'DM Sans',-apple-system,sans-serif; }
+
+  .page-header {
+    padding:32px 40px 20px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .page-header h1 { font-size:18px; font-weight:600; color:rgba(255,255,255,0.9); margin-bottom:4px; }
+  .page-header p { font-size:13px; color:rgba(255,255,255,0.4); }
+
+  .beat-section {
+    padding:40px;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+
+  .beat-label {
+    font-size:9px; text-transform:uppercase; letter-spacing:0.12em;
+    margin-bottom:6px;
+  }
+  .beat-title {
+    font-size:20px; font-weight:600; color:rgba(255,255,255,0.9);
+    margin-bottom:6px;
+  }
+  .beat-subtitle {
+    font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:24px; line-height:1.5;
+  }
+
+  .mockup-frame {
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,0.08);
+    background:linear-gradient(180deg,rgba(12,20,32,0.98),rgba(17,27,40,0.98));
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  .anim-spec {
+    margin-top:20px;
+    padding:14px 18px;
+    border-radius:10px;
+    background:rgba(92,131,255,0.04);
+    border:1px solid rgba(92,131,255,0.08);
+  }
+  .anim-spec-label {
+    font-size:9px; color:rgba(92,131,255,0.5); text-transform:uppercase;
+    letter-spacing:0.08em; margin-bottom:8px;
+  }
+  .anim-spec-content {
+    font-size:12px; color:rgba(255,255,255,0.5); line-height:1.7;
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  .transition-bar {
+    display:flex; align-items:center; gap:12px;
+    padding:20px 40px;
+    background:rgba(255,255,255,0.01);
+  }
+  .transition-bar .arrow {
+    font-size:16px; color:rgba(255,255,255,0.15);
+  }
+  .transition-bar .label {
+    font-size:10px; color:rgba(255,255,255,0.2); text-transform:uppercase; letter-spacing:0.08em;
+  }
+
+  .scroll-marker {
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:20px;
+    background:rgba(166,123,219,0.1);
+    border:1px solid rgba(166,123,219,0.2);
+    font-size:9px;
+    color:rgba(166,123,219,0.6);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+  .click-marker {
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:20px;
+    background:rgba(240,96,96,0.1);
+    border:1px solid rgba(240,96,96,0.2);
+    font-size:9px;
+    color:rgba(240,96,96,0.6);
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>NCE Story Card — Beat-by-Beat Design</h1>
+  <p>Full visual spec for each story beat. Review each one — does it look right so far?</p>
+</div>
+
+<!-- ═══════ BEAT 1: THE HOOK ═══════ -->
+<div class="beat-section">
+  <div class="beat-label" style="color:rgba(240,96,96,0.6);">Beat 1 &bull; Act I &bull; <span class="click-marker">Auto-play on enter</span></div>
+  <div class="beat-title">The Hook — "£1 contracted → 13p leaked"</div>
+  <div class="beat-subtitle">Full card takeover. Dark. Centered. The ratio fades in with cinematic timing. A pause, then the context line.</div>
+
+  <div class="mockup-frame" style="min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;text-align:center;">
+    <!-- Stage label -->
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(255,255,255,0.2);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:32px;">
+      Portfolio Leakage
+    </div>
+
+    <!-- The ratio -->
+    <div style="display:flex;align-items:baseline;justify-content:center;gap:24px;">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:64px;font-weight:800;color:rgba(255,255,255,0.85);letter-spacing:-0.04em;line-height:1;">£1</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:6px;">contracted</div>
+      </div>
+      <div style="font-size:28px;color:rgba(255,255,255,0.1);margin-bottom:16px;">→</div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:64px;font-weight:800;color:#F06060;letter-spacing:-0.04em;line-height:1;text-shadow:0 0 40px rgba(240,96,96,0.3);">13p</div>
+        <div style="font-size:11px;color:rgba(240,96,96,0.4);margin-top:6px;">already leaked</div>
+      </div>
+    </div>
+
+    <!-- Context line (fades in after 1.2s delay) -->
+    <div style="margin-top:40px;font-size:14px;color:rgba(255,255,255,0.3);letter-spacing:0.02em;">
+      Across 5 contractors. In 7 months.
+    </div>
+
+    <!-- Subtle advance cue -->
+    <div style="margin-top:48px;font-size:10px;color:rgba(255,255,255,0.12);">
+      ▼
+    </div>
+  </div>
+
+  <div class="anim-spec">
+    <div class="anim-spec-label">Animation spec</div>
+    <div class="anim-spec-content">
+      t=0ms     "PORTFOLIO LEAKAGE" fades in (opacity 0→1, 400ms, ease-out)<br/>
+      t=300ms   "£1" counts from £0, translateY(20)→0 (600ms, spring(1,80,10))<br/>
+      t=500ms   "→" fades in (300ms)<br/>
+      t=700ms   "13p" counts from 0p, translateY(20)→0 (600ms, spring)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ red glow pulse starts (box-shadow breathe, 2s loop)<br/>
+      t=1400ms  "contracted" / "already leaked" fade in (300ms)<br/>
+      t=2000ms  "Across 5 contractors..." fade in (500ms, ease-out)<br/>
+      t=3500ms  "▼" pulses (opacity 0.08→0.2, 1.5s loop)
+    </div>
+  </div>
+</div>
+
+<div class="transition-bar">
+  <span class="arrow">↓</span>
+  <span class="label">Click or scroll to advance — cinematic crossfade (400ms)</span>
+</div>
+
+<!-- ═══════ BEAT 2: THE FRACTURE ═══════ -->
+<div class="beat-section">
+  <div class="beat-label" style="color:rgba(251,191,36,0.6);">Beat 2 &bull; Act II begins &bull; <span class="click-marker">Click/scroll advance</span></div>
+  <div class="beat-title">The Fracture — "But the bleeding isn't equal"</div>
+  <div class="beat-subtitle">The text line appears first. Then five contractor names stagger in from top to bottom, each with their variation %. Afcons glows last — and stays glowing. Everything else dims.</div>
+
+  <div class="mockup-frame" style="padding:48px 40px;">
+    <!-- Statement -->
+    <div style="text-align:center;margin-bottom:40px;">
+      <div style="font-size:18px;color:rgba(255,255,255,0.6);font-style:italic;letter-spacing:0.01em;">
+        "But the bleeding isn't equal."
+      </div>
+    </div>
+
+    <!-- Contractor list -->
+    <div style="max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px;">
+      <!-- L&T — dimmed -->
+      <div style="display:flex;align-items:center;gap:16px;opacity:0.4;">
+        <div style="width:100px;text-align:right;font-size:13px;color:rgba(255,255,255,0.5);">L&T Construction</div>
+        <div style="flex:1;position:relative;">
+          <div style="height:6px;border-radius:3px;background:rgba(59,184,138,0.2);width:24%;"></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:rgba(59,184,138,0.5);width:44px;text-align:right;">6%</div>
+      </div>
+
+      <!-- Tata — dimmed -->
+      <div style="display:flex;align-items:center;gap:16px;opacity:0.4;">
+        <div style="width:100px;text-align:right;font-size:13px;color:rgba(255,255,255,0.5);">Tata Projects</div>
+        <div style="flex:1;position:relative;">
+          <div style="height:6px;border-radius:3px;background:rgba(92,131,255,0.25);width:39%;"></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:rgba(92,131,255,0.5);width:44px;text-align:right;">9.8%</div>
+      </div>
+
+      <!-- KEC — dimmed -->
+      <div style="display:flex;align-items:center;gap:16px;opacity:0.45;">
+        <div style="width:100px;text-align:right;font-size:13px;color:rgba(255,255,255,0.5);">KEC Intl</div>
+        <div style="flex:1;position:relative;">
+          <div style="height:6px;border-radius:3px;background:rgba(201,168,50,0.3);width:53%;"></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:rgba(201,168,50,0.5);width:44px;text-align:right;">13.3%</div>
+      </div>
+
+      <!-- NCC — slightly brighter -->
+      <div style="display:flex;align-items:center;gap:16px;opacity:0.55;">
+        <div style="width:100px;text-align:right;font-size:13px;color:rgba(255,255,255,0.6);">NCC Ltd</div>
+        <div style="flex:1;position:relative;">
+          <div style="height:7px;border-radius:3px;background:rgba(212,137,58,0.3);width:64%;"></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:rgba(212,137,58,0.6);width:44px;text-align:right;">16%</div>
+      </div>
+
+      <!-- Afcons — GLOWING -->
+      <div style="display:flex;align-items:center;gap:16px;margin-top:8px;">
+        <div style="width:100px;text-align:right;font-size:14px;font-weight:600;color:rgba(255,255,255,0.85);">Afcons Infra</div>
+        <div style="flex:1;position:relative;">
+          <div style="height:10px;border-radius:5px;background:linear-gradient(90deg,rgba(240,96,96,0.5),rgba(240,96,96,0.25));width:100%;box-shadow:0 0 20px rgba(240,96,96,0.2);"></div>
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#F06060;width:44px;text-align:right;text-shadow:0 0 16px rgba(240,96,96,0.4);">25%</div>
+      </div>
+    </div>
+
+    <!-- Micro-narration -->
+    <div style="text-align:center;margin-top:36px;font-size:12px;color:rgba(240,96,96,0.4);">
+      One contractor. A quarter of every pound. What happened?
+    </div>
+  </div>
+
+  <div class="anim-spec">
+    <div class="anim-spec-label">Animation spec</div>
+    <div class="anim-spec-content">
+      t=0ms     Crossfade from Beat 1 (400ms, ease-in-out)<br/>
+      t=200ms   "But the bleeding..." fades in (400ms)<br/>
+      t=800ms   Contractors stagger in, top→bottom (80ms delay each)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;each: translateX(-12)→0, opacity 0→1 (300ms, ease-out)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;% numbers count up from 0<br/>
+      t=1600ms  Afcons enters last — slower (500ms), with glow ramp<br/>
+      t=2200ms  All others dim to 0.4 opacity (300ms)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Afcons glow pulse begins (box-shadow breathe, 2.5s)<br/>
+      t=2800ms  "One contractor..." fades in (400ms)
+    </div>
+  </div>
+</div>
+
+<div class="transition-bar">
+  <span class="arrow">↓</span>
+  <span class="label">Transition to scroll mode — smooth, no jarring switch. Content flows naturally into scrollable area.</span>
+</div>
+
+<!-- ═══════ BEAT 3: THE VILLAIN ═══════ -->
+<div class="beat-section">
+  <div class="beat-label" style="color:rgba(240,96,96,0.6);">Beat 3 &bull; Act II &bull; <span class="scroll-marker">Scroll-driven</span></div>
+  <div class="beat-title">The Villain — Afcons £35.5M breakdown</div>
+  <div class="beat-subtitle">Weighted streams. The £35.5M fractures into its causes — each stream animates in from the left, sized by magnitude. Largest first. Glowing dots pulse by severity.</div>
+
+  <div class="mockup-frame" style="padding:40px;">
+    <!-- Afcons header -->
+    <div style="text-align:center;margin-bottom:8px;">
+      <div style="font-size:10px;color:rgba(240,96,96,0.4);text-transform:uppercase;letter-spacing:0.1em;">Afcons Infra — Where the money went</div>
+    </div>
+    <div style="text-align:center;margin-bottom:32px;">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:800;color:#F06060;text-shadow:0 0 30px rgba(240,96,96,0.25);">£35.5M</span>
+      <span style="font-size:14px;color:rgba(255,255,255,0.3);margin-left:8px;">on a £142M contract</span>
+    </div>
+
+    <!-- Weighted streams -->
+    <div style="display:flex;flex-direction:column;gap:16px;max-width:520px;margin:0 auto;">
+      <!-- Ground conditions — largest -->
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:10px;height:10px;border-radius:50%;background:#F06060;box-shadow:0 0 10px rgba(240,96,96,0.5),0 0 20px rgba(240,96,96,0.2);flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="height:36px;border-radius:8px;background:linear-gradient(90deg,rgba(240,96,96,0.3),rgba(240,96,96,0.05));position:relative;overflow:hidden;">
+            <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:12px;color:rgba(255,255,255,0.7);">Ground conditions</div>
+            <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:14px;color:#F06060;font-weight:600;">£15.2M</div>
+          </div>
+          <div style="margin-top:4px;padding-left:14px;font-size:10px;color:rgba(255,255,255,0.25);font-style:italic;">5 NCEs — the ground told a different story than the survey</div>
+        </div>
+      </div>
+
+      <!-- Design changes -->
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#d4893a;box-shadow:0 0 8px rgba(212,137,58,0.4);flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="height:28px;border-radius:7px;background:linear-gradient(90deg,rgba(212,137,58,0.25),rgba(212,137,58,0.04));width:71%;position:relative;overflow:hidden;">
+            <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:11px;color:rgba(255,255,255,0.6);">Design changes</div>
+            <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:13px;color:#d4893a;font-weight:600;">£10.8M</div>
+          </div>
+          <div style="margin-top:4px;padding-left:14px;font-size:10px;color:rgba(255,255,255,0.2);font-style:italic;">4 NCEs — scope kept shifting under their feet</div>
+        </div>
+      </div>
+
+      <!-- Access delays -->
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:6px;height:6px;border-radius:50%;background:#FBBF24;box-shadow:0 0 6px rgba(251,191,36,0.3);flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="height:22px;border-radius:6px;background:linear-gradient(90deg,rgba(251,191,36,0.18),rgba(251,191,36,0.03));width:40%;position:relative;overflow:hidden;">
+            <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(255,255,255,0.5);">Access delays</div>
+            <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(251,191,36,0.7);">£6.1M</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Physical conditions -->
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.3);flex-shrink:0;"></div>
+        <div style="flex:1;">
+          <div style="height:18px;border-radius:5px;background:linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));width:22%;position:relative;overflow:hidden;">
+            <div style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(255,255,255,0.4);">Physical cond.</div>
+            <div style="position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.35);">£3.4M</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="anim-spec">
+    <div class="anim-spec-label">Animation spec</div>
+    <div class="anim-spec-content">
+      Scroll-triggered (IntersectionObserver, threshold 0.3)<br/>
+      t=0ms     "Afcons Infra" + "£35.5M" count up (800ms, spring)<br/>
+      t=400ms   Ground conditions stream slides in from left<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 0→100%, opacity 0→1 (600ms, ease-out)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dot appears with scale(0)→scale(1) + glow ramp<br/>
+      t=600ms   Caption fades in beneath (300ms, translateY(8)→0)<br/>
+      t=800ms   Design changes stream (same pattern, 500ms)<br/>
+      t=1100ms  Access delays (400ms, smaller = faster)<br/>
+      t=1350ms  Physical conditions (350ms)<br/>
+      <br/>
+      Dot glow pulses continuously — larger dots pulse slower (2.5s), smaller faster (1.5s)
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ BEAT 4: THE TWIST ═══════ -->
+<div class="beat-section">
+  <div class="beat-label" style="color:rgba(166,123,219,0.6);">Beat 4 &bull; Act II &bull; <span class="scroll-marker">Scroll-driven</span></div>
+  <div class="beat-title">The Twist — "And it's accelerating"</div>
+  <div class="beat-subtitle">No line chart. Instead: 7 month-blocks, each taller than the last, with the monthly increment glowing inside. The acceleration is felt, not plotted. NCC emerges as the second threat below.</div>
+
+  <div class="mockup-frame" style="padding:40px;">
+    <div style="text-align:center;margin-bottom:8px;">
+      <div style="font-size:16px;color:rgba(255,255,255,0.6);font-style:italic;">"And it's accelerating."</div>
+    </div>
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:10px;color:rgba(166,123,219,0.4);text-transform:uppercase;letter-spacing:0.1em;">Afcons NCE accumulation — month by month</div>
+    </div>
+
+    <!-- Month blocks -->
+    <div style="display:flex;align-items:flex-end;justify-content:center;gap:8px;height:160px;margin-bottom:16px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="width:48px;height:14px;border-radius:4px;background:rgba(240,96,96,0.1);display:flex;align-items:center;justify-content:center;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(240,96,96,0.4);">+£3.8M</span>
+        </div>
+        <span style="font-size:8px;color:rgba(255,255,255,0.2);">M1</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="width:48px;height:28px;border-radius:4px;background:rgba(240,96,96,0.13);display:flex;align-items:center;justify-content:center;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(240,96,96,0.45);">+£4.4M</span>
+        </div>
+        <span style="font-size:8px;color:rgba(255,255,255,0.2);">M2</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="width:48px;height:48px;border-radius:4px;background:rgba(240,96,96,0.18);display:flex;align-items:center;justify-content:center;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(240,96,96,0.5);">+£5.9M</span>
+        </div>
+        <span style="font-size:8px;color:rgba(255,255,255,0.2);">M3</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="width:48px;height:64px;border-radius:4px;background:rgba(240,96,96,0.24);display:flex;align-items:center;justify-content:center;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(240,96,96,0.55);">+£5.4M</span>
+        </div>
+        <span style="font-size:8px;color:rgba(255,255,255,0.2);">M4</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="width:48px;height:82px;border-radius:4px;background:rgba(240,96,96,0.3);display:flex;align-items:center;justify-content:center;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(240,96,96,0.6);">+£5.7M</span>
+        </div>
+        <span style="font-size:8px;color:rgba(255,255,255,0.2);">M5</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="width:48px;height:104px;border-radius:4px;background:rgba(240,96,96,0.38);display:flex;align-items:center;justify-content:center;">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(240,96,96,0.65);">+£4.9M</span>
+        </div>
+        <span style="font-size:8px;color:rgba(255,255,255,0.2);">M6</span>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div style="width:48px;height:130px;border-radius:4px;background:rgba(240,96,96,0.45);border:1px solid rgba(240,96,96,0.3);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px rgba(240,96,96,0.15);">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#F06060;font-weight:600;">+£5.4M</span>
+        </div>
+        <span style="font-size:8px;color:rgba(255,255,255,0.3);">M7</span>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(240,96,96,0.5);margin-bottom:32px;">
+      cumulative: £35.5M and climbing
+    </div>
+
+    <!-- NCC secondary reveal -->
+    <div style="border-top:1px solid rgba(255,255,255,0.04);padding-top:24px;text-align:center;">
+      <div style="font-size:12px;color:rgba(212,137,58,0.5);margin-bottom:12px;">And there's a second story brewing...</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+        <span style="font-size:13px;color:rgba(255,255,255,0.6);">NCC Ltd</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(212,137,58,0.6);">£9.5M → £12.8M → £15.8M in last 3 months</span>
+        <span style="padding:2px 8px;border-radius:4px;background:rgba(212,137,58,0.15);font-size:9px;color:#d4893a;font-weight:600;">ACCELERATING</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="anim-spec">
+    <div class="anim-spec-label">Animation spec</div>
+    <div class="anim-spec-content">
+      Scroll-triggered (threshold 0.3)<br/>
+      t=0ms     "And it's accelerating" fades in (cinematic, 500ms)<br/>
+      t=600ms   Month blocks grow from height:0, left→right<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stagger: 120ms per block (precision easing)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;each block: height 0→final, opacity 0→1<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;increment labels count from £0 (300ms each)<br/>
+      t=1600ms  Final block gets glow ramp (400ms)<br/>
+      t=2000ms  "cumulative: £35.5M" fades in<br/>
+      t=2600ms  NCC section slides up (translateY(16)→0, 400ms)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ACCELERATING" badge pulses once then steady
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ BEAT 5: CLARITY ═══════ -->
+<div class="beat-section">
+  <div class="beat-label" style="color:rgba(92,131,255,0.6);">Beat 5 &bull; Act III &bull; <span class="scroll-marker">Scroll-driven</span></div>
+  <div class="beat-title">Clarity — "The benchmark exists"</div>
+  <div class="beat-subtitle">The resolution. Two contractors side by side — Afcons (25%) vs L&T (6%). Same project conditions. The contrast is the argument. A clear action line closes the story.</div>
+
+  <div class="mockup-frame" style="padding:40px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="font-size:10px;color:rgba(92,131,255,0.4);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">The proof that 25% isn't inevitable</div>
+      <div style="font-size:16px;color:rgba(255,255,255,0.6);">Same project. Same conditions. Different outcomes.</div>
+    </div>
+
+    <!-- Comparison -->
+    <div style="display:flex;gap:20px;max-width:520px;margin:0 auto 32px;">
+      <!-- Afcons -->
+      <div style="flex:1;padding:24px;border-radius:16px;border:1px solid rgba(240,96,96,0.2);background:rgba(240,96,96,0.04);">
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px;">Afcons Infra</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:800;color:#F06060;margin-bottom:8px;">25%</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);line-height:1.5;">
+          £35.5M NCE variation<br/>
+          14 NCEs in 7 months<br/>
+          £142M original contract
+        </div>
+        <div style="margin-top:12px;padding:6px 10px;border-radius:6px;background:rgba(240,96,96,0.1);font-size:10px;color:rgba(240,96,96,0.6);text-align:center;">
+          Needs forensic review
+        </div>
+      </div>
+
+      <!-- vs -->
+      <div style="display:flex;align-items:center;font-size:14px;color:rgba(255,255,255,0.15);">vs</div>
+
+      <!-- L&T -->
+      <div style="flex:1;padding:24px;border-radius:16px;border:1px solid rgba(59,184,138,0.2);background:rgba(59,184,138,0.04);">
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px;">L&T Construction</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:800;color:#3bb88a;margin-bottom:8px;">6%</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);line-height:1.5;">
+          £12.6M NCE variation<br/>
+          8 NCEs in 7 months<br/>
+          £210.6M original contract
+        </div>
+        <div style="margin-top:12px;padding:6px 10px;border-radius:6px;background:rgba(59,184,138,0.1);font-size:10px;color:rgba(59,184,138,0.6);text-align:center;">
+          The benchmark
+        </div>
+      </div>
+    </div>
+
+    <!-- Action line -->
+    <div style="text-align:center;padding-top:24px;border-top:1px solid rgba(255,255,255,0.04);">
+      <div style="font-size:14px;color:rgba(255,255,255,0.6);line-height:1.6;max-width:400px;margin:0 auto;">
+        If Afcons operated at L&T's rate, the portfolio would save <span style="color:#3bb88a;font-weight:600;">£27M</span>. The variation isn't the market — it's management.
+      </div>
+    </div>
+  </div>
+
+  <div class="anim-spec">
+    <div class="anim-spec-label">Animation spec</div>
+    <div class="anim-spec-content">
+      Scroll-triggered (threshold 0.3)<br/>
+      t=0ms     Header text fades in (400ms, ease-out)<br/>
+      t=400ms   Both cards enter simultaneously<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Afcons: from left, translateX(-20)→0 (500ms, ease-out)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;L&T: from right, translateX(20)→0 (500ms, ease-out)<br/>
+      t=600ms   % numbers count up (Afcons to 25, L&T to 6) (700ms, spring)<br/>
+      t=1200ms  Detail lines stagger in (80ms each, opacity 0→1)<br/>
+      t=1800ms  Action badges fade in (300ms)<br/>
+      t=2200ms  Bottom action line fades in (400ms)<br/>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"£27M" counts up from 0 with green glow
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ DATA DRAWER ═══════ -->
+<div class="beat-section" style="border-bottom:none;">
+  <div class="beat-label" style="color:rgba(255,255,255,0.3);">Epilogue &bull; <span style="display:inline-block;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em;">Optional expand</span></div>
+  <div class="beat-title">Data Drawer — "View raw data"</div>
+  <div class="beat-subtitle">A subtle text link after beat 5. Click to expand a compact data summary. The footnote, not the co-star.</div>
+
+  <div class="mockup-frame" style="padding:24px 40px;">
+    <!-- Collapsed state -->
+    <div style="text-align:center;padding:12px 0;cursor:pointer;">
+      <span style="font-size:11px;color:rgba(255,255,255,0.25);border-bottom:1px solid rgba(255,255,255,0.1);">View raw data ↓</span>
+    </div>
+
+    <!-- Expanded preview -->
+    <div style="margin-top:16px;padding:20px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);">
+      <div style="font-size:9px;color:rgba(255,255,255,0.25);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">All Contractors — NCE Summary</div>
+      <div style="display:grid;grid-template-columns:1.2fr 0.8fr 0.8fr 0.6fr 0.6fr;gap:8px;font-size:11px;">
+        <div style="color:rgba(255,255,255,0.3);padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.04);">Contractor</div>
+        <div style="color:rgba(255,255,255,0.3);padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right;">Contract</div>
+        <div style="color:rgba(255,255,255,0.3);padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right;">NCE</div>
+        <div style="color:rgba(255,255,255,0.3);padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right;">%</div>
+        <div style="color:rgba(255,255,255,0.3);padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:right;">Count</div>
+
+        <div style="color:rgba(255,255,255,0.5);">Tata Projects</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£186.4M</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£18.2M</div><div style="color:rgba(255,255,255,0.4);text-align:right;">9.8%</div><div style="color:rgba(255,255,255,0.4);text-align:right;">22</div>
+        <div style="color:#F06060;font-weight:600;">Afcons Infra</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£142.0M</div><div style="color:#F06060;text-align:right;">£35.5M</div><div style="color:#F06060;text-align:right;font-weight:600;">25%</div><div style="color:rgba(255,255,255,0.4);text-align:right;">14</div>
+        <div style="color:rgba(255,255,255,0.5);">L&T Construction</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£210.6M</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£12.6M</div><div style="color:rgba(59,184,138,0.6);text-align:right;">6%</div><div style="color:rgba(255,255,255,0.4);text-align:right;">8</div>
+        <div style="color:rgba(255,255,255,0.5);">NCC Ltd</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£98.4M</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£15.8M</div><div style="color:rgba(212,137,58,0.6);text-align:right;">16%</div><div style="color:rgba(255,255,255,0.4);text-align:right;">11</div>
+        <div style="color:rgba(255,255,255,0.5);">KEC International</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£83.2M</div><div style="color:rgba(255,255,255,0.4);text-align:right;">£11.1M</div><div style="color:rgba(255,255,255,0.4);text-align:right;">13.3%</div><div style="color:rgba(255,255,255,0.4);text-align:right;">9</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

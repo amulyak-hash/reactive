@@ -1,0 +1,81 @@
+<h2>What kind of motion?</h2>
+<p class="subtitle">"Smooth as butter, simple yet effective." Here are three animation vocabularies — each one is restrained, but they feel different.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Precision Kinetic</h3>
+      <p style="margin-bottom:16px;">Numbers count up with spring easing. Text slides in with <code style="font-size:11px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:4px;">translateY(12px) → 0</code> and opacity fades. Elements stagger with 80ms delays. Everything feels engineered and exact.</p>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:140px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Signature moves</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;">
+            &bull; Number counters (spring)<br/>
+            &bull; Text fade-up (ease-out)<br/>
+            &bull; Staggered reveals<br/>
+            &bull; Scale 0.95 → 1.0 on enter
+          </div>
+        </div>
+        <div style="flex:1;min-width:140px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Feels like</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;">Apple product page.<br/>Stripe dashboard.<br/>Linear app transitions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Cinematic Breath</h3>
+      <p style="margin-bottom:16px;">Slower, more deliberate. Elements breathe — subtle scale pulses on key numbers, slow fades between beats (400-600ms), spotlight effects that draw focus. Transitions feel like scene changes in a film. Silence between moments.</p>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:140px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Signature moves</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;">
+            &bull; Slow crossfades between scenes<br/>
+            &bull; Gentle scale breathing on focus<br/>
+            &bull; Light bloom / glow pulses<br/>
+            &bull; Parallax depth on scroll
+          </div>
+        </div>
+        <div style="flex:1;min-width:140px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Feels like</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;">Nolan film title sequence.<br/>Bloomberg visual story.<br/>Museum exhibit.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Precision + Cinematic Hybrid</h3>
+      <p style="margin-bottom:16px;">Precision kinetics for the data moments (numbers count, elements stagger in), cinematic breath for the emotional beats (scene transitions, the Afcons reveal, the acceleration pulse). The motion style matches the story moment.</p>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:140px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">When to use which</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;">
+            <strong style="color:rgba(255,255,255,0.7);">Precision:</strong> numbers appearing, contractor names entering, data reveals<br/><br/>
+            <strong style="color:rgba(255,255,255,0.7);">Cinematic:</strong> scene transitions, the "13p" moment, Afcons glow, the acceleration heartbeat
+          </div>
+        </div>
+        <div style="flex:1;min-width:140px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Feels like</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.55);line-height:1.6;">The motion serves the narrative.<br/>Tight when showing data.<br/>Atmospheric when building tension.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px;padding:16px 20px;border-radius:12px;background:rgba(92,131,255,0.04);border:1px solid rgba(92,131,255,0.1);">
+  <div style="font-size:11px;color:rgba(92,131,255,0.6);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Tech note</div>
+  <div style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.6;">
+    All three are achievable with CSS animations + a lightweight library (Framer Motion or GSAP). No canvas needed for the story card itself — pure DOM + CSS transforms for 60fps butter.
+  </div>
+</div>
