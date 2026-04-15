@@ -4321,3 +4321,115 @@
         justify-content: center;
       }
     }
+
+    /* ─── NCE Exposure Narrative ─────────────────────────────────────── */
+
+    .nce-exposure-narrative {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .nce-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .nce-section-hidden {
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+    }
+
+    .nce-section-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .nce-agent-text {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      line-height: 1.65;
+      color: var(--muted);
+      padding: 0 2px;
+    }
+
+    .nce-agent-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .nce-agent-text .nce-risk-value {
+      color: #F06060;
+      font-weight: 700;
+    }
+
+    .nce-summary-header {
+      display: flex;
+      gap: 40px;
+      padding: 0 2px 8px;
+    }
+
+    .nce-summary-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .nce-summary-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .nce-summary-blue { color: #3B8BF6; }
+    .nce-summary-amber { color: #FBBF24; }
+
+    .nce-summary-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      color: var(--muted-soft);
+    }
+
+    .nce-row-layout {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .nce-row-left {
+      flex: 0 0 auto;
+    }
+
+    .nce-row-right {
+      flex: 0 0 auto;
+    }
+
+    .nce-row-layout .viz-mount-wrap,
+    .nce-exposure-narrative .viz-mount-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nce-row-layout .d3-mount,
+    .nce-exposure-narrative .d3-mount {
+      min-height: auto;
+    }
+
+    .nce-exposure-narrative .viz-wrap {
+      margin: 4px 0;
+    }
+
+    .nce-exposure-narrative .viz-mount-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nce-exposure-narrative .d3-mount {
+      min-height: auto;
+    }

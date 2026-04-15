@@ -20,7 +20,8 @@ import {
   storyHeader,
   vendorRows,
   NARRATIVE_CHAIN,
-  narrativeStepByQuestion
+  narrativeStepByQuestion,
+  nceExposureData
 } from '../mocks/workspace.mock';
 import {
   escapeHtml,
@@ -642,6 +643,29 @@ export function useWorkspace() {
           timeRanges: RANGE_OPTIONS,
           timeRange: '30D',
           rows: []
+        };
+      }
+
+      if (normalizedQuestion === 'what is my nce exposure') {
+        return {
+          id: makeId(),
+          topic: 'nce-exposure',
+          title: 'NCE Exposure Analysis',
+          question,
+          format: 'nce-exposure',
+          formatLabel: 'Analysis',
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          insight: '',
+          vizConfigs: [
+            { type: 'nce-snapshot-bar', snapshot: nceExposureData.snapshot },
+            { type: 'nce-insight-panels', budget: nceExposureData.budget, ew: nceExposureData.ew },
+            { type: 'nce-top-contractors', topContractors: nceExposureData.topContractors },
+          ],
+          nceExposureData,
+          options: [{ key: 'nce-exposure', label: 'analysis', enabled: true }],
+          rows: [],
+          lenses: [],
+          keyInsights: [],
         };
       }
 
@@ -1382,7 +1406,56 @@ export function useWorkspace() {
       return map[prompt] || baseResponse(prompt);
     }
 
+    function renderNCEExposure(response) {
+      const data = response.nceExposureData;
+      if (!data) return '<div class="viz-empty">No data available</div>';
+
+      const configs = response.vizConfigs || [];
+      const snapshotViz = configs[0] ? renderVizMount(configs[0]) : '';
+      const insightViz = configs[1] ? renderVizMount(configs[1]) : '';
+      const topContractorsViz = configs[2] ? renderVizMount(configs[2]) : '';
+
+      const totalContract = data.snapshot.reduce((sum, s) => sum + s.contractValue, 0).toFixed(1);
+      const totalVariation = data.snapshot.reduce((sum, s) => sum + s.nceVariation, 0).toFixed(1);
+      const contractorCount = data.snapshot.length;
+
+      return `
+        <div class="nce-exposure-narrative" data-nce-reveal="${response.id}">
+          <div class="nce-section nce-section-hidden" data-nce-section="1">
+            <div class="nce-agent-text">
+              Across <strong>${contractorCount} contractors</strong>, NCEs have driven
+              <strong class="nce-risk-value">£${totalVariation}M</strong> in value variation.
+            </div>
+            <div class="nce-summary-header">
+              <div class="nce-summary-item">
+                <span class="nce-summary-value nce-summary-blue">£${totalContract}M</span>
+                <span class="nce-summary-label">total contract value</span>
+              </div>
+              <div class="nce-summary-item">
+                <span class="nce-summary-value nce-summary-amber">+£${totalVariation}M</span>
+                <span class="nce-summary-label">NCE deviation</span>
+              </div>
+            </div>
+            <div class="nce-row-layout">
+              <div class="nce-row-left">${snapshotViz}</div>
+              <div class="nce-row-right">${insightViz}</div>
+            </div>
+          </div>
+
+          <div class="nce-section nce-section-hidden" data-nce-section="2">
+            <div class="nce-agent-text">
+              These <strong>3 contractors</strong> account for the highest NCE volume and budget variation in the portfolio.
+            </div>
+            <div class="viz-wrap viz-type-nce-top-contractors">${topContractorsViz}</div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderPrimaryVisual(response) {
+      if (response.format === 'nce-exposure') {
+        return renderNCEExposure(response);
+      }
       if (response.format === 'dashboard-viz') {
         const configs = response.vizConfigs || [];
         const vizHtml = configs.map(config => renderVizMount(config)).join('');
@@ -1405,16 +1478,17 @@ export function useWorkspace() {
     }
 
     function renderResponseCard(response) {
+      const isNCEExposure = response.format === 'nce-exposure';
       const options = response.options || [
         { key: 'table', label: 'table', enabled: true },
         { key: 'bar', label: 'bar', enabled: true },
         { key: 'line', label: 'line', enabled: true },
         { key: 'text', label: 'text', enabled: true }
       ];
-      const showSwitcher = response.format !== 'insights' && response.format !== 'story' && options.length > 1;
-      const showRanges = response.format !== 'insights' && response.format !== 'story' && supportsTimeRange(response.format) && response.timeRanges?.length;
+      const showSwitcher = !isNCEExposure && response.format !== 'insights' && response.format !== 'story' && options.length > 1;
+      const showRanges = !isNCEExposure && response.format !== 'insights' && response.format !== 'story' && supportsTimeRange(response.format) && response.timeRanges?.length;
       const currentRows = rowsForRange(response.rows || [], response.timeRange || '30D');
-      const showInsights = response.format !== 'table' && response.format !== 'insights' && response.format !== 'story';
+      const showInsights = !isNCEExposure && response.format !== 'table' && response.format !== 'insights' && response.format !== 'story';
       const insights = deriveInsights(response, currentRows);
 
       return `
@@ -1434,7 +1508,7 @@ export function useWorkspace() {
             </div>
           </div>
           <div class="card-block card-body">
-            <div class="agent-insight">${escapeHtml(response.insight)}</div>
+            ${!isNCEExposure ? `<div class="agent-insight">${escapeHtml(response.insight)}</div>` : ''}
             ${renderPrimaryVisual(response)}
             ${showInsights ? (response.keyHighlights ? renderKeyHighlights(response.keyHighlights) : `<ul class="key-insight-list">${insights.map(item => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`) : ''}
             <div class="response-footer">
@@ -1821,6 +1895,32 @@ export function useWorkspace() {
       canvas.classList.remove('dimmed');
     }
 
+    const nceRevealedSections = new Set<string>();
+    let nceRevealTimers: ReturnType<typeof setTimeout>[] = [];
+
+    function triggerNCEReveal() {
+      const narratives = document.querySelectorAll<HTMLElement>('[data-nce-reveal]');
+      narratives.forEach(container => {
+        const revealId = container.dataset.nceReveal ?? '';
+        if (nceRevealedSections.has(revealId)) return;
+        nceRevealedSections.add(revealId);
+
+        const sections = container.querySelectorAll<HTMLElement>('[data-nce-section]');
+        sections.forEach((section, i) => {
+          const timer = setTimeout(() => {
+            section.classList.remove('nce-section-hidden');
+            section.classList.add('nce-section-visible');
+          }, 600 + i * 1400);
+          nceRevealTimers.push(timer);
+        });
+      });
+    }
+
+    function cleanupNCEReveal() {
+      nceRevealTimers.forEach(t => clearTimeout(t));
+      nceRevealTimers = [];
+    }
+
     function renderAll() {
       renderLanding();
       renderEmptyThread();
@@ -1834,6 +1934,7 @@ export function useWorkspace() {
       renderPanels();
       renderTimeline();
       hydrateVisualizationMounts();
+      triggerNCEReveal();
     }
 
     function switchFormat(responseId, nextFormat) {
@@ -2249,6 +2350,7 @@ export function useWorkspace() {
 
     return () => {
       controller.abort();
+      cleanupNCEReveal();
       timeoutIds.forEach(timeoutId => window.clearTimeout(timeoutId));
       animationFrameIds.forEach(animationFrameId => window.cancelAnimationFrame(animationFrameId));
       timeoutIds.clear();

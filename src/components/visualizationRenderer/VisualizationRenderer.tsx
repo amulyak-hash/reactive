@@ -9,6 +9,9 @@ import { EWCategory } from '../ewCategory';
 import { LineChart } from '../lineChart/LineChart';
 import { MiniBars } from '../miniBars/MiniBars';
 import { NCETree } from '../nceTree';
+import { NCEPortfolioBarChart } from '../ncePortfolioBar';
+import { NCEInsightPanels } from '../nceContractorRadial';
+import { NCETopContractors } from '../nceRiskCards';
 import { PieChart } from '../pieChart/PieChart';
 import { ProcessSankey, RankingSankey } from '../sankey';
 import { QuotationBalance } from '../quotationBalance';
@@ -44,6 +47,10 @@ export function VisualizationRenderer({ config, className }: VisualizationRender
   if (config.type === 'quotation-balance') return <QuotationBalance accepted={config.accepted} submitted={config.submitted} />;
   if (config.type === 'quotation-trend') return <QuotationTrend trend={config.trend} />;
   if (config.type === 'weekly-flow') return <WeeklyFlow contractors={config.contractors} />;
+
+  if (config.type === 'nce-snapshot-bar') return <NCEPortfolioBarChart snapshot={config.snapshot} />;
+  if (config.type === 'nce-insight-panels') return <NCEInsightPanels budget={config.budget} ew={config.ew} />;
+  if (config.type === 'nce-top-contractors') return <NCETopContractors topContractors={config.topContractors} />;
 
   return <div className="viz-empty">Visualization unavailable</div>;
 }

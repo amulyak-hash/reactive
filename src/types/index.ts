@@ -152,7 +152,10 @@ export type BaseVisualizationConfig =
   | { type: 'variation-split'; contractors: VariationRow[] }
   | { type: 'quotation-balance'; accepted: QuotationSide; submitted: QuotationSide }
   | { type: 'quotation-trend'; trend: QuotationTrendPoint[] }
-  | { type: 'weekly-flow'; contractors: ContractorRow[] };
+  | { type: 'weekly-flow'; contractors: ContractorRow[] }
+  | { type: 'nce-snapshot-bar'; snapshot: NCESnapshotBar[] }
+  | { type: 'nce-insight-panels'; budget: NCEBudgetInsight; ew: NCEEWInsight }
+  | { type: 'nce-top-contractors'; topContractors: NCETopContractor[] };
 
 export type VisualizationRendererProps = {
   config: BaseVisualizationConfig;
@@ -225,6 +228,55 @@ export type KeyHighlightBlock =
   | { type: 'scorecard-rows';  items: ScorecardRow[]; takeaway?: string }
   | { type: 'flags-list';      items: FlagsListRow[]; takeaway?: string }
   | { type: 'comparison-rows'; columns: string[]; rows: ComparisonRow[]; takeaway?: string };
+
+// ─── NCE Exposure Types ─────────────────────────────────────────────────────
+
+export type NCESnapshotBar = {
+  id: string;
+  name: string;
+  shortName: string;
+  contractValue: number;
+  nceVariation: number;
+};
+
+export type NCEBudgetInsight = {
+  overallBudget: number;
+  contractorsWithNCE: number;
+  totalContractors: number;
+  implementedNCEs: number;
+  pendingNCEs: number;
+  totalNCEs: number;
+  valueDeviation: number;
+};
+
+export type NCEEWInsight = {
+  totalEWs: number;
+  ewConvertedToNCE: number;
+  budgetVariation: number;
+};
+
+export type NCEProjectBreakdown = {
+  projectName: string;
+  nceCount: number;
+};
+
+export type NCETopContractor = {
+  id: string;
+  name: string;
+  shortName: string;
+  nceCount: number;
+  activeProjects: number;
+  budgetVariation: number;
+  contractValue: number;
+  projects: NCEProjectBreakdown[];
+};
+
+export type NCEExposureData = {
+  snapshot: NCESnapshotBar[];
+  budget: NCEBudgetInsight;
+  ew: NCEEWInsight;
+  topContractors: NCETopContractor[];
+};
 
 // ─── Narrative Chain Types ──────────────────────────────────────────────────
 

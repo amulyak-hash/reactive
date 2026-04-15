@@ -24,6 +24,7 @@ export const landingCards = [
 ];
 
 export const quickStartChips = [
+  'What is my NCE exposure',
   'What is the total contract value across all vendors?',
   'Show the contract value breakdown per vendor',
   'Which vendors have the highest total commitment percentage?',
@@ -32,6 +33,7 @@ export const quickStartChips = [
 export const chipPresets = [quickStartChips];
 
 export const chatInterfaceQuestions = [
+  'What is my NCE exposure',
   'What is the total contract value across all vendors?',
   'Show the contract value breakdown per vendor',
   'Which vendors have the highest total commitment percentage?',
@@ -611,6 +613,54 @@ export const quotationTrend = [
   { week: 'W11', count: 5, value: 4.8 },
   { week: 'W12', count: 9, value: 8.3 },
 ];
+
+// ─── NCE Exposure Data ─────────────────────────────────────────────────────
+
+import type { NCEExposureData } from '../types';
+
+export const nceExposureData: NCEExposureData = {
+  snapshot: [
+    { id: 'c1', name: 'Tata Projects',     shortName: 'Tata',   contractValue: 198,   nceVariation: 25.7 },
+    { id: 'c3', name: 'Afcons Infra',      shortName: 'Afcons', contractValue: 142,   nceVariation: 35.5 },
+    { id: 'c2', name: 'L&T Construction',  shortName: 'L&T',    contractValue: 210.6, nceVariation: 12.6 },
+    { id: 'c4', name: 'NCC Ltd',           shortName: 'NCC',    contractValue: 96,    nceVariation: 5.8 },
+    { id: 'c5', name: 'KEC International', shortName: 'KEC',    contractValue: 74,    nceVariation: 13.6 },
+  ],
+  budget: {
+    overallBudget: 752.2,
+    contractorsWithNCE: 5,
+    totalContractors: 5,
+    implementedNCEs: 15,
+    pendingNCEs: 10,
+    totalNCEs: 25,
+    valueDeviation: 93.2,
+  },
+  ew: {
+    totalEWs: 42,
+    ewConvertedToNCE: 25,
+    budgetVariation: 93.2,
+  },
+  topContractors: [
+    { id: 'c1', name: 'Tata Projects', shortName: 'Tata', nceCount: 8, activeProjects: 4, budgetVariation: 25.7, contractValue: 198, projects: [
+      { projectName: 'Highway Corridor Ph-2', nceCount: 3 },
+      { projectName: 'Bridge Retrofit', nceCount: 2 },
+      { projectName: 'Station Upgrade', nceCount: 2 },
+      { projectName: 'Depot Construction', nceCount: 1 },
+    ]},
+    { id: 'c3', name: 'Afcons Infra', shortName: 'Afcons', nceCount: 6, activeProjects: 3, budgetVariation: 35.5, contractValue: 142, projects: [
+      { projectName: 'Coastal Defence', nceCount: 3 },
+      { projectName: 'Port Expansion', nceCount: 2 },
+      { projectName: 'Marine Terminal', nceCount: 1 },
+    ]},
+    { id: 'c2', name: 'L&T Construction', shortName: 'L&T', nceCount: 4, activeProjects: 5, budgetVariation: 12.6, contractValue: 210.6, projects: [
+      { projectName: 'Steel Plant Ext.', nceCount: 2 },
+      { projectName: 'Power Substation', nceCount: 1 },
+      { projectName: 'Pipeline Network', nceCount: 1 },
+      { projectName: 'Warehouse Complex', nceCount: 0 },
+      { projectName: 'Admin Block', nceCount: 0 },
+    ]},
+  ],
+};
 
 // ─── Narrative Chain (Dashboard Questions → Chat Flow) ──────────────────────
 
