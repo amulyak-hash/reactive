@@ -19,11 +19,31 @@ export default function Dashboard() {
     return () => ro.disconnect();
   }, []);
 
-  const vizHeight = Math.max(460, Math.min(vizWidth * 0.6, 640));
+  const [containerHeight, setContainerHeight] = useState(0);
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const parent = containerRef.current.parentElement;
+    if (parent) setContainerHeight(parent.offsetHeight);
+    const ro2 = new ResizeObserver(entries => {
+      const h = entries[0].contentRect.height;
+      if (h > 0) setContainerHeight(Math.floor(h));
+    });
+    ro2.observe(parent);
+    return () => ro2.disconnect();
+  }, []);
+
+  const vizHeight = containerHeight > 0
+    ? containerHeight - 32
+    : Math.max(460, Math.min(vizWidth * 0.6, 640));
 
   return (
     <div ref={containerRef} style={{
-      padding: '16px clamp(18px, 2vw, 32px) 8px',
+      padding: '16px clamp(18px, 2vw, 32px) 16px',
+      height: '100%',
+      boxSizing: 'border-box',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     }}>
       {vizWidth > 0 && (
         <RiskConstellation

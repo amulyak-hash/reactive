@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { useStore } from './store';
-import IntelligenceScene from './components/IntelligenceScene';
+import Dashboard from './components/Dashboard';
 import Thread from './components/Thread';
-// ThreadPanel removed — no side panel trigger
 import CommandBar from './components/CommandBar';
 import { C, FONT_SANS, FONT_MONO } from './theme/tokens';
 
@@ -10,26 +9,15 @@ export default function App() {
   const view = useStore(s => s.view);
   const goToDashboard = useStore(s => s.goToDashboard);
   const newThread = useStore(s => s.newThread);
-  const focusedEntity = useStore(s => s.focusedEntity);
-  // threadEntity removed — no side panel
-  const unfocus = useStore(s => s.unfocus);
-  const setCameraPreset = useStore(s => s.setCameraPreset);
 
   useEffect(() => {
     const handler = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.key === 'Escape') {
-        if (view === 'thread') goToDashboard();
-        // threadEntity escape removed
-        else if (focusedEntity) unfocus();
-      }
-      if ((e.key === 't' || e.key === 'T') && view === 'dashboard' && !focusedEntity) {
-        setCameraPreset('command-table');
-      }
+      if (e.key === 'Escape' && view === 'thread') goToDashboard();
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [view, goToDashboard, focusedEntity, unfocus, setCameraPreset]);
+  }, [view, goToDashboard]);
 
   return (
     <div style={{
@@ -89,8 +77,7 @@ export default function App() {
         overflowX: 'hidden',
         position: 'relative',
       }}>
-        {view === 'dashboard' && <IntelligenceScene />}
-        {/* ThreadPanel removed */}
+        {view === 'dashboard' && <Dashboard />}
         {view === 'thread' && <Thread />}
       </div>
 

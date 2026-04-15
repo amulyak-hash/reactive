@@ -109,6 +109,11 @@ RECOMMENDATION: Forensic review of Afcons (25% variation is an outlier). Tata Pr
     budgetImpact: { value: '£93.2M', detail: 'Total NCE deviation across 5 contractors on £720.6M portfolio', withoutAction: 93200, withAction: 45000, unit: '£K', savingsLabel: 'Targeted review could reduce NCE run-rate by ~50%' },
     timelineImpact: { value: '25% outlier', detail: 'Afcons at 25% NCE variation — 2x portfolio average', monthlyRisk: [0, 3.8, 8.2, 14.1, 19.5, 25.2, 30.1, 35.5], months: ['M0','M1','M2','M3','M4','M5','M6','M7'], label: 'Afcons NCE accumulation trajectory (£M)' },
     businessValue: 'Instant portfolio-level view of which contractors are shifting contract value through NCEs. The 25% outlier (Afcons) would take weeks to surface manually across 47 packages.',
+    insightValue: '£35.5M',
+    insightTag: 'CRITICAL',
+    insightTagColor: C.red,
+    insightHeadline: 'Afcons CE exposure at 25% of contract — 2x portfolio average across 14 compensation events',
+    insightRecommendation: 'Forensic review of Afcons clause 60.1 notifications. Benchmark against L&T (6%).',
   },
 
   {
@@ -179,6 +184,11 @@ RECOMMENDATION: Raise PM Early Warning on all three. Proactive engagement avoids
     budgetImpact: { value: '£2.4M', detail: 'Prevents surprise bulk claims by enabling early intervention', withoutAction: 2400, withAction: 800, unit: '£K', savingsLabel: '£1.6M saved via early detection' },
     timelineImpact: { value: 'Scope gaps', detail: 'Catches scope gaps before they cascade into programme delays', monthlyRisk: [0, 100, 200, 400, 800, 1200, 1600, 2400], months: ['M1','M2','M3','M4','M5','M6','M7','M8'], label: 'Cumulative overrun if undetected (£K)' },
     businessValue: 'Every month of delayed detection adds £400K in accumulated silent overrun. Early detection at month 3 saves £1.6M vs detection at month 7.',
+    insightValue: '£2.4M',
+    insightTag: 'BLEED',
+    insightTagColor: C.red,
+    insightHeadline: '3 packages overspending against BoQ rates with no compensation events raised — silent cost growth',
+    insightRecommendation: 'PM to raise Early Warnings under clause 15.1 before costs become contested CEs.',
   },
 
   {
@@ -244,6 +254,11 @@ RECOMMENDATION: Schedule forensic commercial review. Bid-stage pricing assumptio
     budgetImpact: { value: '£830K', detail: 'Identifies hidden cost recovery and prevents continued margin erosion', withoutAction: 2190, withAction: 1360, unit: '£K', savingsLabel: 'Effective contract: £2.19M vs £1.36M next bidder' },
     timelineImpact: { value: 'Low direct', detail: 'Prevents commercial relationship breakdown causing contractor disengagement', monthlyRisk: [0, 47, 85, 127, 221, 340, 500, 700, 990], months: ['M0','M1','M2','M3','M4','M6','M8','M10','M14'], label: 'Projected cumulative NCEs (£K)' },
     businessValue: 'The £160K "saving" from choosing the lowest bidder is actually a £830K loss. Enterprise Brain reframes the real cost of procurement decisions.',
+    insightValue: '£830K',
+    insightTag: 'PATTERN',
+    insightTagColor: C.amber,
+    insightHeadline: 'RHI bid 12% below next tender, now recovering margin — 7 CEs under £50K threshold totalling £221K',
+    insightRecommendation: 'Forensic review of bid assumptions vs actuals. Low-bid CE recovery pattern.',
   },
 
   {
@@ -305,6 +320,11 @@ RECOMMENDATION: Clear the EW backlog within 5 working days. Prioritize EW-0042, 
     budgetImpact: { value: '£820K', detail: 'Acting this week saves £820K compared to a 2-week delay. £59K/day cost of inaction.', withoutAction: 1400, withAction: 580, unit: '£K', savingsLabel: 'Act this week: £580K vs 2-week delay: £1.4M' },
     timelineImpact: { value: '22 days', detail: '3 of the 12 EWs are on the critical path, risking commissioning push to Q1 2028', monthlyRisk: [68, 68, 145, 145, 310, 310], months: ['≤5d','≤5d','6-14d','6-14d','15+d','15+d'], label: 'CE cost by EW response time (£K avg)' },
     businessValue: 'Transforms the Early Warning process from a compliance checkbox into a quantified financial lever. £59K/day cost of inaction gives the PM hard evidence to prioritize meetings.',
+    insightValue: '£59K/day',
+    insightTag: 'STALE',
+    insightTagColor: C.orange,
+    insightHeadline: '12 Early Warnings without Risk Reduction Meetings — mitigation window closing at £59K/day',
+    insightRecommendation: 'Schedule clause 16 Risk Reduction Meetings this week. Prioritise EW-0042, 0058, 0063.',
   },
 
   {
@@ -367,6 +387,11 @@ RECOMMENDATION: Air-freight transformer (£800K) or parallel temp power (£1.2M)
     budgetImpact: { value: '£24M', detail: 'Identifies £24M total exposure. Recommends £1.2M mitigation — a 19x return.', withoutAction: 24000, withAction: 1200, unit: '£K', savingsLabel: '£1.2M mitigation prevents £24M cascade (19x ROI)' },
     timelineImpact: { value: '14 weeks', detail: 'Without intervention: commissioning delayed to March 2028. With mitigation: 2 weeks max (January 2028).', monthlyRisk: [0, 0, 0, 0, 0, 0, 7200, 7200, 9740, 9740, 14780, 14780, 24000, 24000], months: ['W0','','W6','','W8','','W10','','W12','','W14','','',''], label: 'Cascade cost accumulation by week (£K)' },
     businessValue: 'Humans see single-package delays. Enterprise Brain sees system-level cascades. The transformer is not a £200K problem — it is a £24M problem.',
+    insightValue: '£24M',
+    insightTag: 'CASCADE',
+    insightTagColor: C.purple,
+    insightHeadline: '6-week transformer delay cascades to 14 weeks — £5M extended prelims + £16.8M lost production',
+    insightRecommendation: 'Air-freight transformer (£800K) prevents demob/remob cycle and £24M cascade.',
   },
 
   {
@@ -432,6 +457,11 @@ RECOMMENDATION: Accept NCE (genuine survey gap), apply clause 63.7 — assess as
     budgetImpact: { value: '£140-180K saved', detail: 'Reduces a £400K claim to £220K-£260K through proper application of clause 63.7', withoutAction: 400, withAction: 240, unit: '£K', savingsLabel: 'Claim: £400K → assessed at £220-260K' },
     timelineImpact: { value: 'Fast response', detail: 'Avoids 2-week deadline pressure and prevents contractor escalation to adjudication', monthlyRisk: [400, 400, 260, 240, 220], months: ['Claim','','Clause 63.7','','Fair value'], label: 'NCE assessment breakdown (£K)' },
     businessValue: 'The AI doesn\'t just say "accept" or "reject." It builds the legal and evidential case for a nuanced position that protects the client while maintaining fair commercial relationships.',
+    insightValue: '£180K',
+    insightTag: 'SAVE',
+    insightTagColor: C.cyan,
+    insightHeadline: '£400K ground conditions CE valid but overpriced — clause 63.7 reduces to £220-260K',
+    insightRecommendation: 'Accept CE, assess as if Early Warning had been given. Fair value £220-260K.',
   },
 
   {
@@ -531,6 +561,11 @@ RECOMMENDATION: PM to raise proactive EWs on all three (clause 15.1). Keller: Ri
     budgetImpact: { value: '£450K', detail: 'Proactive PM EW on Keller avoids a contested NCE and preserves right to reduced assessment', withoutAction: 450, withAction: 0, unit: '£K', savingsLabel: 'Proactive EW avoids £450K contested claim' },
     timelineImpact: { value: '3 days critical', detail: 'Catching now allows recovery. Catching in 4 weeks means commissioning moves.', monthlyRisk: [0, 1, 3, 5, 7, 9, 11, 15], months: ['W1','W2','W3','W4','W5','W6','W7','W8'], label: 'Projected critical path slippage (days)' },
     businessValue: 'Contractors don\'t always hide problems maliciously — sometimes they genuinely believe they can recover. Enterprise Brain removes reliance on contractor self-reporting.',
+    insightValue: '3 silent',
+    insightTag: 'SILENT',
+    insightTagColor: C.green,
+    insightHeadline: '3 contractors behind programme with no clause 15 Early Warnings raised — Keller 3 days past critical float',
+    insightRecommendation: 'PM to raise proactive EWs under clause 15.1. Keller needs Risk Reduction Meeting within 48hrs.',
   },
 
   {
@@ -592,6 +627,11 @@ RECOMMENDATION: Board decision on air-freight is the single highest-leverage act
     budgetImpact: { value: '£24M decision', detail: 'Enables £800K air-freight decision that prevents £24M cascade — a 30x return', withoutAction: 90000, withAction: 0, unit: '£K', savingsLabel: '£90M projected overrun recoverable in 30 days' },
     timelineImpact: { value: 'Jan 2028', detail: 'If all 5 actions taken within 2 weeks, commissioning recovers to within tolerance', monthlyRisk: [24000, 2500, 1400, 990, 830], months: ['Transformer','Piling','EW backlog','Salami','NCE trend'], label: 'Top 5 risks by £K exposure' },
     businessValue: 'The board needs 5 items, each with a number and an action. Enterprise Brain compresses an entire project into a decision-ready format.',
+    insightValue: '5 risks',
+    insightTag: 'BRIEF',
+    insightTagColor: C.blue,
+    insightHeadline: '£90M budget gap recoverable if 5 actions taken within 30 days — board decision pack ready',
+    insightRecommendation: 'Board approval on transformer air-freight is the single highest-leverage action (30x ROI).',
   },
 
   {
@@ -651,6 +691,38 @@ RECOMMENDATION: Any acceleration under £780K/day saved is justified. Approve £
     budgetImpact: { value: '£780K/day', detail: 'Reframes every NCE and acceleration decision. A £500K acceleration saving 5 days = £3.4M saving.', withoutAction: 780, withAction: 180, unit: '£K/day', savingsLabel: 'True cost £780K vs visible £180K (4.3x hidden)' },
     timelineImpact: { value: 'Faster decisions', detail: 'When the board sees £780K/day, delay becomes intolerable. Weeks to hours.', monthlyRisk: [5460, 23400, 70200], months: ['1 week','1 month','3 months'], label: 'Cumulative delay cost at £780K/day (£K)' },
     businessValue: 'This is the single most valuable question. It transforms "should we spend more to go faster?" from a debate into arithmetic. The £180K visible cost undervalues delay by 4.3x.',
+  },
+  {
+    id: 'uc-09',
+    title: 'Hidden Claim Pattern Analysis',
+    shortTitle: 'Claim Patterns',
+    stage: 'NCE',
+    accent: C.amber,
+    zone: 'overview',
+    camera: null,
+    question: 'Show me hidden patterns in how contractors submit claims',
+    keywords: ['hidden', 'pattern', 'claim', 'submit', 'contractor', 'NCE', 'detect', 'suspicious', 'overview', 'intelligence'],
+    sampleQuestions: [
+      'Show me hidden patterns in how contractors submit claims',
+      'Are there any suspicious NCE patterns?',
+      'Give me an intelligence overview of all contractors',
+    ],
+    answer: `Pattern analysis across all contractors reveals interconnected risks:
+
+£93.2M total exposure across 5 contractors. KEC International flagged for salami-slicing: 7 NCEs in 4 months, all below £50K threshold, spread across 3 clauses.
+Afcons Infra at 25% NCE variation — 2x portfolio average. Budget bleed detected in 3 packages with zero NCEs raised.
+12 open early warnings sitting without meetings. Coupled risk: EAF transformer delay cascades to £24M exposure.
+
+RECOMMENDATION: Start with the red nodes — Afcons variation and budget bleed are the highest-severity items. Click any node to investigate.`,
+    vizType: 'constellation',
+    vizTitle: 'Intelligence Constellation — All Contractor Patterns',
+    vizData: {},
+    companionVizType: null,
+    companionVizData: null,
+    cognitiveLoad: { without: 'Weeks of cross-referencing 47 packages', with: '10 seconds' },
+    budgetImpact: { value: '£93.2M', detail: 'Total portfolio exposure surfaced in a single view', withoutAction: 93200, withAction: 45000, unit: '£K', savingsLabel: 'Comprehensive risk view enables targeted intervention' },
+    timelineImpact: { value: 'Immediate', detail: 'All critical risks visible at once — no sequential investigation needed', monthlyRisk: [0, 10, 25, 45, 70, 93], months: ['M0','M2','M4','M6','M8','M10'], label: 'Cumulative exposure trajectory (£M)' },
+    businessValue: 'The intelligence constellation shows every risk, connection, and pattern in one view. What took weeks of cross-referencing is now instant.',
   },
 ];
 

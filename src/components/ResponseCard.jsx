@@ -7,6 +7,7 @@ import { VizProvider, useVizContext } from './VizContext';
 import ContractorDrilldown from './ContractorDrilldown';
 import NCEStoryCard from './story/NCEStoryCard';
 import SalamiSlicingCard from './story/SalamiSlicingCard';
+import ConstellationCard from './story/ConstellationCard';
 import { C, rgb, FONT_SANS, FONT_MONO } from '../theme/tokens';
 
 export default function ResponseCard({ useCaseId, onStoryComplete }) {
@@ -29,6 +30,7 @@ export default function ResponseCard({ useCaseId, onStoryComplete }) {
   // Story card replacements
   if (uc.id === 'uc-00') return <NCEStoryCard useCaseId={useCaseId} onStoryComplete={onStoryComplete} />;
   if (uc.id === 'uc-02') return <SalamiSlicingCard useCaseId={useCaseId} onStoryComplete={onStoryComplete} />;
+  if (uc.id === 'uc-09') return <ConstellationCard useCaseId={useCaseId} onStoryComplete={onStoryComplete} />;
 
   const halfWidth = Math.floor((vizWidth - 14) / 2);
 

@@ -8,6 +8,7 @@ import SilenceAlarmGauge from '../canvas/uc/SilenceAlarmGauge';
 import BoardRiskMatrix from '../canvas/uc/BoardRiskMatrix';
 import CostOfDelayWaterfall from '../canvas/uc/CostOfDelayWaterfall';
 import NCEStackedBars from '../canvas/uc/NCEStackedBars';
+import IsometricConstellation from './iso/IsometricConstellation';
 import { C, FONT_MONO } from '../theme/tokens';
 
 const VIZ_COMPONENTS = {
@@ -20,6 +21,7 @@ const VIZ_COMPONENTS = {
   'gauges': SilenceAlarmGauge,
   'risk-matrix': BoardRiskMatrix,
   'waterfall': CostOfDelayWaterfall,
+  'constellation': IsometricConstellation,
 };
 
 export default function UseCaseViz({ vizType, vizData, vizTitle, accent, activeKey, dimOthers, onVizHover, onVizClick }) {
@@ -37,13 +39,14 @@ export default function UseCaseViz({ vizType, vizData, vizTitle, accent, activeK
   }, []);
 
   const VizComponent = VIZ_COMPONENTS[vizType];
+  const vizHeight = vizType === 'constellation' ? 520 : size.height;
 
   // When used standalone (with vizTitle), wrap in a card container
   // When used inside ResponseCard (no vizTitle), render bare
   const bare = !vizTitle;
 
   const content = VizComponent ? (
-    <VizComponent width={bare ? size.width : size.width - 32} height={size.height} data={vizData} accent={accent} activeKey={activeKey} dimOthers={dimOthers} onVizHover={onVizHover} onVizClick={onVizClick} />
+    <VizComponent width={bare ? size.width : size.width - 32} height={vizHeight} data={vizData} accent={accent} activeKey={activeKey} dimOthers={dimOthers} onVizHover={onVizHover} onVizClick={onVizClick} />
   ) : (
     <div style={{
       width: size.width, height: size.height,
